@@ -1,5 +1,3 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +24,7 @@ import { motion } from "framer-motion";
 import { Bell, Moon, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ColorPaletteSelector } from "./color-palette-selector";
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
@@ -60,7 +59,7 @@ export function SettingsForm() {
     // Show saved toast
     setTimeout(() => {
       setIsSaving(false);
-      toast.success("Settings saved", {
+      toast("Settings saved", {
         description: "Your preferences have been updated.",
       });
     }, 500);
@@ -72,102 +71,111 @@ export function SettingsForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card>
-        <CardHeader>
-          <CardTitle>App Settings</CardTitle>
-          <CardDescription>
-            Customize your quest logger experience
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="darkMode"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center">
-                          <Moon className="h-4 w-4 mr-2 text-blue-500" />
-                          <FormLabel className="text-base">Dark Mode</FormLabel>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>App Settings</CardTitle>
+            <CardDescription>
+              Customize your quest tracker experience
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="darkMode"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Moon className="h-4 w-4 mr-2 text-blue-500" />
+                            <FormLabel className="text-base">
+                              Dark Mode
+                            </FormLabel>
+                          </div>
+                          <FormDescription>
+                            Use dark theme for reduced eye strain
+                          </FormDescription>
                         </div>
-                        <FormDescription>
-                          Use dark theme for reduced eye strain
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="animationsEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center">
-                          <Sparkles className="h-4 w-4 mr-2 text-purple-500" />
-                          <FormLabel className="text-base">
-                            Animations
-                          </FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="animationsEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2 text-purple-500" />
+                            <FormLabel className="text-base">
+                              Animations
+                            </FormLabel>
+                          </div>
+                          <FormDescription>
+                            Enable animations for a more engaging experience
+                          </FormDescription>
                         </div>
-                        <FormDescription>
-                          Enable animations for a more engaging experience
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="notificationsEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center">
-                          <Bell className="h-4 w-4 mr-2 text-green-500" />
-                          <FormLabel className="text-base">
-                            Notifications
-                          </FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="notificationsEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Bell className="h-4 w-4 mr-2 text-green-500" />
+                            <FormLabel className="text-base">
+                              Notifications
+                            </FormLabel>
+                          </div>
+                          <FormDescription>
+                            Receive notifications for upcoming quests and
+                            achievements
+                          </FormDescription>
                         </div>
-                        <FormDescription>
-                          Receive notifications for upcoming quests and
-                          achievements
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <Button type="submit" disabled={isSaving} className="w-full">
-                {isSaving ? "Saving..." : "Save Settings"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                <Button type="submit" disabled={isSaving} className="w-full">
+                  {isSaving ? "Saving..." : "Save Settings"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        <ColorPaletteSelector />
+      </div>
     </motion.div>
   );
 }

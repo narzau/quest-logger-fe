@@ -1,6 +1,7 @@
 // src/lib/validators.ts
 import { z } from "zod";
 import { QuestRarity, QuestType } from "@/types/quest";
+import { defaultPalettes } from "@/lib/color-config";
 
 // Login validation schema
 export const loginSchema = z.object({
@@ -83,9 +84,19 @@ export const updateUserSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
 });
 
-// Settings validation schema
+// Updated settings validation schema to include color palette
 export const settingsSchema = z.object({
   darkMode: z.boolean(),
   animationsEnabled: z.boolean(),
   notificationsEnabled: z.boolean(),
+  colorPalette: z
+    .enum(Object.keys(defaultPalettes) as [string, ...string[]])
+    .optional(),
+});
+
+// Optional: Color validation schema for custom color picking
+export const colorSchema = z.object({
+  hue: z.number().min(0).max(360),
+  saturation: z.number().min(0).max(100),
+  lightness: z.number().min(0).max(100),
 });
