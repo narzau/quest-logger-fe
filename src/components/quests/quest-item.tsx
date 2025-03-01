@@ -103,10 +103,12 @@ export function QuestItem({ quest }: QuestItemProps) {
   return (
     <>
       <motion.div
-        initial={animationsEnabled ? { opacity: 0, y: 10 } : false}
-        animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
+        initial={animationsEnabled ? { opacity: 0, y: 10 } : undefined}
+        animate={animationsEnabled ? { opacity: 1, y: 0 } : undefined}
         exit={
-          animationsEnabled ? { opacity: 0, height: 0, marginBottom: 0 } : false
+          animationsEnabled
+            ? { opacity: 0, height: 0, marginBottom: 0 }
+            : undefined
         }
         transition={{ duration: 0.2 }}
         className={cn(
@@ -215,8 +217,8 @@ export function QuestItem({ quest }: QuestItemProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the quest "{quest.title}". This
-              action cannot be undone.
+              This will permanently delete the quest &quot;{quest.title}&quot;.
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

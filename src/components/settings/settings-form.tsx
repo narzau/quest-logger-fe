@@ -60,8 +60,7 @@ export function SettingsForm() {
     // Show saved toast
     setTimeout(() => {
       setIsSaving(false);
-      toast({
-        title: "Settings saved",
+      toast.success("Settings saved", {
         description: "Your preferences have been updated.",
       });
     }, 500);
