@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "task gamification",
   ],
   verification: {
-    google: "8BnrnwB-BF8DuAvQhIFyazfJ8fNsuC6NzNsvED7f7kM",
+    google: "m-fqKKJL-jfqDBfKgXxrQpkdtnxnrhsQ0nKT030JCY8",
   },
   manifest: "/manifest.json",
   robots: {
