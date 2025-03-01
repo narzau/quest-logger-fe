@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     "motivation app",
     "task gamification",
   ],
+  verification: {
+    google: "8BnrnwB-BF8DuAvQhIFyazfJ8fNsuC6NzNsvED7f7kM",
+  },
   manifest: "/manifest.json",
   robots: {
     index: true,
