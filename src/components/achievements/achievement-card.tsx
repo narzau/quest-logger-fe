@@ -54,17 +54,19 @@ export function AchievementCard({
 
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-medium leading-none">{achievement.name}</h3>
+                <h3 className="font-medium leading-none">
+                  {(achievement as Achievement).name}
+                </h3>
                 <Badge
                   variant={unlocked ? "default" : "outline"}
                   className={unlocked ? "bg-yellow-600" : ""}
                 >
-                  {achievement.exp_reward} XP
+                  {(achievement as Achievement).exp_reward} XP
                 </Badge>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                {achievement.description}
+                {(achievement as Achievement).description}
               </p>
 
               {userAchievement && (

@@ -18,7 +18,7 @@ import { QuestType } from "@/types/quest";
 import { Calendar, CheckCircle2, PlusCircle, Clock, Flame } from "lucide-react";
 
 export default function DailyQuestsPage() {
-  const { quests, isLoading } = useQuests({ quest_type: QuestType.DAILY });
+  const { quests } = useQuests({ quest_type: QuestType.DAILY });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Separate complete and incomplete quests
@@ -47,7 +47,7 @@ export default function DailyQuestsPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Today's Progress
+                  Today&apos;s Progress
                 </CardTitle>
               </CardHeader>
               <CardContent>

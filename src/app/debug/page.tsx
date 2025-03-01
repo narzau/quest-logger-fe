@@ -72,6 +72,7 @@ export default function DebugPage() {
       addLog(
         `Axios response headers: ${JSON.stringify(axiosResponse.headers)}`
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addLog(`Error: ${error.message}`);
       if (error.response) {

@@ -3,7 +3,7 @@
 import { useQuests } from "@/hooks/useQuests";
 import { useUser } from "@/hooks/useUser";
 import { useAchievements } from "@/hooks/useAchievements";
-import { QuestType, QuestRarity } from "@/types/quest";
+import { QuestType } from "@/types/quest";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -20,15 +20,13 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { useState } from "react";
 import { CreateQuestDialog } from "@/components/quests/create-quest-dialog";
 
 export function DashboardOverview() {
   const { user } = useUser();
-  const { quests, isLoading: questsLoading } = useQuests();
-  const { userAchievements, isLoading: achievementsLoading } =
-    useAchievements();
+  const { quests } = useQuests();
+  const { userAchievements } = useAchievements();
   const [createQuestOpen, setCreateQuestOpen] = useState(false);
 
   // Calculate level progress
@@ -63,8 +61,6 @@ export function DashboardOverview() {
         new Date(b.unlocked_at).getTime() - new Date(a.unlocked_at).getTime()
     )
     .slice(0, 3);
-
-  const isLoading = questsLoading || achievementsLoading || !user;
 
   return (
     <div className="space-y-6">

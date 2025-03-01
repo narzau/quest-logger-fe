@@ -4,7 +4,7 @@ import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementCard } from "./achievement-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Award, Lock } from "lucide-react";
-import { UserAchievement, Achievement } from "@/types/achievement";
+import { UserAchievement } from "@/types/achievement";
 
 export function AchievementGrid() {
   const { userAchievements, availableAchievements, isLoading } =
@@ -77,7 +77,7 @@ export function AchievementGrid() {
               All achievements unlocked!
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Impressive! You've unlocked every achievement.
+              Impressive! You&apos;ve unlocked every achievement.
             </p>
           </div>
         ) : (

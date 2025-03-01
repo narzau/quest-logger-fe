@@ -12,7 +12,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -27,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { Award, Edit, User as UserIcon } from "lucide-react";
+import { Award, Edit } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAchievements } from "@/hooks/useAchievements";

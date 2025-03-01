@@ -127,6 +127,7 @@ export const questApi = {
 
     if (filters) {
       Object.entries(filters)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([_, value]) => value !== undefined)
         .forEach(([key, value]) => params?.append(key, String(value)));
     }

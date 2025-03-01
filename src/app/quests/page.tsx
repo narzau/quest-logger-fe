@@ -20,22 +20,20 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
   PlusCircle,
   Search,
-  Filter,
   SortAsc,
   ListFilter,
   Calendar,
   Check,
 } from "lucide-react";
-import { QuestType, QuestRarity } from "@/types/quest";
+import { QuestType } from "@/types/quest";
 
 export default function QuestsPage() {
-  const { quests, isLoading } = useQuests();
+  const { quests } = useQuests();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");

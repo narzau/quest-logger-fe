@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserAchievement } from "@/types/achievement";
 import { useAchievementStore } from "@/store/achievementStore";
 import {
   Dialog,
@@ -13,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Award } from "lucide-react";
 import confetti from "canvas-confetti";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 
 export function AchievementUnlockedDialog() {

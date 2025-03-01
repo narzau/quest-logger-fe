@@ -74,15 +74,22 @@ export function QuestDetailsDialog({
       priority: quest.priority,
     },
   });
-
   const onSubmit = (values: UpdateQuestFormValues) => {
-    const payload = {
-      ...values,
-      due_date: date ? date.toISOString() : null,
-    };
-
     updateQuest(
-      { questId: quest.id, quest: payload },
+      {
+        questId: quest.id,
+        quest: {
+          ...values,
+          // Convert any null values to undefined to match UpdateQuestPayload type (annoying)
+          description:
+            values.description === null ? undefined : values.description,
+          due_date: date ? date.toISOString() : undefined,
+          parent_quest_id:
+            values.parent_quest_id === null
+              ? undefined
+              : values.parent_quest_id,
+        },
+      },
       {
         onSuccess: () => {
           setIsEditing(false);
@@ -249,7 +256,7 @@ export function QuestDetailsDialog({
                         onValueChange={(value) =>
                           field.onChange(parseInt(value))
                         }
-                        defaultValue={field.value.toString()}
+                        defaultValue={field.value?.toString() || "1"}
                       >
                         <FormControl>
                           <SelectTrigger>
