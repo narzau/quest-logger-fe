@@ -1,0 +1,22 @@
+# Robots.txt for ADHD Quest Tracker
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /settings
+
+Sitemap: https://quest-logger-fe.vercel.app/sitemap.xml
+
+# Performance and crawl optimization
+Crawl-delay: 10
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /

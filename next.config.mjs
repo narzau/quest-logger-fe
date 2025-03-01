@@ -10,6 +10,8 @@ const withPWA = NextPWA({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  generateSitemap: true,
+  generateRobotsTxt: true,
   async rewrites() {
     return [
       {
