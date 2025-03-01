@@ -1,6 +1,6 @@
 {
-  "name": "ADHD Quest Tracker",
-  "short_name": "Quest Tracker",
+  "name": "Quest Logger",
+  "short_name": "Quest Logger",
   "description": "Gamified task tracking app for people with ADHD",
   "start_url": "/",
   "display": "standalone",
