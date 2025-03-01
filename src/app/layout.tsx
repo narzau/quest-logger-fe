@@ -8,13 +8,13 @@ import { QueryProvider } from "@/components/providers/query-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ADHD Quest Tracker",
+  title: "Quest Logger",
   description: "Gamified task tracking app for people with ADHD",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ADHD Quest Tracker",
+    title: "Quest Logger",
   },
 };
 

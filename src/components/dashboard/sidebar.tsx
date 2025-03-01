@@ -50,7 +50,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     <div className="flex flex-col h-full py-4">
       <div className="px-4 flex justify-between items-center md:hidden">
         <Link href="/dashboard" className="text-lg font-bold">
-          Quest Tracker
+          Quest Logger
         </Link>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-5 w-5" />
@@ -59,7 +59,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       <div className="hidden md:block px-4 py-4">
         <Link href="/dashboard" className="text-lg font-bold">
-          ADHD Quest Tracker
+          Quest Logger
         </Link>
       </div>
 

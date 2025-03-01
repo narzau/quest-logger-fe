@@ -13,7 +13,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      darkMode: true, // Default to dark mode for ADHD users
+      darkMode: true,
       animationsEnabled: true,
       notificationsEnabled: true,
 
@@ -23,7 +23,7 @@ export const useSettingsStore = create<SettingsState>()(
         set({ notificationsEnabled: enabled }),
     }),
     {
-      name: "adhd-quest-settings",
+      name: "quest-settings",
     }
   )
 );

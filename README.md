@@ -1,4 +1,4 @@
-# ADHD Quest Tracker - Frontend
+# Quest Logger - Frontend
 
 A gamified task tracker Progressive Web App (PWA) designed specifically for people with ADHD. This application transforms ordinary task tracking into an engaging, game-like experience inspired by video game quest logs.
 

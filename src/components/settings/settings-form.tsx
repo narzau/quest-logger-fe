@@ -76,7 +76,7 @@ export function SettingsForm() {
         <CardHeader>
           <CardTitle>App Settings</CardTitle>
           <CardDescription>
-            Customize your quest tracker experience
+            Customize your quest logger experience
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "ADHD Quest Tracker",
+  title: "Quest Logger",
   description: "Gamified task tracking for people with ADHD",
 };
 
@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center border-b">
         <Link href="/" className="flex items-center justify-center">
-          <span className="font-bold text-lg">ADHD Quest Tracker</span>
+          <span className="font-bold text-lg">Quest Logger</span>
         </Link>
         <nav className="ml-auto flex gap-4 items-center">
           <Link href="/auth/login">
@@ -33,9 +33,8 @@ export default function HomePage() {
                     Turn Your Tasks Into Epic Quests
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    A gamified task tracker specifically designed for people
-                    with ADHD. Transform your daily to-dos into an RPG adventure
-                    with rewards, levels, and achievements.
+                    A gamified task tracker. Transform your daily to-dos into an
+                    RPG adventure with rewards, levels, and achievements.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -142,7 +141,7 @@ export default function HomePage() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full border-t px-4 md:px-6">
         <p className="text-xs text-muted-foreground">
-          © 2025 ADHD Quest Tracker. All rights reserved.
+          © 2025 Quest Logger. All rights reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
