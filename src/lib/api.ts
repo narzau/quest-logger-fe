@@ -6,7 +6,7 @@ import { Achievement, UserAchievement } from "@/types/achievement";
 
 // Create a base axios instance with common configuration
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
+  baseURL: "https://api.questlog.site/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
