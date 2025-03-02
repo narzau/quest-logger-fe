@@ -38,9 +38,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Mic } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AudioRecorder } from "./audio-recorder";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 type CreateQuestFormValues = z.infer<typeof createQuestSchema>;
 
@@ -57,6 +60,8 @@ export function CreateQuestDialog({
 }: CreateQuestDialogProps) {
   const { createQuest, isCreating } = useQuests();
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [isUsingVoice, setIsUsingVoice] = useState(false);
+  const [isProcessingAudio, setIsProcessingAudio] = useState(false);
 
   const form = useForm<CreateQuestFormValues>({
     resolver: zodResolver(createQuestSchema),
@@ -69,6 +74,52 @@ export function CreateQuestDialog({
     },
   });
 
+  const handleAudioCaptured = async (audioBlob: Blob) => {
+    setIsProcessingAudio(true);
+    try {
+      // Call the API to process the audio
+      const result = await api.quest.generateQuestFromAudio(audioBlob);
+
+      // Update the form with the generated quest data
+      if (result) {
+        // Handle the case where result might have all or some of these fields
+        if (result.title) {
+          form.setValue("title", result.title);
+        }
+        if (result.description) {
+          form.setValue("description", result.description);
+        }
+        if (result.rarity) {
+          form.setValue("rarity", result.rarity);
+        }
+        if (result.quest_type) {
+          form.setValue("quest_type", result.quest_type);
+        }
+        if (result.priority) {
+          form.setValue("priority", result.priority);
+        }
+        if (result.due_date) {
+          setDate(new Date(result.due_date));
+        }
+
+        toast("Quest generated from voice!", {
+          description:
+            "Your voice recording has been transformed into a quest.",
+        });
+      } else {
+        throw new Error("No data returned from the voice processing service");
+      }
+    } catch (error) {
+      console.error("Error processing audio:", error);
+      toast("Error processing audio", {
+        description:
+          "There was a problem generating a quest from your voice. Please try again or use the form.",
+      });
+    } finally {
+      setIsProcessingAudio(false);
+    }
+  };
+
   const onSubmit = (values: CreateQuestFormValues) => {
     const payload = {
       ...values,
@@ -79,6 +130,7 @@ export function CreateQuestDialog({
       onSuccess: () => {
         form.reset();
         setDate(undefined);
+        setIsUsingVoice(false);
         onOpenChange(false);
       },
     });
@@ -90,6 +142,57 @@ export function CreateQuestDialog({
         <DialogHeader>
           <DialogTitle>Create a new quest</DialogTitle>
         </DialogHeader>
+
+        {!isUsingVoice ? (
+          <div className="flex gap-2 mb-4">
+            <Button
+              type="button"
+              variant="default"
+              className="w-full"
+              onClick={() => setIsUsingVoice(true)}
+            >
+              <Mic className="h-4 w-4 mr-2" />
+              Use Voice
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsUsingVoice(false)}
+            >
+              Manual Entry
+            </Button>
+          </div>
+        ) : (
+          <div className="mb-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsUsingVoice(false)}
+            >
+              Switch to Manual Entry
+            </Button>
+          </div>
+        )}
+
+        {isUsingVoice && (
+          <div className="space-y-4 mb-4">
+            <div className="text-center mb-2">
+              <p className="text-sm text-muted-foreground">
+                Record your voice to automatically generate a quest
+              </p>
+            </div>
+            <AudioRecorder onAudioCaptured={handleAudioCaptured} />
+            {isProcessingAudio && (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Processing your voice...
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -256,8 +359,12 @@ export function CreateQuestDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? "Creating..." : "Create Quest"}
+              <Button type="submit" disabled={isCreating || isProcessingAudio}>
+                {isCreating
+                  ? "Creating..."
+                  : isProcessingAudio
+                  ? "Processing Voice..."
+                  : "Create Quest"}
               </Button>
             </DialogFooter>
           </form>

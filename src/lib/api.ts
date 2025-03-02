@@ -166,6 +166,40 @@ export const questApi = {
   completeQuest: async (questId: number): Promise<Quest> => {
     return questApi.updateQuest(questId, { is_completed: true });
   },
+  generateQuestFromAudio: async (
+    audioBlob: Blob
+  ): Promise<CreateQuestPayload> => {
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "voice-recording.webm");
+
+      // Use a direct fetch call for handling FormData with files properly
+      const token = localStorage.getItem("auth_token") || "";
+      const apiUrl = "/api/v1/quests/voice-generation";
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Don't set Content-Type - browser will set it with correct boundary
+        },
+        body: formData,
+        credentials: "same-origin",
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `API Error (${response.status}): ${errorText || response.statusText}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in generateQuestFromAudio:", error);
+      throw error;
+    }
+  },
 };
 
 // Achievement API

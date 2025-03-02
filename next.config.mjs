@@ -10,16 +10,20 @@ const withPWA = NextPWA({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  generateSitemap: true,
-  generateRobotsTxt: true,
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     return [
       {
         source: "/api/v1/:path*",
-        destination: "https://api.questlog.site/api/v1/:path*", // Change to your FastAPI backend URL
+        destination: `${apiUrl}/api/v1/:path*`,
         basePath: false,
       },
     ];
+  },
+  // Increase buffer size for handling audio uploads
+  experimental: {
+    serverComponentsExternalPackages: [],
+    largePageDataBytes: 800 * 1024, // 800KB
   },
 };
 
