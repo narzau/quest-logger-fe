@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/dashboard/", "/profile/", "/settings/"],
       },
     ],
-    sitemap: "https://quest-logger-fe.vercel.app/sitemap.xml",
+    sitemap: "https://questlog.site/sitemap.xml",
   };
 }
