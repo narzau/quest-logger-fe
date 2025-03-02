@@ -2,8 +2,8 @@ export function StructuredData() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "ADHD Quest Tracker",
-    url: "https://www.quest-logger-fe.vercel.app",
+    name: "Quest Log",
+    url: "https://www.questlog.site",
     description:
       "A gamified task management app designed specifically for people with ADHD",
     applicationCategory: "Productivity",

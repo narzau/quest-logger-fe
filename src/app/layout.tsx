@@ -9,10 +9,10 @@ import ClientLayout from "./client-layout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://quest-logger-fe.vercel.app/"),
+  metadataBase: new URL("https://questlog.site/"),
   title: {
-    default: "ADHD Quest Tracker - Gamified Task Management for ADHD",
-    template: "%s | ADHD Quest Tracker",
+    default: "Quest Log - Gamified Task Management for ADHD",
+    template: "%s | Quest Log",
   },
   description:
     "A revolutionary task management app designed specifically for people with ADHD. Transform your daily tasks into an engaging game-like experience with progress tracking, achievements, and motivation.",
@@ -43,8 +43,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://quest-logger-fe.vercel.app/",
-    title: "ADHD Quest Tracker - Gamified Task Management",
+    url: "https://questlog.site/",
+    title: "Quest Log - Gamified Task Management",
     description:
       "Transform your daily tasks into an engaging game-like experience with progress tracking, achievements, and motivation.",
     images: [
@@ -52,13 +52,13 @@ export const metadata: Metadata = {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ADHD Quest Tracker - Gamify Your Productivity",
+        alt: "Quest Log - Gamify Your Productivity",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ADHD Quest Tracker - Gamified Task Management",
+    title: "Quest Log - Gamified Task Management",
     description:
       "Transform your daily tasks into an engaging game-like experience with progress tracking, achievements, and motivation.",
     images: ["/images/twitter-image.png"],
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ADHD Quest Tracker",
+    title: "Quest Log",
   },
 };
 

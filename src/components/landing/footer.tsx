@@ -12,7 +12,7 @@ export const Footer: React.FC = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <Sparkles className="h-5 w-5 mr-2 text-blue-900 dark:text-blue-600" />
             <span className="font-semibold text-gray-900 dark:text-white">
-              ADHD Quest Tracker
+              Quest Log
             </span>
           </div>
 
@@ -38,7 +38,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="mt-4 md:mt-0 text-sm text-gray-500 dark:text-gray-500">
-            © 2025 ADHD Quest Tracker
+            © 2025 Quest Log
           </div>
         </div>
       </div>

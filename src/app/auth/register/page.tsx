@@ -31,7 +31,7 @@ export default function RegisterPage() {
           <Link href="/" className="flex items-center justify-center">
             <Sparkles className="h-6 w-6 mr-2 text-blue-900 dark:text-blue-600" />
             <span className="font-bold text-xl text-gray-900 dark:text-white">
-              ADHD Quest Tracker
+              Quest Log
             </span>
           </Link>
         </div>

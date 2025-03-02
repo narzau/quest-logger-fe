@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
       <Link href="/" className="flex items-center justify-center">
         <Sparkles className="h-6 w-6 mr-2 text-blue-900 dark:text-blue-600" />
         <span className="font-bold text-xl text-gray-900 dark:text-gray-50">
-          ADHD Quest Tracker
+          Quest Log
         </span>
       </Link>
       <nav className="ml-auto flex gap-4 items-center">
