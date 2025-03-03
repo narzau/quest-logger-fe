@@ -9,12 +9,25 @@ type AuthState = {
   setAuthError: (error: string | null) => void;
 };
 
+const getInitialToken = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
+  }
+  return null;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
-  token: localStorage.getItem("token") || null,
-  isAuthenticated: !!localStorage.getItem("token"),
+  token: getInitialToken(),
+  isAuthenticated: getInitialToken() !== null,
   authError: null,
   setToken: (token) => {
-    localStorage.setItem("token", token || "");
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
+    }
     set({
       token,
       isAuthenticated: !!token,

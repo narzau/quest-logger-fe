@@ -22,7 +22,6 @@ const nextConfig = {
   },
   // Increase buffer size for handling audio uploads
   experimental: {
-    serverComponentsExternalPackages: [],
     largePageDataBytes: 800 * 1024, // 800KB
   },
 };
