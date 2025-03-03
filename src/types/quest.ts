@@ -22,7 +22,7 @@ export interface Quest {
   due_date?: string; // ISO datetime
   rarity: QuestRarity;
   quest_type: QuestType;
-  priority: number; // 1-5
+  priority: number; // 1-100
   exp_reward: number;
   owner_id: number;
   parent_quest_id?: number; // For quest chains/dependencies

@@ -43,7 +43,7 @@ export const createQuestSchema = z.object({
   quest_type: z.nativeEnum(QuestType, {
     errorMap: () => ({ message: "Please select a valid quest type" }),
   }),
-  priority: z.number().min(1).max(5),
+  priority: z.number().min(1).max(100),
   parent_quest_id: z.number().optional(),
 });
 
@@ -71,7 +71,7 @@ export const updateQuestSchema = z.object({
       errorMap: () => ({ message: "Please select a valid quest type" }),
     })
     .optional(),
-  priority: z.number().min(1).max(5).optional(),
+  priority: z.number().min(1).max(100).optional(),
   parent_quest_id: z.number().optional().nullable(),
 });
 

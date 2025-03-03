@@ -142,24 +142,6 @@ export function truncateString(str: string, maxLength: number): string {
   return str.slice(0, maxLength) + "...";
 }
 
-// Function to determine the color for priority (1-5)
-export function getPriorityColor(priority: number): string {
-  switch (priority) {
-    case 1:
-      return "text-green-500";
-    case 2:
-      return "text-blue-500";
-    case 3:
-      return "text-yellow-500";
-    case 4:
-      return "text-orange-500";
-    case 5:
-      return "text-red-500";
-    default:
-      return "text-blue-500";
-  }
-}
-
 // Group quests by day for better visualization
 export function groupQuestsByDay(quests: Quest[]) {
   const grouped = new Map();
