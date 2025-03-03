@@ -6,7 +6,8 @@ import { Achievement, UserAchievement } from "@/types/achievement";
 
 // Create a base axios instance with common configuration
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: "https://api.questlog.site/api/v1",
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000" + "/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -166,39 +167,31 @@ export const questApi = {
   completeQuest: async (questId: number): Promise<Quest> => {
     return questApi.updateQuest(questId, { is_completed: true });
   },
-  generateQuestFromAudio: async (
+  createQuestFromAudio: async (audioBlob: Blob): Promise<Quest> => {
+    const formData = new FormData();
+    formData.append("audio_file", audioBlob, "voice-recording.webm");
+
+    const response = await axiosClient.post<Quest>(
+      "/quests/voice-generation/auto",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  },
+  suggestQuestFromAudio: async (
     audioBlob: Blob
   ): Promise<CreateQuestPayload> => {
-    try {
-      const formData = new FormData();
-      formData.append("audio", audioBlob, "voice-recording.webm");
+    const formData = new FormData();
+    formData.append("audio_file", audioBlob, "voice-recording.webm");
 
-      // Use a direct fetch call for handling FormData with files properly
-      const token = localStorage.getItem("auth_token") || "";
-      const apiUrl = "/api/v1/quests/voice-generation";
+    const response = await axiosClient.post<CreateQuestPayload>(
+      "/quests/voice-generation/suggest",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
 
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // Don't set Content-Type - browser will set it with correct boundary
-        },
-        body: formData,
-        credentials: "same-origin",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `API Error (${response.status}): ${errorText || response.statusText}`
-        );
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error in generateQuestFromAudio:", error);
-      throw error;
-    }
+    return response.data;
   },
 };
 

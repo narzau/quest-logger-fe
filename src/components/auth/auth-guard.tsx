@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/authStore";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 
 interface AuthGuardProps {
@@ -10,7 +10,7 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);

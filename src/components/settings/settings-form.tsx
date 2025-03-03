@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Bell, Moon, Sparkles } from "lucide-react";
+import { Bell, Mic, Moon, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColorPaletteSelector } from "./color-palette-selector";
@@ -33,9 +33,11 @@ export function SettingsForm() {
     darkMode,
     animationsEnabled,
     notificationsEnabled,
+    autoCreateQuestsFromVoice,
     setDarkMode,
     setAnimationsEnabled,
     setNotificationsEnabled,
+    setAutoCreateQuestsFromVoice,
   } = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -45,6 +47,7 @@ export function SettingsForm() {
       darkMode,
       animationsEnabled,
       notificationsEnabled,
+      autoCreateQuestsFromVoice,
     },
   });
 
@@ -55,7 +58,7 @@ export function SettingsForm() {
     setDarkMode(values.darkMode);
     setAnimationsEnabled(values.animationsEnabled);
     setNotificationsEnabled(values.notificationsEnabled);
-
+    setAutoCreateQuestsFromVoice(values.autoCreateQuestsFromVoice);
     // Show saved toast
     setTimeout(() => {
       setIsSaving(false);
@@ -153,6 +156,33 @@ export function SettingsForm() {
                           <FormDescription>
                             Receive notifications for upcoming quests and
                             achievements
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="autoCreateQuestsFromVoice"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Mic className="h-4 w-4 mr-2 text-pink-500" />
+                            <FormLabel className="text-base">
+                              Auto-Create Voice Quests
+                            </FormLabel>
+                          </div>
+                          <FormDescription>
+                            Automatically create quests from voice recordings
+                            without review
                           </FormDescription>
                         </div>
                         <FormControl>

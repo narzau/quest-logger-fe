@@ -1,214 +1,357 @@
-// src/components/quests/audio-recorder.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Square, Loader2, AlertCircle } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Mic, Square, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
-import { useSettingsStore } from "@/store/settingsStore";
-import { checkAudioRecordingSupport } from "@/lib/media-utils";
+import { motion, AnimatePresence } from "framer-motion";
+
+type ViewState = "idle" | "preparing" | "recording" | "processing";
 
 interface AudioRecorderProps {
-  onAudioCaptured: (audioBlob: Blob) => void;
+  onAudioCaptured: (audioBlob: Blob) => Promise<void>;
+  onProcessingStateChange?: (isProcessing: boolean) => void;
+  onCancel?: () => void;
 }
 
-export function AudioRecorder({ onAudioCaptured }: AudioRecorderProps) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPreparing, setIsPreparing] = useState(false);
+// Constants for audio visualization
+const VISUALIZATION_BARS = 15;
+const INITIAL_LEVELS = Array(VISUALIZATION_BARS).fill(7);
+
+// Time formatting utility
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+export function AudioRecorder({
+  onAudioCaptured,
+  onProcessingStateChange,
+  onCancel,
+}: AudioRecorderProps) {
+  const [viewState, setViewState] = useState<ViewState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
-  const [isSupported, setIsSupported] = useState(true);
+  const [audioLevels, setAudioLevels] = useState<number[]>(INITIAL_LEVELS);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const { animationsEnabled } = useSettingsStore();
+  const isStoppingRef = useRef(false);
+  const timerRef = useRef<number>(0);
+  const animationFrameRef = useRef<number>(0);
 
-  // Check browser compatibility on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const support = checkAudioRecordingSupport();
-      setIsSupported(support.isSupported);
+  const cleanupAudioResources = useCallback(() => {
+    mediaRecorderRef.current?.stream
+      ?.getTracks()
+      .forEach((track) => track.stop());
+    audioStreamRef.current?.getTracks().forEach((track) => track.stop());
+    audioContextRef.current?.close();
 
-      if (!support.isSupported) {
-        console.warn("Audio recording not supported in this browser", support);
-      }
-    }
+    mediaRecorderRef.current = null;
+    audioStreamRef.current = null;
+    audioContextRef.current = null;
+    analyserRef.current = null;
   }, []);
-
-  // Clean up on unmount
+  // Cleanup effects
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      if (audioURL) {
-        URL.revokeObjectURL(audioURL);
-      }
+      window.clearInterval(timerRef.current);
+      window.cancelAnimationFrame(animationFrameRef.current!);
+      cleanupAudioResources();
     };
-  }, [audioURL]);
+  }, [cleanupAudioResources]);
+  const processAudio = useCallback(
+    async (audioBlob: Blob) => {
+      setViewState("processing");
+      onProcessingStateChange?.(true);
 
-  const startRecording = async () => {
+      try {
+        await onAudioCaptured(audioBlob);
+      } catch (error) {
+        console.error("Error processing audio:", error);
+        toast.error("Error processing audio", {
+          description: "There was a problem processing your voice recording.",
+        });
+        setViewState("idle");
+      } finally {
+        onProcessingStateChange?.(false);
+      }
+    },
+    [onAudioCaptured, onProcessingStateChange]
+  );
+
+  const processAudioData = useCallback((data: Uint8Array): number[] => {
+    const sectionSize = Math.floor(data.length / VISUALIZATION_BARS);
+    return Array.from({ length: VISUALIZATION_BARS }, (_, i) => {
+      const start = i * sectionSize;
+      const end = start + sectionSize;
+      const max = Math.max(...Array.from(data.slice(start, end)));
+      return 5 + (max / 255) * 35;
+    });
+  }, []);
+
+  const updateAudioVisualization = useCallback(() => {
+    if (!analyserRef.current) return;
+
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+
+    const animate = () => {
+      analyserRef.current?.getByteFrequencyData(dataArray);
+      setAudioLevels(processAudioData(dataArray));
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+  }, [processAudioData]);
+
+  const setupAudioContext = useCallback(
+    async (stream: MediaStream) => {
+      const audioContext = new (window.AudioContext || window.AudioContext)();
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      audioStreamRef.current = stream;
+
+      updateAudioVisualization();
+    },
+    [updateAudioVisualization]
+  );
+
+  const startRecording = useCallback(async () => {
+    setViewState("preparing");
     audioChunksRef.current = [];
-    setIsPreparing(true);
+    isStoppingRef.current = false;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // Create the media recorder
       const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
 
-      // Handle dataavailable event to collect audio chunks
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+      mediaRecorder.ondataavailable = ({ data }) => {
+        if (data.size > 0) audioChunksRef.current.push(data);
+      };
+
+      mediaRecorder.onstop = () => {
+        if (isStoppingRef.current && audioChunksRef.current.length) {
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: "audio/webm",
+          });
+          processAudio(audioBlob);
         }
       };
 
-      // Handle recording stop
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm",
-        });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioURL(url);
-        onAudioCaptured(audioBlob);
-
-        // Stop all audio tracks
-        stream.getAudioTracks().forEach((track) => track.stop());
-      };
-
-      // Start recording
+      mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
-      setIsRecording(true);
-      setIsPreparing(false);
 
-      // Start timer
+      await setupAudioContext(stream);
+
+      setViewState("recording");
       setRecordingTime(0);
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prevTime) => prevTime + 1);
-      }, 1000);
+      timerRef.current = window.setInterval(
+        () => setRecordingTime((t) => t + 1),
+        1000
+      );
     } catch (error) {
-      console.error("Error accessing microphone:", error);
-      setIsPreparing(false);
-      toast("Microphone access denied", {
-        description: "Please allow microphone access to record audio.",
+      console.error("Error starting recording:", error);
+      setViewState("idle");
+      toast.error("Microphone access required", {
+        description: "Please enable microphone access to record audio.",
       });
     }
-  };
+  }, [processAudio, setupAudioContext]);
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+  const stopRecording = useCallback(() => {
+    if (viewState !== "recording") return;
 
-      // Clear timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-  };
+    isStoppingRef.current = true;
+    mediaRecorderRef.current?.stop();
+    cleanupAudioResources();
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
+    window.clearInterval(timerRef.current);
+    if (animationFrameRef.current)
+      cancelAnimationFrame(animationFrameRef.current);
+  }, [viewState, cleanupAudioResources]);
+
+  const cancelRecording = useCallback(() => {
+    isStoppingRef.current = false;
+    mediaRecorderRef.current?.stop();
+    cleanupAudioResources();
+
+    window.clearInterval(timerRef.current);
+    if (animationFrameRef.current)
+      cancelAnimationFrame(animationFrameRef.current);
+
+    setViewState("idle");
+    setAudioLevels(INITIAL_LEVELS);
+    setRecordingTime(0);
+    onCancel?.();
+  }, [onCancel, cleanupAudioResources]);
 
   return (
-    <div className="space-y-4">
-      {!isSupported && (
-        <div className="p-4 border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-900 rounded-md flex items-start">
-          <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-              Audio recording not supported
-            </p>
-            <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
-              Your browser doesn't support audio recording. Try using Chrome,
-              Safari, or Firefox.
-            </p>
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center py-2">
+      <AnimatePresence mode="wait">
+        {viewState === "idle" && (
+          <IdleState key="idle" onStartRecording={startRecording} />
+        )}
 
-      {!isRecording && !audioURL && isSupported && (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={startRecording}
-          disabled={isPreparing}
-        >
-          {isPreparing ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Mic className="h-4 w-4 mr-2" />
-          )}
-          {isPreparing ? "Accessing microphone..." : "Record Voice"}
-        </Button>
-      )}
+        {viewState === "preparing" && <PreparingState key="preparing" />}
 
-      {isRecording && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className={`w-3 h-3 rounded-full bg-red-500 mr-2 ${
-                  !animationsEnabled && "animate-pulse"
-                }`}
-              />
-              <span className="text-sm font-medium">
-                Recording... {formatTime(recordingTime)}
-              </span>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={stopRecording}
-            >
-              <Square className="h-4 w-4" />
-            </Button>
-          </div>
-          <Progress
-            value={Math.min((recordingTime / 60) * 100, 100)}
-            className="h-1"
+        {viewState === "recording" && (
+          <RecordingState
+            key="recording"
+            audioLevels={audioLevels}
+            recordingTime={recordingTime}
+            onCancel={cancelRecording}
+            onStop={stopRecording}
           />
-        </div>
-      )}
+        )}
 
-      {audioURL && !isRecording && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Audio recorded</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (audioURL) {
-                  URL.revokeObjectURL(audioURL);
-                }
-                setAudioURL(null);
-              }}
-            >
-              Record again
-            </Button>
-          </div>
-          <audio controls className="w-full">
-            <source src={audioURL} type="audio/webm" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
+        {viewState === "processing" && <ProcessingState key="processing" />}
+      </AnimatePresence>
     </div>
   );
 }
+
+// Sub-components for each state
+const IdleState = ({ onStartRecording }: { onStartRecording: () => void }) => (
+  <motion.div
+    initial={{ scale: 0.8, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    exit={{ scale: 0.8, opacity: 0 }}
+    className="flex flex-col items-center"
+  >
+    <Button
+      type="button"
+      className="h-24 w-24 rounded-full bg-primary hover:bg-primary/90"
+      onClick={onStartRecording}
+    >
+      <Mic className="h-20 w-10 text-red-400" />
+    </Button>
+    <p className="text-sm text-muted-foreground mt-2">Tap to speak</p>
+  </motion.div>
+);
+
+const PreparingState = () => (
+  <motion.div
+    initial={{ scale: 0.8, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    exit={{ scale: 0.8, opacity: 0 }}
+    className="flex flex-col items-center"
+  >
+    <Button className="h-24 w-24 rounded-full bg-muted" disabled>
+      <Loader2 className="h-8 w-8 animate-spin text-primary-foreground" />
+    </Button>
+    <p className="text-sm text-muted-foreground mt-2">Preparing...</p>
+  </motion.div>
+);
+
+const RecordingState = ({
+  audioLevels,
+  recordingTime,
+  onCancel,
+  onStop,
+}: {
+  audioLevels: number[];
+  recordingTime: number;
+  onCancel: () => void;
+  onStop: () => void;
+}) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex flex-col items-center w-full"
+  >
+    <div className="flex items-center justify-center mb-4 relative">
+      <div className="flex items-end h-20 space-x-1 px-2">
+        {audioLevels.map((height, i) => (
+          <motion.div
+            key={i}
+            className="w-2 bg-primary rounded-full"
+            style={{ height: `${height}px` }}
+            transition={{ duration: 0.05 }}
+          />
+        ))}
+      </div>
+      <motion.div
+        className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2"
+        animate={{
+          boxShadow: [
+            "0 0 0 0 rgba(239, 68, 68, 0.2)",
+            "0 0 0 8px rgba(239, 68, 68, 0)",
+          ],
+        }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <div className="h-4 w-4 rounded-full bg-red-500" />
+      </motion.div>
+    </div>
+
+    <div className="text-base font-medium">{formatTime(recordingTime)}</div>
+
+    <div className="flex space-x-4 mt-4">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onCancel}
+        className="h-10 w-10 rounded-full border-gray-300"
+      >
+        <X className="h-4 w-4 text-gray-500" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onStop}
+        className="h-10 w-10 rounded-full border-red-500 hover:bg-red-500/10"
+      >
+        <Square className="h-4 w-4 text-red-500" />
+      </Button>
+    </div>
+  </motion.div>
+);
+
+const ProcessingState = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex flex-col items-center w-full"
+  >
+    <div className="flex flex-col items-center mb-4">
+      <div className="relative">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Mic className="h-6 w-6 text-primary" />
+        </div>
+      </div>
+      <p className="text-base font-medium mt-4">Processing...</p>
+      <p className="text-sm text-muted-foreground">Creating your quest</p>
+    </div>
+
+    <div className="w-full max-w-xs">
+      <motion.div
+        className="w-full h-1 bg-primary/20 rounded-full overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <motion.div
+          className="h-full bg-primary"
+          initial={{ width: "0%" }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 3.5, ease: "easeInOut" }}
+        />
+      </motion.div>
+    </div>
+  </motion.div>
+);

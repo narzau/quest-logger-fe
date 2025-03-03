@@ -10,10 +10,11 @@ const withPWA = NextPWA({
 const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
+    const apiURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     return [
       {
         source: "/api/v1/:path*",
-        destination: "https://api.questlog.site/api/v1/:path*",
+        destination: `${apiURL}/api/v1/:path*`,
         basePath: false,
       },
     ];

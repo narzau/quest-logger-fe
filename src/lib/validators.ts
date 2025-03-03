@@ -92,6 +92,7 @@ export const settingsSchema = z.object({
   colorPalette: z
     .enum(Object.keys(defaultPalettes) as [string, ...string[]])
     .optional(),
+  autoCreateQuestsFromVoice: z.boolean(),
 });
 
 // Optional: Color validation schema for custom color picking

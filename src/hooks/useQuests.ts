@@ -29,6 +29,21 @@ export function useQuests(filters?: {
     },
   });
 
+  const generateQuestFromAudio = useMutation({
+    mutationFn: (audioBlob: Blob) => api.quest.createQuestFromAudio(audioBlob),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quests"] });
+    },
+    // Add this to handle final state
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["quests"] });
+    },
+  });
+
+  const suggestQuestFromAudio = useMutation({
+    mutationFn: (audioBlob: Blob) => api.quest.suggestQuestFromAudio(audioBlob),
+  });
+
   const updateQuestMutation = useMutation({
     mutationFn: ({
       questId,
@@ -69,6 +84,8 @@ export function useQuests(filters?: {
     updateQuest: updateQuestMutation.mutate,
     deleteQuest: deleteQuestMutation.mutate,
     completeQuest: completeQuestMutation.mutate,
+    generateQuestFromAudio: generateQuestFromAudio.mutate,
+    suggestQuestFromAudio: suggestQuestFromAudio.mutate,
     isCreating: createQuestMutation.isPending,
     isUpdating: updateQuestMutation.isPending,
     isDeleting: deleteQuestMutation.isPending,

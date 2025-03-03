@@ -1,18 +1,21 @@
+// hooks/useUser.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 import { User } from "@/types/user";
 
 export function useUser() {
+  const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
   const userQuery = useQuery({
     queryKey: ["currentUser"],
     queryFn: () => api.user.getCurrentUser(),
-    enabled: api.auth.isAuthenticated(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
   });
 
-  const updateUserMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: (userData: Partial<User>) => api.user.updateUser(userData),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(["currentUser"], updatedUser);
@@ -23,8 +26,7 @@ export function useUser() {
     user: userQuery.data,
     isLoading: userQuery.isLoading,
     error: userQuery.error?.message,
-    updateUser: updateUserMutation.mutate,
-    isUpdating: updateUserMutation.isPending,
-    updateError: updateUserMutation.error?.message,
+    updateUser: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
   };
 }
