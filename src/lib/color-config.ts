@@ -53,17 +53,6 @@ export function colorToString(color: Oklch): string {
 }
 
 export const defaultPalettes = {
-  // Deep, Sophisticated Technology-Inspired Palette
-  midnight: {
-    primary: createOklch(0.3, 0.2, 260), // Deep blue-purple
-    secondary: createOklch(0.4, 0.15, 40), // Muted copper
-    background: createOklch(0.12, 0.05, 240), // Deep navy
-    foreground: createOklch(0.9, 0, 0), // Soft white
-    muted: createOklch(0.3, 0.05, 270), // Soft slate blue
-    accent: createOklch(0.5, 0.2, 200), // Vibrant teal
-    destructive: createOklch(0.45, 0.2, 20), // Deep rust
-  },
-
   // Warm, Earthy Natural Palette
   woodland: {
     primary: createOklch(0.4, 0.15, 100), // Warm olive green
@@ -86,36 +75,15 @@ export const defaultPalettes = {
     destructive: createOklch(0.45, 0.15, 20), // Muted brick red
   },
 
-  // Soft, Pastel-Inspired Digital Palette
-  digital: {
-    primary: createOklch(0.4, 0.15, 260), // Soft periwinkle
-    secondary: createOklch(0.5, 0.1, 180), // Muted mint
-    background: createOklch(0.15, 0.05, 250), // Deep blue-gray
-    foreground: createOklch(0.9, 0, 0), // Soft white
-    muted: createOklch(0.3, 0.08, 230), // Soft slate
-    accent: createOklch(0.5, 0.15, 200), // Cool aqua
-    destructive: createOklch(0.45, 0.15, 10), // Soft brick
-  },
   // Soft Pastel Dream Palette
   pastelDream: {
     primary: createOklch(0.75, 0.1, 280), // Soft lavender
     secondary: createOklch(0.78, 0.1, 350), // Blush pink
-    background: createOklch(0.95, 0.02, 280), // Frosted lilac
+    background: createOklch(0.96, 0.02, 220), // Frosted lilac
     foreground: createOklch(0.15, 0.05, 280), // Deep twilight
     muted: createOklch(0.8, 0.05, 280), // Misty lavender
     accent: createOklch(0.7, 0.15, 160), // Seafoam mint
     destructive: createOklch(0.7, 0.1, 20), // Soft coral
-  },
-
-  // Cool Ocean Breeze Palette
-  oceanBreeze: {
-    primary: createOklch(0.5, 0.2, 200), // Deep teal
-    secondary: createOklch(0.55, 0.15, 170), // Seafoam green
-    background: createOklch(0.12, 0.1, 240), // Abyssal blue
-    foreground: createOklch(0.9, 0, 0), // Foam white
-    muted: createOklch(0.3, 0.08, 200), // Stormy sea
-    accent: createOklch(0.6, 0.2, 190), // Tropical cyan
-    destructive: createOklch(0.5, 0.15, 20), // Coral reef
   },
 
   // Mystical Twilight Palette
@@ -129,26 +97,57 @@ export const defaultPalettes = {
     destructive: createOklch(0.45, 0.2, 10), // Blood garnet
   },
 
-  // Retro Neon Palette
-  retroNeon: {
-    primary: createOklch(0.5, 0.3, 200), // Electric cyan
-    secondary: createOklch(0.6, 0.3, 330), // Hot pink
-    background: createOklch(0.1, 0.2, 240), // Deep synthwave
-    foreground: createOklch(0.95, 0, 0), // Neon white
-    muted: createOklch(0.3, 0.2, 200), // Cyber teal
-    accent: createOklch(0.7, 0.3, 90), // Laser lemon
-    destructive: createOklch(0.6, 0.3, 10), // Neon red
-  },
-
   // Earthy Clay Palette
   earthenClay: {
     primary: createOklch(0.5, 0.15, 30), // Terracotta
     secondary: createOklch(0.45, 0.1, 80), // Olive grove
-    background: createOklch(0.15, 0.1, 40), // Dark umber
+    background: createOklch(0.19, 0.025, 40), // Dark umber
     foreground: createOklch(0.9, 0.05, 50), // Sandstone
     muted: createOklch(0.3, 0.08, 30), // Mudstone
     accent: createOklch(0.55, 0.15, 60), // Mustard seed
     destructive: createOklch(0.45, 0.15, 20), // Rust metal
+  },
+  carbon: {
+    primary: createOklch(0.35, 0, 280), // Medium gray
+    secondary: createOklch(0.3, 0, 280), // Dark gray
+    background: createOklch(0.21, 0, 299), // Near-black
+    foreground: createOklch(0.85, 0, 280), // Light gray
+    muted: createOklch(0.3, 0.01, 280), // Charcoal
+    accent: createOklch(0.35, 0.05, 280), // Subtle accent gray
+    destructive: createOklch(0.4, 0.1, 20), // Dark red (accessible contrast)
+  },
+
+  // Light Monotone Gray Palette
+  silver: {
+    primary: createOklch(0.5, 0, 280), // Medium gray
+    secondary: createOklch(0.6, 0, 280), // Light gray
+    background: createOklch(0.85, 0, 280), // Off-white
+    foreground: createOklch(0.15, 0.05, 280), // Dark gray
+    muted: createOklch(0.7, 0, 280), // Silver
+    accent: createOklch(0.65, 0.05, 280), // Subtle accent
+    destructive: createOklch(0.4, 0.1, 20), // Accessible red
+  },
+
+  // Warm Light Palette
+  warmDawn: {
+    primary: createOklch(0.45, 0.1, 40), // Warm taupe
+    secondary: createOklch(0.55, 0.08, 60), // Soft beige
+    background: createOklch(0.9, 0.04, 60), // Warm white
+    foreground: createOklch(0.2, 0.1, 40), // Chocolate brown
+    muted: createOklch(0.75, 0.06, 50), // Warm gray
+    accent: createOklch(0.5, 0.12, 30), // Terracotta
+    destructive: createOklch(0.5, 0.15, 20), // Brick red
+  },
+
+  // Cool Light Palette
+  frost: {
+    primary: createOklch(0.4, 0.1, 220), // Steel blue
+    secondary: createOklch(0.5, 0.08, 220), // Pale blue
+    background: createOklch(0.96, 0.02, 220), // Icy white
+    foreground: createOklch(0.18, 0.12, 220), // Deep navy
+    muted: createOklch(0.82, 0.05, 220), // Frosted blue
+    accent: createOklch(0.6, 0.15, 200), // Arctic teal
+    destructive: createOklch(0.5, 0.15, 10), // Cool crimson
   },
 };
 

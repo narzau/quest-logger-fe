@@ -12,7 +12,6 @@ import {
   Settings,
   LogOut,
   X,
-  CalendarDays,
   BarChart,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
+import { calculateLevelInfo } from "@/lib/utils";
 
 interface SidebarProps {
   onClose: () => void;
@@ -32,14 +32,18 @@ export function Sidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
 
   // Calculate level progress
-  const nextLevelExp = (user?.level || 1) * 100;
-  const currentExp = user?.experience || 0;
-  const progress = Math.min(100, (currentExp / nextLevelExp) * 100);
+  const levelInfo = user
+    ? calculateLevelInfo(user.experience)
+    : {
+        level: 1,
+        currentXp: 0,
+        nextLevelXp: 100,
+        progress: 0,
+      };
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Quests", href: "/quests", icon: ListTodo },
-    { name: "Daily Quests", href: "/quests/daily", icon: CalendarDays },
     { name: "Achievements", href: "/achievements", icon: Award },
     { name: "Stats", href: "/stats", icon: BarChart },
     { name: "Profile", href: "/profile", icon: User },
@@ -57,12 +61,6 @@ export function Sidebar({ onClose }: SidebarProps) {
         </Button>
       </div>
 
-      <div className="hidden md:block px-4 py-4">
-        <Link href="/dashboard" className="text-lg font-bold">
-          Quest Logger
-        </Link>
-      </div>
-
       {user && (
         <Card className="mx-4 my-4 p-4 bg-card">
           <div className="flex items-center space-x-3">
@@ -74,16 +72,16 @@ export function Sidebar({ onClose }: SidebarProps) {
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{user.username}</p>
               <div className="flex items-center text-xs text-muted-foreground">
-                <span>Level {user.level}</span>
+                <span>Level {levelInfo.level}</span>
               </div>
             </div>
           </div>
           <div className="mt-2 space-y-1">
             <div className="flex justify-between text-xs mb-1">
-              <span>{currentExp} XP</span>
-              <span>{nextLevelExp} XP</span>
+              <span>{levelInfo.currentXp} XP</span>
+              <span>{levelInfo.nextLevelXp} XP</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={levelInfo.progress} className="h-2" />
           </div>
         </Card>
       )}

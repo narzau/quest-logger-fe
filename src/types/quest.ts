@@ -26,6 +26,7 @@ export interface Quest {
   exp_reward: number;
   owner_id: number;
   parent_quest_id?: number; // For quest chains/dependencies
+  tracked: boolean;
 }
 
 export interface CreateQuestPayload {

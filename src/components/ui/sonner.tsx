@@ -1,29 +1,39 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import { Toaster as Sonner, ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  // Get the current theme/palette from your theme context
+  // If you don't have a theme context yet, you'll need to create one
+  // const { currentPalette } = useTheme();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
-      className="toaster group"
       toastOptions={{
         classNames: {
-          toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground font-medium",
-          cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground font-medium",
+          // Use Tailwind's theme variables which will reflect your dynamic colors
+          toast: "group border-border bg-background text-foreground",
+          title: "text-foreground text-sm font-medium",
+          description: "text-muted-foreground text-xs",
+          actionButton: "bg-primary text-primary-foreground",
+          cancelButton: "bg-muted text-muted-foreground",
+          // For specific toast types
+          success: "border-l-4 border-l-primary",
+          error: "border-l-4 border-l-destructive",
+          info: "border-l-4 border-l-accent",
+          warning: "border-l-4 border-l-secondary",
+        },
+        // You can also use inline styles that read from your CSS variables
+        style: {
+          // These will pull from the CSS variables set by your generateColorCSS function
+          backgroundColor: "var(--background)",
+          color: "var(--foreground)",
+          border: "1px solid var(--border)",
         },
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

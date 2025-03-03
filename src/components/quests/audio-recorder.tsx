@@ -220,7 +220,7 @@ export function AudioRecorder({
     </div>
   );
 }
-
+// Sub-components for each state
 // Sub-components for each state
 const IdleState = ({ onStartRecording }: { onStartRecording: () => void }) => (
   <motion.div
@@ -231,10 +231,18 @@ const IdleState = ({ onStartRecording }: { onStartRecording: () => void }) => (
   >
     <Button
       type="button"
-      className="h-24 w-24 rounded-full bg-primary hover:bg-primary/90"
+      className="h-24 w-24 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center p-0"
       onClick={onStartRecording}
     >
-      <Mic className="h-20 w-10 text-red-400" />
+      <Mic
+        className="text-card"
+        style={{
+          width: "3.5rem",
+          height: "3.5rem",
+          minWidth: "3.5rem",
+          minHeight: "3.5rem",
+        }}
+      />
     </Button>
     <p className="text-sm text-muted-foreground mt-2">Tap to speak</p>
   </motion.div>
@@ -329,10 +337,10 @@ const ProcessingState = () => (
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary"
+          className="h-24 w-24 rounded-full border-4 border-primary/20 border-t-primary"
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <Mic className="h-6 w-6 text-primary" />
+          <Mic className="h-14 w-14 text-primary" />
         </div>
       </div>
       <p className="text-base font-medium mt-4">Processing...</p>

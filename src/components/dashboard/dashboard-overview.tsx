@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { CreateQuestDialog } from "@/components/quests/create-quest-dialog";
+import { calculateLevelInfo } from "@/lib/utils";
 
 export function DashboardOverview() {
   const { user } = useUser();
@@ -29,10 +30,14 @@ export function DashboardOverview() {
   const { userAchievements } = useAchievements();
   const [createQuestOpen, setCreateQuestOpen] = useState(false);
 
-  // Calculate level progress
-  const nextLevelExp = (user?.level || 1) * 100;
-  const currentExp = user?.experience || 0;
-  const progress = Math.min(100, (currentExp / nextLevelExp) * 100);
+  const levelInfo = user
+    ? calculateLevelInfo(user.experience)
+    : {
+        level: 1,
+        currentXp: 0,
+        nextLevelXp: 100,
+        progress: 0,
+      };
 
   // Filter quests
   const dailyQuests = quests.filter(
@@ -80,13 +85,13 @@ export function DashboardOverview() {
             <Sparkles className="h-6 w-6 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{user?.level || 1}</div>
+            <div className="text-2xl font-bold">{levelInfo.level || 1}</div>
             <div className="mt-2 space-y-1">
               <div className="flex justify-between text-xs">
-                <span>{currentExp} XP</span>
-                <span>{nextLevelExp} XP</span>
+                <span>{levelInfo.currentXp} XP</span>
+                <span>{levelInfo.nextLevelXp} XP</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={levelInfo.progress} className="h-2" />
             </div>
           </CardContent>
         </Card>
@@ -227,7 +232,7 @@ export function DashboardOverview() {
       {/* All quests */}
       <Card>
         <CardHeader>
-          <CardTitle>Quest Log</CardTitle>
+          <CardTitle>Ledger</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="active">
@@ -276,7 +281,7 @@ export function DashboardOverview() {
                       return b.priority - a.priority;
                     })
                     .map((quest) => (
-                      <QuestItem key={quest.id} quest={quest} />
+                      <QuestItem key={quest.id} quest={quest} expanded />
                     ))}
                 </div>
               )}
@@ -301,7 +306,7 @@ export function DashboardOverview() {
                         new Date(a.created_at).getTime()
                     )
                     .map((quest) => (
-                      <QuestItem key={quest.id} quest={quest} />
+                      <QuestItem key={quest.id} quest={quest} expanded />
                     ))}
                 </div>
               )}

@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import {
   CalendarDays,
+  ChevronDown,
   Clock,
   Crown,
   Info,
@@ -41,6 +42,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSettingsStore } from "@/store/settingsStore";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
+
+// Animation configurations
+const containerVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, height: 0, marginBottom: 0 },
+};
+
+// Fixed checkVariants - using only two keyframes for spring animation
+const checkVariants = {
+  unchecked: { scale: 1 },
+  checked: { scale: 1.2 }, // Removed array of keyframes
+};
+
+const dropdownVariants = {
+  closed: { opacity: 0, y: -10 },
+  open: { opacity: 1, y: 0 },
+};
 
 interface QuestItemProps {
   quest: Quest;
@@ -98,7 +118,9 @@ export function QuestItem({
 
   const handleComplete = () => {
     if (!quest.is_completed) {
-      completeQuest(quest.id);
+      setTimeout(() => {
+        completeQuest(quest.id);
+      }, 300);
     }
   };
 
@@ -108,141 +130,213 @@ export function QuestItem({
   };
 
   return (
-    <>
+    <LayoutGroup>
       <motion.div
-        initial={animationsEnabled ? { opacity: 0, y: 10 } : undefined}
-        animate={animationsEnabled ? { opacity: 1, y: 0 } : undefined}
-        exit={
-          animationsEnabled
-            ? { opacity: 0, height: 0, marginBottom: 0 }
-            : undefined
-        }
-        transition={{ duration: 0.2 }}
+        layout
+        initial={animationsEnabled ? "hidden" : undefined}
+        animate={animationsEnabled ? "visible" : undefined}
+        exit={animationsEnabled ? "exit" : undefined}
+        variants={containerVariants}
+        transition={{ type: "spring", duration: 0.3 }}
         className={cn(
-          "flex items-center p-3 rounded-lg border",
+          "group flex flex-col p-3 rounded-lg border cursor-pointer",
           quest.is_completed
             ? "bg-muted/30 border-muted"
             : "bg-card border-border hover:border-primary/20"
         )}
-        onClick={() => !expanded && setIsOpen(!isOpen)}
+        onClick={(e) => {
+          if (!(e.target instanceof HTMLButtonElement) && !expanded) {
+            setIsOpen(!isOpen);
+          }
+        }}
       >
-        <Checkbox
-          checked={quest.is_completed}
-          onCheckedChange={handleComplete}
-          className="h-5 w-5"
-          disabled={quest.is_completed}
-        />
+        <div className="flex items-center">
+          <motion.div
+            animate={quest.is_completed ? "checked" : "unchecked"}
+            variants={checkVariants}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              // Add this to create a bounce effect that mimics the original animation
+              damping: 10,
+            }}
+            className="flex"
+          >
+            <Checkbox
+              checked={quest.is_completed}
+              onCheckedChange={handleComplete}
+              className="h-5 w-5"
+              disabled={quest.is_completed}
+            />
+          </motion.div>
 
-        <div className="ml-3 flex-1 min-w-0">
-          <div className="flex items-center">
-            <p
-              className={cn(
-                "font-medium",
-                quest.is_completed && "line-through text-muted-foreground"
-              )}
-            >
-              {quest.title}
-            </p>
+          <div className="ml-3 flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <motion.div className="overflow-hidden">
+                <motion.p
+                  layout="position"
+                  className={cn(
+                    "font-medium",
+                    quest.is_completed && "line-through text-muted-foreground"
+                  )}
+                  initial={{ opacity: 1 }}
+                  animate={{
+                    opacity: quest.is_completed ? 0.6 : 1,
+                    x: quest.is_completed ? 4 : 0,
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {quest.title}
+                </motion.p>
+              </motion.div>
 
-            <div className="ml-2 flex items-center space-x-1">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TypeIcon className={cn("h-4 w-4", rarityColor)} />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {quest.quest_type} Quest - {quest.rarity} Rarity
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {quest.due_date && (
+              <div className="flex items-center gap-2">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formatDistanceToNow(new Date(quest.due_date), {
-                          addSuffix: true,
-                        })}
-                      </div>
+                      <TypeIcon className={cn("h-4 w-4", rarityColor)} />
                     </TooltipTrigger>
                     <TooltipContent>
-                      Due: {new Date(quest.due_date).toLocaleDateString()}
+                      {quest.quest_type} quest - {quest.rarity} rarity
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              )}
+
+                {quest.due_date && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          className="flex items-center text-xs text-muted-foreground"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          {formatDistanceToNow(new Date(quest.due_date), {
+                            addSuffix: true,
+                          })}
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Due: {new Date(quest.due_date).toLocaleDateString()}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
-          </div>
 
-          {quest.description && (
-            <p className="text-sm text-muted-foreground truncate">
-              {quest.description}
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center ml-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setDetailsDialogOpen(true)}
-            className="h-8 w-8"
-          >
-            <Info className="h-4 w-4" />
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setDetailsDialogOpen(true)}>
-                View Details
-              </DropdownMenuItem>
-              {!quest.is_completed && (
-                <DropdownMenuItem onClick={handleComplete}>
-                  Mark as Completed
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => setDeleteDialogOpen(true)}
+            {quest.description && (
+              <motion.p
+                className="text-sm text-muted-foreground line-clamp-1 mt-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
               >
-                <Trash className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {quest.description}
+              </motion.p>
+            )}
+          </div>
+
+          <div className="flex items-center ml-2 gap-1">
+            {!expanded && (
+              <motion.div
+                animate={{ rotate: isOpen ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="text-muted-foreground"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </motion.div>
+            )}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDetailsDialogOpen(true)}
+              className="h-8 w-8"
+            >
+              <Info className="h-4 w-4" />
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </motion.div>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" asChild>
+                <motion.div
+                  variants={dropdownVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </motion.div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
-        {(isOpen || expanded) && quest.description && (
-          <div className="p-3 pt-0 border-t border-border/40">
-            <div className="mt-3 text-sm text-muted-foreground">
-              {quest.description}
-            </div>
+        <AnimatePresence>
+          {(isOpen || expanded) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: 1,
+                height: "auto",
+                transition: { type: "spring", duration: 0.3 },
+              }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                transition: { duration: 0.2 },
+              }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 pt-3 border-t border-border/40">
+                <motion.div
+                  initial={{ y: -10 }}
+                  animate={{ y: 0 }}
+                  className="text-sm text-muted-foreground whitespace-pre-wrap"
+                >
+                  {quest.description}
+                </motion.div>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              <div className="flex items-center text-xs text-muted-foreground">
-                <span className="font-semibold mr-1">Priority:</span>{" "}
-                {quest.priority}/5
+                <motion.div
+                  className="mt-3 flex flex-wrap gap-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div className="flex items-center text-sm gap-2">
+                    <span className="font-semibold">Priority:</span>
+                    <AnimatedProgress
+                      value={quest.priority}
+                      className="w-28 mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="font-semibold mr-2">Reward:</span>
+                    <span className="text-muted-foreground">
+                      {quest.exp_reward} XP
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="font-semibold mr-2 ">Rarity:</span>
+                    <span className={cn(rarityColor)}>{quest.rarity}</span>
+                  </div>
+                </motion.div>
               </div>
-              <div className="flex items-center text-xs text-muted-foreground">
-                <span className="font-semibold mr-1">Reward:</span>{" "}
-                {quest.exp_reward} XP
-              </div>
-              <div className={cn("flex items-center text-xs", rarityColor)}>
-                <span className="font-semibold mr-1 text-muted-foreground">
-                  Rarity:
-                </span>{" "}
-                {quest.rarity}
-              </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -271,6 +365,6 @@ export function QuestItem({
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
       />
-    </>
+    </LayoutGroup>
   );
 }

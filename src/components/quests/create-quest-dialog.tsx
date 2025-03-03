@@ -46,9 +46,8 @@ import { AudioProcessingAnimation } from "@/components/ui/audio-processing-anima
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
-// Import the mock API instead of the real one
 import { Switch } from "@/components/ui/switch";
-
+import { Slider } from "@/components/ui/slider";
 type CreateQuestFormValues = z.infer<typeof createQuestSchema>;
 
 interface CreateQuestDialogProps {
@@ -85,7 +84,7 @@ export function CreateQuestDialog({
       description: "",
       rarity: QuestRarity.COMMON,
       quest_type: defaultQuestType,
-      priority: 3,
+      priority: 50, // Changed from 3 to 50
     },
   });
 
@@ -100,7 +99,7 @@ export function CreateQuestDialog({
         description: "",
         rarity: QuestRarity.COMMON,
         quest_type: defaultQuestType,
-        priority: 3,
+        priority: 50, // Changed from 3 to 50
       });
       setDate(undefined);
     }
@@ -121,7 +120,7 @@ export function CreateQuestDialog({
           onSuccess: (createdQuest) => {
             setSuccessAnimation(true);
             setTimeout(() => onOpenChange(false), 5000);
-            toast(
+            toast.success(
               <div className="flex flex-col">
                 <div className="font-medium text-base">Quest Created!</div>
                 <div className="text-sm mt-1">{createdQuest.title}</div>
@@ -167,8 +166,8 @@ export function CreateQuestDialog({
           onSettled: () => setIsProcessingAudio(false),
         });
       }
-    } catch (error) {
-      handleAudioError(error);
+    } catch {
+      handleAudioError();
     }
   };
 
@@ -350,25 +349,16 @@ export function CreateQuestDialog({
             name="priority"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Priority (1-5)</FormLabel>
-                <Select
-                  onValueChange={(value) => field.onChange(parseInt(value))}
-                  defaultValue={field.value.toString()}
-                  value={field.value.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="1">Low (1)</SelectItem>
-                    <SelectItem value="2">Medium-Low (2)</SelectItem>
-                    <SelectItem value="3">Medium (3)</SelectItem>
-                    <SelectItem value="4">Medium-High (4)</SelectItem>
-                    <SelectItem value="5">High (5)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Priority ({field.value})</FormLabel>
+                <FormControl>
+                  <Slider
+                    min={1}
+                    max={100}
+                    step={1}
+                    value={[field.value]}
+                    onValueChange={(value) => field.onChange(value[0])}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -448,7 +438,7 @@ export function CreateQuestDialog({
 
         <div className="flex flex-row items-center justify-between rounded-lg border p-1 gap-4 px-4">
           <div className="flex items-center text-sm font-medium">
-            <Mic className="h-4 w-4 mr-2 text-pink-500" />
+            <Mic className="h-4 w-4 mr-2" />
             Auto Create
           </div>
           <Switch

@@ -3,14 +3,6 @@
 import { Bell, Menu, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUser } from "@/hooks/useUser";
-import { useSettingsStore } from "@/store/settingsStore";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { CreateQuestDialog } from "@/components/quests/create-quest-dialog";
 import { useState } from "react";
 
@@ -19,8 +11,6 @@ interface TopBarProps {
 }
 
 export function TopBar({ onOpenSidebar }: TopBarProps) {
-  const { user } = useUser();
-  const { darkMode, setDarkMode } = useSettingsStore();
   const [createQuestOpen, setCreateQuestOpen] = useState(false);
 
   return (
@@ -72,23 +62,6 @@ export function TopBar({ onOpenSidebar }: TopBarProps) {
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
           </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <span className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
-                  <span className="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                    {user?.username?.charAt(0).toUpperCase() || "U"}
-                  </span>
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setDarkMode(!darkMode)}>
-                Toggle {darkMode ? "Light" : "Dark"} Mode
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 

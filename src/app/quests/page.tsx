@@ -6,13 +6,7 @@ import { AuthGuard } from "@/components/auth/auth-guard";
 import { useQuests } from "@/hooks/useQuests";
 import { QuestCategory } from "@/components/quests/quest-category";
 import { CreateQuestDialog } from "@/components/quests/create-quest-dialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,40 +23,64 @@ import {
   Map,
   Crown,
   Swords,
-  Flame,
-  Sparkles,
-  Clock,
 } from "lucide-react";
 import { QuestType, QuestRarity } from "@/types/quest";
-import { QuestItem } from "@/components/quests/quest-item";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
-import { cn } from "@/lib/utils";
 
 export default function QuestsPage() {
   const { quests } = useQuests();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [rarityFilter, setRarityFilter] = useState<string>("all");
+  const [completedFilter, setCompletedFilter] = useState({
+    completed: false,
+    notCompleted: true,
+  });
+  const [trackedFilter, setTrackedFilter] = useState({
+    tracked: true,
+    notTracked: false,
+  });
   const { animationsEnabled } = useSettingsStore();
 
-  // Filter quests based on search and rarity
+  const handleCompletedChange = (
+    checked: boolean | "indeterminate",
+    type: "completed" | "notCompleted"
+  ) => {
+    if (checked === "indeterminate") return;
+    setCompletedFilter((prev) => ({ ...prev, [type]: checked }));
+  };
+
+  const handleTrackedChange = (
+    checked: boolean | "indeterminate",
+    type: "tracked" | "notTracked"
+  ) => {
+    if (checked === "indeterminate") return;
+    setTrackedFilter((prev) => ({ ...prev, [type]: checked }));
+  };
+
   const filteredQuests = quests.filter((quest) => {
-    // Apply search filter (case insensitive)
-    if (
-      searchTerm &&
-      !quest.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !quest.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
+    // Existing search and rarity filters
+    const matchesSearch =
+      !searchTerm ||
+      quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quest.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Apply rarity filter
-    if (rarityFilter !== "all" && quest.rarity !== rarityFilter) {
-      return false;
-    }
+    const matchesRarity =
+      rarityFilter === "all" || quest.rarity === rarityFilter;
 
-    return true;
+    // New filters
+    const matchesCompleted =
+      (quest.is_completed && completedFilter.completed) ||
+      (!quest.is_completed && completedFilter.notCompleted);
+
+    const matchesTracked =
+      (quest.tracked && trackedFilter.tracked) ||
+      (!quest.tracked && trackedFilter.notTracked);
+
+    return matchesSearch && matchesRarity && matchesCompleted && matchesTracked;
   });
 
   // Group quests by type
@@ -78,29 +96,6 @@ export default function QuestsPage() {
   const regularQuests = filteredQuests.filter(
     (q) => q.quest_type === QuestType.REGULAR
   );
-
-  // Group active daily quests
-  const activeDailyQuests = dailyQuests.filter((q) => !q.is_completed);
-
-  // Extract incomplete quests with due dates
-  const incompleteQuestsWithDue = filteredQuests
-    .filter((q) => !q.is_completed && q.due_date)
-    .sort((a, b) => {
-      return new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime();
-    });
-
-  // Get nearest due quests (max 3)
-  const upcomingQuests = incompleteQuestsWithDue.slice(0, 3);
-
-  // For tracking
-  const trackedQuests = filteredQuests
-    .filter(
-      (q) =>
-        !q.is_completed &&
-        (q.quest_type === QuestType.BOSS || q.quest_type === QuestType.EPIC) &&
-        !upcomingQuests.some((uq) => uq.id === q.id)
-    )
-    .slice(0, 2);
 
   return (
     <AuthGuard>
@@ -121,93 +116,8 @@ export default function QuestsPage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="gap-4">
             {/* Quest Logger */}
-            <motion.div
-              initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
-              animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
-              transition={{ duration: 0.3 }}
-              className="md:col-span-1 space-y-4"
-            >
-              {/* Active Daily Quests */}
-              <Card
-                className={cn(
-                  "border-blue-400/30",
-                  activeDailyQuests.length > 0 ? "bg-blue-900/5" : ""
-                )}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center">
-                    <CalendarDays className="h-5 w-5 mr-2 text-blue-500" />
-                    <CardTitle className="text-lg">Daily Quests</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {activeDailyQuests.length > 0
-                      ? `${activeDailyQuests.length} quests remaining today`
-                      : "All daily quests completed!"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {activeDailyQuests.length > 0 ? (
-                    activeDailyQuests.map((quest) => (
-                      <QuestItem key={quest.id} quest={quest} expanded />
-                    ))
-                  ) : (
-                    <div className="flex items-center justify-center py-4 text-muted-foreground">
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Come back tomorrow for new dailies!
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Upcoming Quests */}
-              <Card
-                className={
-                  upcomingQuests.length > 0
-                    ? "border-yellow-400/30 bg-yellow-900/5"
-                    : ""
-                }
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center">
-                    <Clock className="h-5 w-5 mr-2 text-yellow-500" />
-                    <CardTitle className="text-lg">
-                      Upcoming Deadlines
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {upcomingQuests.length > 0 ? (
-                    upcomingQuests.map((quest) => (
-                      <QuestItem key={quest.id} quest={quest} expanded />
-                    ))
-                  ) : (
-                    <div className="flex items-center justify-center py-4 text-muted-foreground">
-                      <Flame className="h-4 w-4 mr-2" />
-                      No upcoming deadlines
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Tracked Quests */}
-              {trackedQuests.length > 0 && (
-                <Card className="border-purple-400/30 bg-purple-900/5">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center">
-                      <Sparkles className="h-5 w-5 mr-2 text-purple-500" />
-                      <CardTitle className="text-lg">Tracked Quests</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {trackedQuests.map((quest) => (
-                      <QuestItem key={quest.id} quest={quest} expanded />
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </motion.div>
 
             {/* Main Quest Log */}
             <motion.div
@@ -218,8 +128,7 @@ export default function QuestsPage() {
             >
               <Card className="border-accent/20">
                 <CardHeader>
-                  <CardTitle>All Quests</CardTitle>
-                  <div className="flex flex-col sm:flex-row gap-4 mt-3">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -256,6 +165,54 @@ export default function QuestsPage() {
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                  </div>
+                  {/* New checkboxes */}
+                  <div className="flex flex-wrap gap-6 mt-3">
+                    <div className="space-y-2">
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="not-completed"
+                            checked={completedFilter.notCompleted}
+                            onCheckedChange={(checked) =>
+                              handleCompletedChange(checked, "notCompleted")
+                            }
+                          />
+                          <Label htmlFor="not-completed">Not Completed</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="tracked"
+                            checked={trackedFilter.tracked}
+                            onCheckedChange={(checked) =>
+                              handleTrackedChange(checked, "tracked")
+                            }
+                          />
+                          <Label htmlFor="tracked">Tracked</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="completed"
+                            checked={completedFilter.completed}
+                            onCheckedChange={(checked) =>
+                              handleCompletedChange(checked, "completed")
+                            }
+                          />
+                          <Label htmlFor="completed">Completed</Label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="not-tracked"
+                            checked={trackedFilter.notTracked}
+                            onCheckedChange={(checked) =>
+                              handleTrackedChange(checked, "notTracked")
+                            }
+                          />
+                          <Label htmlFor="not-tracked">Not Tracked</Label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -305,16 +262,16 @@ export default function QuestsPage() {
                         Your quest log is empty
                       </h3>
                       <p className="text-muted-foreground mt-2 max-w-sm">
-                        Start by adding a new quest to your log. Quests can be
-                        daily tasks, regular to-dos, epic projects, or major
-                        boss challenges!
+                        Start by adding a quest to your log. Quests can be daily
+                        tasks, regular to-dos, epic projects, or major boss
+                        challenges!
                       </p>
                       <Button
                         className="mt-4"
                         onClick={() => setCreateDialogOpen(true)}
                       >
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        Add First Quest
+                        Add Quest
                       </Button>
                     </div>
                   )}
