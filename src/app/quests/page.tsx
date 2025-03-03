@@ -34,7 +34,7 @@ import {
   Clock,
 } from "lucide-react";
 import { QuestType, QuestRarity } from "@/types/quest";
-import { WowQuestItem } from "@/components/quests/wow-quest-item";
+import { QuestItem } from "@/components/quests/quest-item";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 import { cn } from "@/lib/utils";
@@ -150,7 +150,7 @@ export default function QuestsPage() {
                 <CardContent>
                   {activeDailyQuests.length > 0 ? (
                     activeDailyQuests.map((quest) => (
-                      <WowQuestItem key={quest.id} quest={quest} expanded />
+                      <QuestItem key={quest.id} quest={quest} expanded />
                     ))
                   ) : (
                     <div className="flex items-center justify-center py-4 text-muted-foreground">
@@ -180,7 +180,7 @@ export default function QuestsPage() {
                 <CardContent>
                   {upcomingQuests.length > 0 ? (
                     upcomingQuests.map((quest) => (
-                      <WowQuestItem key={quest.id} quest={quest} expanded />
+                      <QuestItem key={quest.id} quest={quest} expanded />
                     ))
                   ) : (
                     <div className="flex items-center justify-center py-4 text-muted-foreground">
@@ -202,7 +202,7 @@ export default function QuestsPage() {
                   </CardHeader>
                   <CardContent>
                     {trackedQuests.map((quest) => (
-                      <WowQuestItem key={quest.id} quest={quest} expanded />
+                      <QuestItem key={quest.id} quest={quest} expanded />
                     ))}
                   </CardContent>
                 </Card>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Quest } from "@/types/quest";
-import { WowQuestItem } from "./wow-quest-item";
+import { QuestItem } from "./quest-item";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -33,11 +33,11 @@ export function QuestCategory({
       initial={animationsEnabled ? { opacity: 0 } : false}
       animate={animationsEnabled ? { opacity: 1 } : false}
       transition={{ duration: 0.3 }}
-      className="mb-6"
+      className="mb-6 "
     >
       <div
         className={cn(
-          "flex items-center py-2 px-1 cursor-pointer border-b hover:bg-accent/10 transition-colors",
+          "flex items-center py-2 px-1 cursor-pointer border-b hover:bg-accent/10 transition-colors ",
           hasQuests ? "border-accent/30" : "border-muted/30"
         )}
         onClick={() => setIsOpen(!isOpen)}
@@ -69,7 +69,7 @@ export function QuestCategory({
       {isOpen && (
         <div className="mt-2 pl-6">
           {hasQuests ? (
-            quests.map((quest) => <WowQuestItem key={quest.id} quest={quest} />)
+            quests.map((quest) => <QuestItem key={quest.id} quest={quest} />)
           ) : (
             <div className="text-sm text-muted-foreground italic py-2">
               {emptyMessage}

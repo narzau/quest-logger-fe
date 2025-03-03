@@ -46,7 +46,7 @@ export function AchievementCard({
               )}
             >
               {unlocked ? (
-                <Award className="h-6 w-6" />
+                <Award className="h-8 w-8" />
               ) : (
                 <Lock className="h-6 w-6" />
               )}
@@ -55,18 +55,25 @@ export function AchievementCard({
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium leading-none">
-                  {(achievement as Achievement).name}
+                  {userAchievement
+                    ? userAchievement.achievement.name
+                    : (achievement as Achievement).name}
                 </h3>
                 <Badge
                   variant={unlocked ? "default" : "outline"}
                   className={unlocked ? "bg-yellow-600" : ""}
                 >
-                  {(achievement as Achievement).exp_reward} XP
+                  {userAchievement
+                    ? userAchievement.achievement.exp_reward
+                    : (achievement as Achievement).exp_reward}
+                  XP
                 </Badge>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                {(achievement as Achievement).description}
+                {userAchievement
+                  ? userAchievement.achievement.description
+                  : (achievement as Achievement).description}
               </p>
 
               {userAchievement && (

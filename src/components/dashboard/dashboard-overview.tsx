@@ -67,7 +67,7 @@ export function DashboardOverview() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <Button onClick={() => setCreateQuestOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
+          <PlusCircle className="h-6 w-6 mr-2" />
           New Quest
         </Button>
       </div>
@@ -77,7 +77,7 @@ export function DashboardOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Level</CardTitle>
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Sparkles className="h-6 w-6 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{user?.level || 1}</div>
@@ -94,7 +94,7 @@ export function DashboardOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Daily Quests</CardTitle>
-            <CalendarDays className="h-4 w-4 text-blue-500" />
+            <CalendarDays className="h-6 w-6 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -118,7 +118,7 @@ export function DashboardOverview() {
             <CardTitle className="text-sm font-medium">
               Completion Rate
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <TrendingUp className="h-6 w-6 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -136,7 +136,7 @@ export function DashboardOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Achievements</CardTitle>
-            <Award className="h-4 w-4 text-yellow-500" />
+            <Award className="h-6 w-6 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -157,7 +157,7 @@ export function DashboardOverview() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Daily Quests</CardTitle>
             <div className="flex items-center space-x-2">
-              <Flame className="h-5 w-5 text-orange-500" />
+              <Flame className="h-6 w-6 text-orange-500" />
               <span className="font-medium">
                 {dailyQuests.filter((q) => q.is_completed).length}/
                 {dailyQuests.length}
@@ -179,7 +179,7 @@ export function DashboardOverview() {
                   size="sm"
                   onClick={() => setCreateQuestOpen(true)}
                 >
-                  <PlusCircle className="h-4 w-4 mr-2" />
+                  <PlusCircle className="h-6 w-6 mr-2" />
                   Add Daily Quest
                 </Button>
               </div>
@@ -233,11 +233,11 @@ export function DashboardOverview() {
           <Tabs defaultValue="active">
             <TabsList className="mb-4">
               <TabsTrigger value="active">
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-6 w-6 mr-2" />
                 Active ({pendingQuests.length})
               </TabsTrigger>
               <TabsTrigger value="completed">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-6 w-6 mr-2" />
                 Completed ({completedQuests.length})
               </TabsTrigger>
             </TabsList>
@@ -255,7 +255,7 @@ export function DashboardOverview() {
                     className="mt-4"
                     onClick={() => setCreateQuestOpen(true)}
                   >
-                    <PlusCircle className="h-4 w-4 mr-2" />
+                    <PlusCircle className="h-6 w-6 mr-2" />
                     Add New Quest
                   </Button>
                 </div>

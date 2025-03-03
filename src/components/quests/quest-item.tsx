@@ -44,13 +44,20 @@ import { useSettingsStore } from "@/store/settingsStore";
 
 interface QuestItemProps {
   quest: Quest;
+  expanded?: boolean;
+  defaultOpen?: boolean;
 }
 
-export function QuestItem({ quest }: QuestItemProps) {
+export function QuestItem({
+  quest,
+  expanded = false,
+  defaultOpen = false,
+}: QuestItemProps) {
   const { completeQuest, deleteQuest } = useQuests();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const { animationsEnabled } = useSettingsStore();
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Get color based on rarity
   const getRarityColor = (rarity: QuestRarity) => {
@@ -117,6 +124,7 @@ export function QuestItem({ quest }: QuestItemProps) {
             ? "bg-muted/30 border-muted"
             : "bg-card border-border hover:border-primary/20"
         )}
+        onClick={() => !expanded && setIsOpen(!isOpen)}
       >
         <Checkbox
           checked={quest.is_completed}
@@ -210,6 +218,31 @@ export function QuestItem({ quest }: QuestItemProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {(isOpen || expanded) && quest.description && (
+          <div className="p-3 pt-0 border-t border-border/40">
+            <div className="mt-3 text-sm text-muted-foreground">
+              {quest.description}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <div className="flex items-center text-xs text-muted-foreground">
+                <span className="font-semibold mr-1">Priority:</span>{" "}
+                {quest.priority}/5
+              </div>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <span className="font-semibold mr-1">Reward:</span>{" "}
+                {quest.exp_reward} XP
+              </div>
+              <div className={cn("flex items-center text-xs", rarityColor)}>
+                <span className="font-semibold mr-1 text-muted-foreground">
+                  Rarity:
+                </span>{" "}
+                {quest.rarity}
+              </div>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

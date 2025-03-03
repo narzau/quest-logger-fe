@@ -86,28 +86,6 @@ export const defaultPalettes = {
     destructive: createOklch(0.45, 0.15, 20), // Muted brick red
   },
 
-  // Vibrant, Energetic Design Palette
-  electric: {
-    primary: createOklch(0.4, 0.25, 280), // Deep purple
-    secondary: createOklch(0.5, 0.2, 40), // Bright orange
-    background: createOklch(0.1, 0.1, 260), // Very dark purple
-    foreground: createOklch(0.9, 0, 0), // Soft white
-    muted: createOklch(0.3, 0.15, 270), // Muted lavender
-    accent: createOklch(0.5, 0.25, 200), // Bright teal
-    destructive: createOklch(0.45, 0.2, 10), // Deep crimson
-  },
-
-  // Warm, Inviting Sunset Palette
-  sunset: {
-    primary: createOklch(0.4, 0.2, 30), // Warm terracotta
-    secondary: createOklch(0.5, 0.15, 50), // Soft peach
-    background: createOklch(0.15, 0.1, 40), // Deep rust
-    foreground: createOklch(0.9, 0, 0), // Soft cream
-    muted: createOklch(0.3, 0.1, 20), // Muted clay
-    accent: createOklch(0.5, 0.2, 60), // Golden ochre
-    destructive: createOklch(0.45, 0.2, 10), // Deep maroon
-  },
-
   // Soft, Pastel-Inspired Digital Palette
   digital: {
     primary: createOklch(0.4, 0.15, 260), // Soft periwinkle
@@ -117,6 +95,60 @@ export const defaultPalettes = {
     muted: createOklch(0.3, 0.08, 230), // Soft slate
     accent: createOklch(0.5, 0.15, 200), // Cool aqua
     destructive: createOklch(0.45, 0.15, 10), // Soft brick
+  },
+  // Soft Pastel Dream Palette
+  pastelDream: {
+    primary: createOklch(0.75, 0.1, 280), // Soft lavender
+    secondary: createOklch(0.78, 0.1, 350), // Blush pink
+    background: createOklch(0.95, 0.02, 280), // Frosted lilac
+    foreground: createOklch(0.15, 0.05, 280), // Deep twilight
+    muted: createOklch(0.8, 0.05, 280), // Misty lavender
+    accent: createOklch(0.7, 0.15, 160), // Seafoam mint
+    destructive: createOklch(0.7, 0.1, 20), // Soft coral
+  },
+
+  // Cool Ocean Breeze Palette
+  oceanBreeze: {
+    primary: createOklch(0.5, 0.2, 200), // Deep teal
+    secondary: createOklch(0.55, 0.15, 170), // Seafoam green
+    background: createOklch(0.12, 0.1, 240), // Abyssal blue
+    foreground: createOklch(0.9, 0, 0), // Foam white
+    muted: createOklch(0.3, 0.08, 200), // Stormy sea
+    accent: createOklch(0.6, 0.2, 190), // Tropical cyan
+    destructive: createOklch(0.5, 0.15, 20), // Coral reef
+  },
+
+  // Mystical Twilight Palette
+  mysticTwilight: {
+    primary: createOklch(0.4, 0.2, 290), // Royal purple
+    secondary: createOklch(0.5, 0.2, 330), // Magenta bloom
+    background: createOklch(0.1, 0.1, 280), // Midnight cosmos
+    foreground: createOklch(0.9, 0.05, 300), // Pale orchid
+    muted: createOklch(0.3, 0.1, 290), // Twilight shadow
+    accent: createOklch(0.6, 0.25, 340), // Electric pink
+    destructive: createOklch(0.45, 0.2, 10), // Blood garnet
+  },
+
+  // Retro Neon Palette
+  retroNeon: {
+    primary: createOklch(0.5, 0.3, 200), // Electric cyan
+    secondary: createOklch(0.6, 0.3, 330), // Hot pink
+    background: createOklch(0.1, 0.2, 240), // Deep synthwave
+    foreground: createOklch(0.95, 0, 0), // Neon white
+    muted: createOklch(0.3, 0.2, 200), // Cyber teal
+    accent: createOklch(0.7, 0.3, 90), // Laser lemon
+    destructive: createOklch(0.6, 0.3, 10), // Neon red
+  },
+
+  // Earthy Clay Palette
+  earthenClay: {
+    primary: createOklch(0.5, 0.15, 30), // Terracotta
+    secondary: createOklch(0.45, 0.1, 80), // Olive grove
+    background: createOklch(0.15, 0.1, 40), // Dark umber
+    foreground: createOklch(0.9, 0.05, 50), // Sandstone
+    muted: createOklch(0.3, 0.08, 30), // Mudstone
+    accent: createOklch(0.55, 0.15, 60), // Mustard seed
+    destructive: createOklch(0.45, 0.15, 20), // Rust metal
   },
 };
 
