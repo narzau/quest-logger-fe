@@ -197,51 +197,52 @@ export function CreateQuestDialog({
       due_date: date ? date.toISOString() : undefined,
     };
 
-    // Show a loading toast
     const loadingToast = toast.loading("Creating quest...");
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Clear the loading toast
-      toast.dismiss(loadingToast);
-
-      // Show success toast
-      toast.success(
-        <div className="flex flex-col">
-          <div className="font-medium text-base">Quest Created!</div>
-          <div className="text-sm mt-1">{payload.title}</div>
-          <div className="mt-1 flex items-center space-x-2">
-            <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
-              {payload.quest_type}
-            </span>
-            <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
-              {payload.rarity}
-            </span>
-          </div>
-          {payload.description && (
-            <div className="text-xs mt-2 text-muted-foreground line-clamp-2">
-              {payload.description}
+    createQuest(payload, {
+      onSuccess: (createdQuest) => {
+        toast.success(
+          <div className="flex flex-col">
+            <div className="font-medium text-base">Quest Created!</div>
+            <div className="text-sm mt-1">{createdQuest.title}</div>
+            <div className="mt-1 flex items-center space-x-2">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
+                {createdQuest.quest_type}
+              </span>
+              <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
+                {createdQuest.rarity}
+              </span>
             </div>
-          )}
-        </div>,
-        {
-          description: "Your quest has been added to your quest log.",
-          duration: 5000,
-          action: {
-            label: "View Details",
-            onClick: () => {
-              console.log("Navigate to quest:", payload);
+            {createdQuest.description && (
+              <div className="text-xs mt-2 text-muted-foreground line-clamp-2">
+                {createdQuest.description}
+              </div>
+            )}
+          </div>,
+          {
+            description: "Your quest has been added to your quest log.",
+            duration: 5000,
+            action: {
+              label: "View Details",
+              onClick: () => console.log("Navigate to quest:", createdQuest),
             },
-          },
-        }
-      );
+          }
+        );
 
-      // Reset and close
-      form.reset();
-      setDate(undefined);
-      setMode("voice");
-      onOpenChange(false);
-    }, 1000);
+        form.reset();
+        setDate(undefined);
+        setMode("voice");
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        toast.error("Failed to create quest", {
+          description: error?.message || "Please try again later.",
+        });
+      },
+      onSettled: () => {
+        toast.dismiss(loadingToast);
+      },
+    });
   };
 
   // Render the form for manual entry
