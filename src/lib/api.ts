@@ -7,7 +7,7 @@ import { Achievement, UserAchievement } from "@/types/achievement";
 // Create a base axios instance with common configuration
 const axiosClient: AxiosInstance = axios.create({
   baseURL:
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000" + "/api/v1",
+    (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
