@@ -426,17 +426,17 @@ export function CreateQuestDialog({
           console.log("Recording cancelled");
         }}
       />
-      <div className="mt-6 flex justify-center gap-2">
+      <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
         <Button
           variant="outline"
           onClick={() => setMode("manual")}
-          className="flex items-center"
+          className="flex items-center w-full sm:w-auto"
         >
           <Edit className="h-4 w-4 mr-2" />
           Switch to Manual Entry
         </Button>
 
-        <div className="flex flex-row items-center justify-between rounded-lg border p-1 gap-4 px-4">
+        <div className="flex flex-row h-9 items-center justify-between rounded-lg border p-1 gap-4 px-4 w-full sm:w-auto">
           <div className="flex items-center text-sm font-medium">
             <Mic className="h-4 w-4 mr-2" />
             Auto Create

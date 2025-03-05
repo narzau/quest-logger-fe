@@ -104,17 +104,6 @@ export function ColorPaletteSelector() {
             </div>
           </div>
         </div>
-
-        {/* Custom Color Palette (Future Enhancement) */}
-        <div className="mt-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            // onClick={openCustomColorPicker}
-          >
-            Create Custom Palette
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

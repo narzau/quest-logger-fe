@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Bell, Mic, Moon, Sparkles } from "lucide-react";
+import { Bell, Mic, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColorPaletteSelector } from "./color-palette-selector";
@@ -91,32 +91,6 @@ export function SettingsForm() {
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="darkMode"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center">
-                            <Moon className="h-4 w-4 mr-2 text-blue-500" />
-                            <FormLabel className="text-base">
-                              Dark Mode
-                            </FormLabel>
-                          </div>
-                          <FormDescription>
-                            Use dark theme for reduced eye strain
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="animationsEnabled"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -129,33 +103,6 @@ export function SettingsForm() {
                           </div>
                           <FormDescription>
                             Enable animations for a more engaging experience
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="notificationsEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center">
-                            <Bell className="h-4 w-4 mr-2 text-green-500" />
-                            <FormLabel className="text-base">
-                              Notifications
-                            </FormLabel>
-                          </div>
-                          <FormDescription>
-                            Receive notifications for upcoming quests and
-                            achievements
                           </FormDescription>
                         </div>
                         <FormControl>
@@ -189,6 +136,37 @@ export function SettingsForm() {
                           <Switch
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="notificationsEnabled"
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Bell className="h-4 w-4 mr-2 text-green-500" />
+                            <FormLabel className="text-base">
+                              Notifications
+                              <span className="text-xs text-secondary">
+                                [coming soon]
+                              </span>
+                            </FormLabel>
+                          </div>
+                          <FormDescription>
+                            Receive notifications for upcoming quests and
+                            achievements
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={false} // {field.value}
+                            // onCheckedChange={field.onChange}
                           />
                         </FormControl>
                       </FormItem>

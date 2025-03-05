@@ -29,13 +29,13 @@ export function AchievementCard({
     >
       <Card
         className={cn(
-          "overflow-hidden transition-all duration-200",
+          "overflow-hidden transition-all duration-200 ",
           unlocked
             ? "border-yellow-400/30 bg-gradient-to-br from-card to-yellow-950/10"
             : "border-border bg-card opacity-70 hover:opacity-100"
         )}
       >
-        <CardContent className="p-4">
+        <CardContent className="p-2 px-4">
           <div className="flex items-start gap-3">
             <div
               className={cn(
@@ -48,7 +48,7 @@ export function AchievementCard({
               {unlocked ? (
                 <Award className="h-8 w-8" />
               ) : (
-                <Lock className="h-6 w-6" />
+                <Lock className="h-8 w-8" />
               )}
             </div>
 

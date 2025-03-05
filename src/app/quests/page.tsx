@@ -117,8 +117,6 @@ export default function QuestsPage() {
           </div>
 
           <div className="gap-4">
-            {/* Quest Logger */}
-
             {/* Main Quest Log */}
             <motion.div
               initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
@@ -126,51 +124,56 @@ export default function QuestsPage() {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="md:col-span-2"
             >
-              <Card className="border-accent/20">
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search quests..."
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
+              {/* Fixed height container to prevent content jump when header becomes sticky */}
+              <div className="relative">
+                <Card className="border-accent/20">
+                  {/* Sticky Header */}
+                  <CardHeader className="bg-background sticky pt-4 -top-6 z-10 border-b border-border/30 pb-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search quests..."
+                          className="pl-8"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
 
-                    <div className="w-full sm:w-44">
-                      <Select
-                        value={rarityFilter}
-                        onValueChange={setRarityFilter}
-                      >
-                        <SelectTrigger>
-                          <div className="flex items-center">
-                            <Filter className="mr-2 h-4 w-4" />
-                            <span>Rarity</span>
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Rarities</SelectItem>
-                          <SelectItem value={QuestRarity.COMMON}>
-                            Common
-                          </SelectItem>
-                          <SelectItem value={QuestRarity.UNCOMMON}>
-                            Uncommon
-                          </SelectItem>
-                          <SelectItem value={QuestRarity.RARE}>Rare</SelectItem>
-                          <SelectItem value={QuestRarity.EPIC}>Epic</SelectItem>
-                          <SelectItem value={QuestRarity.LEGENDARY}>
-                            Legendary
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="w-full sm:w-44">
+                        <Select
+                          value={rarityFilter}
+                          onValueChange={setRarityFilter}
+                        >
+                          <SelectTrigger>
+                            <div className="flex items-center">
+                              <Filter className="mr-2 h-4 w-4" />
+                              <span>Rarity</span>
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Rarities</SelectItem>
+                            <SelectItem value={QuestRarity.COMMON}>
+                              Common
+                            </SelectItem>
+                            <SelectItem value={QuestRarity.UNCOMMON}>
+                              Uncommon
+                            </SelectItem>
+                            <SelectItem value={QuestRarity.RARE}>
+                              Rare
+                            </SelectItem>
+                            <SelectItem value={QuestRarity.EPIC}>
+                              Epic
+                            </SelectItem>
+                            <SelectItem value={QuestRarity.LEGENDARY}>
+                              Legendary
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  </div>
-                  {/* New checkboxes */}
-                  <div className="flex flex-wrap gap-6 mt-3">
-                    <div className="space-y-2">
-                      <div className="flex gap-4">
+                    <div className="mt-3">
+                      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id="not-completed"
@@ -179,7 +182,12 @@ export default function QuestsPage() {
                               handleCompletedChange(checked, "notCompleted")
                             }
                           />
-                          <Label htmlFor="not-completed">Not Completed</Label>
+                          <Label
+                            htmlFor="not-completed"
+                            className="text-sm sm:text-base whitespace-nowrap"
+                          >
+                            Not Completed
+                          </Label>
                         </div>
                         <div className="flex items-center gap-2">
                           <Checkbox
@@ -189,7 +197,12 @@ export default function QuestsPage() {
                               handleTrackedChange(checked, "tracked")
                             }
                           />
-                          <Label htmlFor="tracked">Tracked</Label>
+                          <Label
+                            htmlFor="tracked"
+                            className="text-sm sm:text-base"
+                          >
+                            Tracked
+                          </Label>
                         </div>
                         <div className="flex items-center gap-2">
                           <Checkbox
@@ -199,9 +212,13 @@ export default function QuestsPage() {
                               handleCompletedChange(checked, "completed")
                             }
                           />
-                          <Label htmlFor="completed">Completed</Label>
+                          <Label
+                            htmlFor="completed"
+                            className="text-sm sm:text-base"
+                          >
+                            Completed
+                          </Label>
                         </div>
-
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id="not-tracked"
@@ -210,73 +227,79 @@ export default function QuestsPage() {
                               handleTrackedChange(checked, "notTracked")
                             }
                           />
-                          <Label htmlFor="not-tracked">Not Tracked</Label>
+                          <Label
+                            htmlFor="not-tracked"
+                            className="text-sm sm:text-base whitespace-nowrap"
+                          >
+                            Not Tracked
+                          </Label>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  {/* Daily Quests */}
-                  <QuestCategory
-                    title="Daily Quests"
-                    quests={dailyQuests}
-                    icon={<CalendarDays className="h-5 w-5 text-blue-500" />}
-                    emptyMessage="No daily quests. Create some to build habits!"
-                    defaultOpen={dailyQuests.length > 0}
-                  />
+                  </CardHeader>
 
-                  {/* Boss Quests */}
-                  <QuestCategory
-                    title="Boss Quests"
-                    quests={bossQuests}
-                    icon={<Swords className="h-5 w-5 text-red-500" />}
-                    emptyMessage="No boss quests. Create one for your major tasks!"
-                    defaultOpen={bossQuests.length > 0}
-                  />
+                  <CardContent className="pt-2">
+                    {/* Daily Quests */}
+                    <QuestCategory
+                      title="Daily Quests"
+                      quests={dailyQuests}
+                      icon={<CalendarDays className="h-5 w-5 text-blue-500" />}
+                      emptyMessage="No daily quests. Create some to build habits!"
+                      defaultOpen={dailyQuests.length > 0}
+                    />
 
-                  {/* Epic Quests */}
-                  <QuestCategory
-                    title="Epic Quests"
-                    quests={epicQuests}
-                    icon={<Crown className="h-5 w-5 text-purple-500" />}
-                    emptyMessage="No epic quests. Create one for significant projects!"
-                    defaultOpen={epicQuests.length > 0}
-                  />
+                    {/* Boss Quests */}
+                    <QuestCategory
+                      title="Boss Quests"
+                      quests={bossQuests}
+                      icon={<Swords className="h-5 w-5 text-red-500" />}
+                      emptyMessage="No boss quests. Create one for your major tasks!"
+                      defaultOpen={bossQuests.length > 0}
+                    />
 
-                  {/* Regular Quests */}
-                  <QuestCategory
-                    title="Regular Quests"
-                    quests={regularQuests}
-                    icon={<Map className="h-5 w-5 text-green-500" />}
-                    emptyMessage="No regular quests. Add your everyday tasks!"
-                    defaultOpen={regularQuests.length > 0}
-                  />
+                    {/* Epic Quests */}
+                    <QuestCategory
+                      title="Epic Quests"
+                      quests={epicQuests}
+                      icon={<Crown className="h-5 w-5 text-purple-500" />}
+                      emptyMessage="No epic quests. Create one for significant projects!"
+                      defaultOpen={epicQuests.length > 0}
+                    />
 
-                  {filteredQuests.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-10 text-center">
-                      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                        <Map className="h-8 w-8 text-primary" />
+                    {/* Regular Quests */}
+                    <QuestCategory
+                      title="Regular Quests"
+                      quests={regularQuests}
+                      icon={<Map className="h-5 w-5 text-green-500" />}
+                      emptyMessage="No regular quests. Add your everyday tasks!"
+                      defaultOpen={regularQuests.length > 0}
+                    />
+
+                    {filteredQuests.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                          <Map className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="font-medium text-lg">
+                          Your quest log is empty
+                        </h3>
+                        <p className="text-muted-foreground mt-2 max-w-sm">
+                          Start by adding a quest to your log. Quests can be
+                          daily tasks, regular to-dos, epic projects, or major
+                          boss challenges!
+                        </p>
+                        <Button
+                          className="mt-4"
+                          onClick={() => setCreateDialogOpen(true)}
+                        >
+                          <PlusCircle className="h-4 w-4 mr-2" />
+                          Add Quest
+                        </Button>
                       </div>
-                      <h3 className="font-medium text-lg">
-                        Your quest log is empty
-                      </h3>
-                      <p className="text-muted-foreground mt-2 max-w-sm">
-                        Start by adding a quest to your log. Quests can be daily
-                        tasks, regular to-dos, epic projects, or major boss
-                        challenges!
-                      </p>
-                      <Button
-                        className="mt-4"
-                        onClick={() => setCreateDialogOpen(true)}
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add Quest
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </motion.div>
           </div>
         </div>

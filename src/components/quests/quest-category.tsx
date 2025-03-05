@@ -67,7 +67,7 @@ export function QuestCategory({
       </div>
 
       {isOpen && (
-        <div className="mt-2 pl-6">
+        <div className="mt-2 pl-4 gap-2 flex flex-col">
           {hasQuests ? (
             quests.map((quest) => <QuestItem key={quest.id} quest={quest} />)
           ) : (
