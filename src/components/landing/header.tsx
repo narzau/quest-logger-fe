@@ -3,17 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useSettingsStore } from "@/store/settingsStore";
-import { Sparkles, Moon, Sun, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
 export const Header: React.FC = () => {
-  const { darkMode, setDarkMode } = useSettingsStore();
   const { isAuthenticated } = useAuthStore();
-
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-  };
 
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center border-b border-gray-200 dark:border-gray-800">
@@ -24,19 +18,6 @@ export const Header: React.FC = () => {
         </span>
       </Link>
       <nav className="ml-auto flex gap-4 items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          className="rounded-full cursor-pointer"
-          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {darkMode ? (
-            <Sun className="h-5 w-5 text-yellow-400" />
-          ) : (
-            <Moon className="h-5 w-5 text-blue-900" />
-          )}
-        </Button>
         {!isAuthenticated ? (
           <div>
             <Link href="/auth/login">

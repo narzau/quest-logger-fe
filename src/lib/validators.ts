@@ -86,13 +86,13 @@ export const updateUserSchema = z.object({
 
 // Updated settings validation schema to include color palette
 export const settingsSchema = z.object({
-  darkMode: z.boolean(),
   animationsEnabled: z.boolean(),
   notificationsEnabled: z.boolean(),
   colorPalette: z
     .enum(Object.keys(defaultPalettes) as [string, ...string[]])
     .optional(),
   autoCreateQuestsFromVoice: z.boolean(),
+  googleCalendarEnabled: z.boolean(),
 });
 
 // Optional: Color validation schema for custom color picking

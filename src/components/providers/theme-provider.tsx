@@ -14,12 +14,9 @@ export function ThemeProvider({
   children,
   ...props
 }: ThemeProviderProps & { children: React.ReactNode }) {
-  const { darkMode, colorPalette } = useSettingsStore();
+  const { colorPalette } = useSettingsStore();
 
   useEffect(() => {
-    // Apply color palette to document root
-    const root = document.documentElement;
-
     // Generate color CSS
     const colorCSS = generateColorCSS(colorPalette);
 
@@ -41,27 +38,13 @@ export function ThemeProvider({
       document.getElementById("global-theme-override") ||
       document.createElement("style");
     globalStyleTag.id = "global-theme-override";
-    globalStyleTag.textContent = `
-      :root {
-        color-scheme: ${darkMode ? "dark" : "light"};
-      }
-    `;
     document.head.appendChild(globalStyleTag);
-
-    // Toggle dark mode class
-    if (darkMode) {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else {
-      root.classList.remove("dark");
-      root.classList.add("light");
-    }
 
     return () => {
       styleTag?.remove();
       globalStyleTag?.remove();
     };
-  }, [darkMode, colorPalette]);
+  }, [colorPalette]);
 
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
