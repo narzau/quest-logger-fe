@@ -67,10 +67,11 @@ export default function PrivacyPolicyPage() {
                 1. Introduction
               </h2>
               <p>
-                QuestLog ("we," "our," or "us") is committed to protecting your
-                privacy. This Privacy Policy explains how we collect, use,
-                disclose, and safeguard your information when you use our
-                QuestLog application ("Application").
+                QuestLog (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is
+                committed to protecting your privacy. This Privacy Policy
+                explains how we collect, use, disclose, and safeguard your
+                information when you use our QuestLog application
+                (&quot;Application&quot;).
               </p>
               <p>
                 Please read this Privacy Policy carefully. By accessing or using
@@ -123,7 +124,10 @@ export default function PrivacyPolicyPage() {
               </ul>
               <p>We use this data solely to:</p>
               <ul className="list-disc pl-6 mt-2 space-y-2">
-                <li>Create calendar events based on your tasks ("quests")</li>
+                <li>
+                  Create calendar events based on your tasks
+                  (&quot;quests&quot;)
+                </li>
                 <li>Update calendar events when you modify your tasks</li>
                 <li>Delete calendar events when you delete tasks</li>
                 <li>Synchronize task completion status</li>
@@ -250,8 +254,8 @@ export default function PrivacyPolicyPage() {
                 7.2 Google Account Permissions
               </h3>
               <p>
-                You may revoke the Application's access to your Google account
-                at any time by:
+                You may revoke the Application&quot;s access to your Google
+                account at any time by:
               </p>
               <ol className="list-decimal pl-6 mt-2 space-y-2">
                 <li>
@@ -268,7 +272,7 @@ export default function PrivacyPolicyPage() {
                 <li>
                   Selecting QuestLog from the list of connected applications
                 </li>
-                <li>Clicking "Remove Access"</li>
+                <li>Clicking &quot;Remove Access&quot;</li>
               </ol>
               <p>
                 Upon revocation, we will no longer have access to your Google
@@ -300,11 +304,11 @@ export default function PrivacyPolicyPage() {
               </ul>
               <p>
                 To exercise these rights, please contact us using the
-                information provided in the "Contact Us" section.
+                information provided in the &quot;Contact Us&quot; section.
               </p>
 
               <h2 className="text-xl font-bold text-slate-200 mt-8 mb-4">
-                8. Children's Privacy
+                8. Children&quot;s Privacy
               </h2>
               <p>
                 The Application is not intended for children under 13 years of
@@ -320,9 +324,9 @@ export default function PrivacyPolicyPage() {
               <p>
                 We may update this Privacy Policy from time to time. We will
                 notify you of any changes by posting the new Privacy Policy on
-                this page and updating the "Effective Date" at the top. You are
-                advised to review this Privacy Policy periodically for any
-                changes.
+                this page and updating the &quot;Effective Date&quot; at the
+                top. You are advised to review this Privacy Policy periodically
+                for any changes.
               </p>
 
               <h2 className="text-xl font-bold text-slate-200 mt-8 mb-4">
@@ -391,7 +395,7 @@ export default function PrivacyPolicyPage() {
               </ul>
               <p>
                 To exercise these rights, please contact us using the
-                information in the "Contact Us" section.
+                information in the &quot;Contact Us&quot; section.
               </p>
 
               <h2 className="text-xl font-bold text-slate-200 mt-8 mb-4">

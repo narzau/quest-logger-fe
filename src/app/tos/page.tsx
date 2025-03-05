@@ -67,10 +67,11 @@ export default function TermsOfServicePage() {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing or using the QuestLog application ("Application"),
-                you agree to be bound by these Terms of Service ("Terms"). If
-                you disagree with any part of the Terms, you do not have
-                permission to access or use the Application.
+                By accessing or using the QuestLog application
+                (&ldquo;Application&ldquo;), you agree to be bound by these
+                Terms of Service (&quot;Terms&quot;). If you disagree with any
+                part of the Terms, you do not have permission to access or use
+                the Application.
               </p>
 
               <h2 className="text-xl font-bold text-slate-200 mt-8 mb-4">
@@ -82,7 +83,7 @@ export default function TermsOfServicePage() {
                 engaging quest-based system. Features include:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-2">
-                <li>Task ("Quest") creation and management</li>
+                <li>Task (&quot;Quest&quot;) creation and management</li>
                 <li>Experience points and level progression</li>
                 <li>Achievement system</li>
                 <li>Google Calendar integration for task scheduling</li>
@@ -124,7 +125,7 @@ export default function TermsOfServicePage() {
               <ul className="list-disc pl-6 mt-2 space-y-2">
                 <li>Create more than one account per person</li>
                 <li>Share your account with any other person</li>
-                <li>Use another user's account</li>
+                <li>Use another user&apos;s account</li>
               </ul>
 
               <h2 className="text-xl font-bold text-slate-200 mt-8 mb-4">
@@ -189,7 +190,7 @@ export default function TermsOfServicePage() {
                 </li>
                 <li>
                   You acknowledge that your use of Google Calendar is subject to
-                  Google's Terms of Service and Privacy Policy
+                  Google&apos;s Terms of Service and Privacy Policy
                 </li>
                 <li>
                   You can revoke our access to your Google account at any time
@@ -264,11 +265,12 @@ export default function TermsOfServicePage() {
               </h2>
 
               <h3 className="text-lg font-semibold text-slate-200 mt-6 mb-3">
-                9.1 "As Is" and "As Available"
+                9.1 &quot;As Is&quot; and &quot;As Available&quot;
               </h3>
               <p>
-                The Application is provided on an "as is" and "as available"
-                basis without warranties of any kind, either express or implied.
+                The Application is provided on an &quot;as is&quot; and &quot;as
+                available&quot; basis without warranties of any kind, either
+                express or implied.
               </p>
 
               <h3 className="text-lg font-semibold text-slate-200 mt-6 mb-3">
