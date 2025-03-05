@@ -1030,7 +1030,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-[#0d1424] border-t border-blue-900/30 py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div className="flex justify-center lg:gap-48 sm:gap-20 mb-8">
             <div>
               <h4 className="text-lg font-bold text-slate-200 mb-4">Product</h4>
               <ul className="space-y-2">
@@ -1070,59 +1070,19 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-lg font-bold text-slate-200 mb-4">
-                Resources
-              </h4>
+              <h4 className="text-lg font-bold text-slate-200 mb-4">Legal</h4>
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/blog"
+                    href="/privacy-policy"
                     className="text-slate-400 hover:text-blue-400"
                   >
-                    Blog
+                    Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="/guides"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    User Guides
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/community"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Community
-                  </a>
-                </li>
-                <li>
-                  <a href="/api" className="text-slate-400 hover:text-blue-400">
-                    API
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-bold text-slate-200 mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/about"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/careers"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Careers
+                  <a href="/tos" className="text-slate-400 hover:text-blue-400">
+                    Terms of Service
                   </a>
                 </li>
                 <li>
@@ -1130,53 +1090,7 @@ export default function HomePage() {
                     href="/contact"
                     className="text-slate-400 hover:text-blue-400"
                   >
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/press"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Press Kit
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-bold text-slate-200 mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/privacy"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/terms"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/cookies"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    Cookie Policy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/gdpr"
-                    className="text-slate-400 hover:text-blue-400"
-                  >
-                    GDPR
+                    Contact Us
                   </a>
                 </li>
               </ul>
