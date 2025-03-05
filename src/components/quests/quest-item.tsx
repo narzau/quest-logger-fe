@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuests } from "@/hooks/useQuests";
 import { Quest, QuestRarity, QuestType } from "@/types/quest";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
   Swords,
   Trash,
+  Award,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -59,6 +60,51 @@ const dropdownVariants = {
   open: { opacity: 1, y: 0 },
 };
 
+// Confetti particles component for the completion animation
+const Confetti = () => {
+  const particles = Array.from({ length: 30 }).map((_, i) => ({
+    id: i,
+    size: Math.random() * 6 + 2,
+    x: Math.random() * 100 - 50, // Between -50 and 50
+    y: Math.random() * -50 - 10, // Start above the component
+    rotation: Math.random() * 360,
+    duration: Math.random() * 1 + 1.5,
+    color: i % 3 === 0 ? "#4f46e5" : i % 3 === 1 ? "#38bdf8" : "#818cf8",
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-visible pointer-events-none z-10">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute left-1/2 top-1/2 rounded-full pointer-events-none"
+          style={{
+            width: particle.size,
+            height: particle.size,
+            backgroundColor: particle.color,
+            x: particle.x,
+            y: particle.y,
+            rotate: particle.rotation,
+          }}
+          animate={{
+            y: [particle.y, particle.y + 100 + Math.random() * 50],
+            x: [particle.x, particle.x + (Math.random() * 100 - 50)],
+            opacity: [1, 0],
+            rotate: [
+              particle.rotation,
+              particle.rotation + (Math.random() * 360 - 180),
+            ],
+          }}
+          transition={{
+            duration: particle.duration,
+            ease: "easeOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 interface QuestItemProps {
   quest: Quest;
   expanded?: boolean;
@@ -70,11 +116,31 @@ export function QuestItem({
   expanded = false,
   defaultOpen = false,
 }: QuestItemProps) {
+  // Make a local copy of the quest to manipulate for animations
+  const [localQuest, setLocalQuest] = useState<Quest>({ ...quest });
   const { completeQuest, deleteQuest } = useQuests();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const { animationsEnabled } = useSettingsStore();
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  // Animation states
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [showCompletionBadge, setShowCompletionBadge] = useState(false);
+  const [showXpBadge, setShowXpBadge] = useState(false);
+  const [showStrikethrough, setShowStrikethrough] = useState(
+    quest.is_completed
+  );
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showGlow, setShowGlow] = useState(false);
+
+  // Update local quest when the prop changes
+  useEffect(() => {
+    if (!isAnimating) {
+      setLocalQuest({ ...quest });
+      setShowStrikethrough(quest.is_completed);
+    }
+  }, [quest, isAnimating]);
 
   // Get color based on rarity
   const getRarityColor = (rarity: QuestRarity) => {
@@ -111,13 +177,54 @@ export function QuestItem({
   };
 
   const TypeIcon = getQuestTypeIcon(quest.quest_type);
-  const rarityColor = getRarityColor(quest.rarity);
+  const rarityColor = getRarityColor(localQuest.rarity);
+
+  // Run the completion animation sequence
+  const runCompletionAnimation = () => {
+    if (localQuest.is_completed || isAnimating) return;
+
+    setIsAnimating(true);
+
+    // 1. Start the glow effect
+    setShowGlow(true);
+
+    // 2. After a short delay, show the strikethrough
+    setTimeout(() => {
+      setShowStrikethrough(true);
+    }, 200);
+
+    // 3. After another delay, show the completion badge
+    setTimeout(() => {
+      setShowCompletionBadge(true);
+      setShowConfetti(true);
+    }, 500);
+
+    // 4. After another delay, show the XP badge
+    setTimeout(() => {
+      setShowXpBadge(true);
+    }, 800);
+
+    // 5. Update the local quest state to show completed UI (but don't update backend yet)
+    setTimeout(() => {
+      setLocalQuest((prev) => ({ ...prev, is_completed: true }));
+    }, 300);
+
+    // 6. After all animations finish, update the actual quest state
+    setTimeout(() => {
+      completeQuest(quest.id);
+
+      // Hide the effects
+      setShowCompletionBadge(false);
+      setShowXpBadge(false);
+      setShowConfetti(false);
+      setShowGlow(false);
+      setIsAnimating(false);
+    }, 2500); // Give plenty of time for the animations to finish
+  };
 
   const handleComplete = () => {
-    if (!quest.is_completed) {
-      setTimeout(() => {
-        completeQuest(quest.id);
-      }, 300);
+    if (!localQuest.is_completed && !isAnimating) {
+      runCompletionAnimation();
     }
   };
 
@@ -136,22 +243,79 @@ export function QuestItem({
         variants={containerVariants}
         transition={{ type: "spring", duration: 0.3 }}
         className={cn(
-          "group flex flex-col p-3 rounded-lg border cursor-pointer",
-          quest.is_completed
+          "group flex flex-col p-3 rounded-lg border cursor-pointer relative", // Removed overflow-hidden from here
+          localQuest.is_completed
             ? "bg-muted/30 border-muted"
-            : "bg-card border-border hover:border-primary/20"
+            : "bg-card border-border hover:border-primary/20",
+          showGlow && "shadow-[0_0_15px_rgba(59,130,246,0.3)]" // Glow effect
         )}
+        style={{
+          transform: showGlow ? "scale(1.02)" : "scale(1)",
+          transition: "transform 0.3s, box-shadow 0.3s",
+        }}
         onClick={(e) => {
-          if (!(e.target instanceof HTMLButtonElement) && !expanded) {
+          if (
+            !(e.target instanceof HTMLButtonElement) &&
+            !expanded &&
+            !isAnimating
+          ) {
             setIsOpen(!isOpen);
           }
         }}
       >
+        {/* Completion Effects */}
+        {showCompletionBadge && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+            initial={{ opacity: 0, scale: 0, y: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              scale: [0.5, 1.2, 1.2, 1],
+              y: [0, -20, -20, -40],
+            }}
+            transition={{
+              duration: 1.6,
+              times: [0, 0.2, 0.8, 1],
+              ease: "easeOut",
+            }}
+          >
+            <div className="bg-primary/80 text-primary-foreground px-3 py-1 rounded-full flex items-center shadow-md">
+              <Award className="mr-1.5 h-4 w-4" />
+              <span className="font-semibold text-sm">Quest Complete!</span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Floating XP reward */}
+        {showXpBadge && (
+          <motion.div
+            className="absolute top-3 right-5 pointer-events-none z-10"
+            initial={{ opacity: 0, scale: 0.5, y: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              scale: [0.5, 1.2, 1.2, 1],
+              y: [0, -5, -5, -15], // Reduced vertical movement to stay in bounds
+            }}
+            transition={{
+              duration: 1.5,
+              times: [0, 0.2, 0.8, 1],
+              ease: "easeOut",
+            }}
+          >
+            <div className="bg-primary/80 text-primary-foreground px-2 py-0.5 rounded-full text-xs font-medium shadow-md">
+              +{quest.exp_reward} XP
+            </div>
+          </motion.div>
+        )}
+
+        {/* Confetti effect */}
+        {showConfetti && <Confetti />}
+
         <div className="flex flex-col sm:flex-row">
           {/* Checkbox and Title Section */}
           <div className="flex items-start flex-1 min-w-0">
             <motion.div
-              animate={quest.is_completed ? "checked" : "unchecked"}
+              animate={localQuest.is_completed ? "checked" : "unchecked"}
               variants={checkVariants}
               transition={{
                 type: "spring",
@@ -161,30 +325,44 @@ export function QuestItem({
               className="flex mt-1"
             >
               <Checkbox
-                checked={quest.is_completed}
+                checked={localQuest.is_completed}
                 onCheckedChange={handleComplete}
                 className="h-5 w-5"
-                disabled={quest.is_completed}
+                disabled={localQuest.is_completed || isAnimating}
               />
             </motion.div>
 
             <div className="ml-3 flex-1 min-w-0">
               <motion.div className="overflow-hidden">
-                <motion.p
-                  layout="position"
-                  className={cn(
-                    "font-medium break-words pr-2",
-                    quest.is_completed && "line-through text-muted-foreground"
-                  )}
-                  initial={{ opacity: 1 }}
-                  animate={{
-                    opacity: quest.is_completed ? 0.6 : 1,
-                    x: quest.is_completed ? 4 : 0,
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {quest.title}
-                </motion.p>
+                <div className="relative inline-block">
+                  <motion.div
+                    layout="position"
+                    className={cn(
+                      "font-medium break-words pr-2",
+                      (localQuest.is_completed || showStrikethrough) &&
+                        "text-muted-foreground"
+                    )}
+                    initial={{ opacity: 1 }}
+                    animate={{
+                      opacity: localQuest.is_completed ? 0.6 : 1,
+                      x: localQuest.is_completed ? 4 : 0,
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {quest.title}
+
+                    {/* Strike-through line that matches text width exactly */}
+                    {showStrikethrough && (
+                      <motion.div
+                        className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        style={{ width: "90%" }}
+                      />
+                    )}
+                  </motion.div>
+                </div>
               </motion.div>
 
               {quest.description && (
@@ -305,7 +483,7 @@ export function QuestItem({
                 height: 0,
                 transition: { duration: 0.2 },
               }}
-              className="overflow-hidden"
+              className="overflow-hidden" // Added overflow-hidden only to the expandable content
             >
               <div className="mt-3 pt-3 border-t border-border/40">
                 <motion.div
