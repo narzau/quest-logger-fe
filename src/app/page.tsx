@@ -161,7 +161,7 @@ export default function HomePage() {
                   Login
                 </a>
                 <a
-                  href="/auth/signup"
+                  href="/auth/register"
                   className="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white"
                 >
                   Sign Up
@@ -207,7 +207,7 @@ export default function HomePage() {
                   Login
                 </a>
                 <a
-                  href="/auth/signup"
+                  href="/auth/register"
                   className="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white"
                 >
                   Sign Up
@@ -246,7 +246,7 @@ export default function HomePage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a
-                    href="/auth/signup"
+                    href="/auth/register"
                     className="px-8 py-3 text-center rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium text-lg flex items-center justify-center"
                   >
                     Start Your Adventure
@@ -783,7 +783,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href="/auth/signup"
+                  href="/auth/register"
                   className="px-8 py-3 text-center rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium text-lg"
                 >
                   Start Your Free Trial
@@ -950,7 +950,7 @@ export default function HomePage() {
                     </li>
                   </ul>
                   <a
-                    href="/auth/signup"
+                    href="/auth/register"
                     className="block text-center py-2 px-4 rounded-md border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 font-medium"
                   >
                     Start Free
@@ -1015,7 +1015,7 @@ export default function HomePage() {
                     </li>
                   </ul>
                   <a
-                    href="/auth/signup"
+                    href="/auth/register"
                     className="block text-center py-2 px-4 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium"
                   >
                     Start 14-Day Free Trial
