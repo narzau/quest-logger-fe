@@ -23,9 +23,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       {/* Navigation bar */}
       <header className="px-4 lg:px-6 h-16 flex items-center border-b border-gray-200 dark:border-gray-800">
-        <Link href="/" className="flex items-center">
+        <Link
+          href="/"
+          className="flex items-center dark:text-gray-300 text-gray-800"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Back to Home</span>
+          <span className="text-sm font-medium ">Back to Home</span>
         </Link>
         <div className="ml-auto flex gap-4 items-center">
           <Link href="/" className="flex items-center justify-center">

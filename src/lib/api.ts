@@ -72,7 +72,6 @@ export const authApi = {
       if (typeof window !== "undefined") {
         localStorage.setItem("auth_token", response.data.access_token);
       }
-
       return response.data;
     } catch (error) {
       console.error("Login failed:", error);

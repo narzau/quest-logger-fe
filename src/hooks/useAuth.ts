@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -21,7 +22,11 @@ export function useAuth() {
         setToken(authTokens.access_token);
         return authTokens.access_token;
       } catch (error) {
-        setAuthError(error instanceof Error ? error.message : "Login failed");
+        setAuthError(
+          error instanceof AxiosError
+            ? error?.response?.data.detail
+            : "Login failed"
+        );
         throw error;
       }
     },

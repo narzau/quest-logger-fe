@@ -77,7 +77,7 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-md mx-auto p-6 space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800"
+      className="w-full max-w-md mx-auto p-6 space-y-6 bg-gray-300 dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800"
     >
       <div className="text-center">
         <motion.h2
@@ -129,7 +129,7 @@ export function LoginForm() {
                   <FormControl>
                     <Input
                       placeholder="Enter your username"
-                      className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+                      className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-300 "
                       disabled={isLoading}
                       {...field}
                     />
@@ -154,7 +154,7 @@ export function LoginForm() {
                       <Input
                         placeholder="••••••••"
                         type={showPassword ? "text" : "password"}
-                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-300"
                         disabled={isLoading}
                         {...field}
                       />
