@@ -86,7 +86,7 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{levelInfo.level || 1}</div>
-            <div className="mt-2 space-y-1">
+            <div className="mt-2 md:mt-0 space-y-1">
               <div className="flex justify-between text-xs">
                 <span>{levelInfo.currentXp} XP</span>
                 <span>{levelInfo.nextLevelXp} XP</span>
