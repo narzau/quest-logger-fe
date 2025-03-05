@@ -1,15 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Shield,
-  ArrowRight,
-  ChevronDown,
-  Mail,
-  Send,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { Shield, ArrowRight, Mail, Send, Phone } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
 // Reuse the GridBackground component from landing page
