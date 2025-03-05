@@ -2,13 +2,11 @@
 
 import { RegisterForm } from "@/components/auth/register-form";
 import Link from "next/link";
-import { Sparkles, Moon, Sun, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useSettingsStore } from "@/store/settingsStore";
+import { Shield, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function RegisterPage() {
-  const { darkMode, setDarkMode } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
 
   // Handle initial mount to prevent hydration mismatch
@@ -20,39 +18,52 @@ export default function RegisterPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen flex flex-col bg-[#0f172a]">
       {/* Navigation bar */}
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b border-gray-200 dark:border-gray-800">
-        <Link href="/" className="flex items-center">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Back to Home</span>
-        </Link>
-        <div className="ml-auto flex gap-4 items-center">
-          <Link href="/" className="flex items-center justify-center">
-            <Sparkles className="h-6 w-6 mr-2 text-blue-900 dark:text-blue-600" />
-            <span className="font-bold text-xl text-gray-900 dark:text-white">
-              Quest Log
-            </span>
-          </Link>
+      <header className="border-b border-blue-900/30 backdrop-blur-md bg-[#0f172a]/80 fixed w-full z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Link
+              href="/"
+              className="flex items-center text-slate-300 hover:text-blue-400"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </Link>
+            <div className="flex items-center">
+              <Shield className="h-6 w-6 text-blue-400 mr-2" />
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                QuestLog
+              </span>
+            </div>
+            <div className="w-24">{/* Empty div to balance the header */}</div>
+          </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setDarkMode(!darkMode)}
-          className="ml-4 rounded-full"
-        >
-          {darkMode ? (
-            <Sun className="h-5 w-5 text-yellow-400" />
-          ) : (
-            <Moon className="h-5 w-5 text-blue-900" />
-          )}
-        </Button>
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-4 py-12">
-        <RegisterForm />
-      </div>
+      <motion.div
+        className="flex-1 flex items-center justify-center p-4 py-24"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <div className="absolute inset-0 bg-[#0f172a] radial-gradient z-0"></div>
+        <div className="relative z-10 w-full">
+          <RegisterForm />
+        </div>
+      </motion.div>
+
+      {/* Add the CSS for gradient backgrounds */}
+      <style jsx global>{`
+        .radial-gradient {
+          background-image: radial-gradient(
+            circle at 50% 50%,
+            rgba(56, 189, 248, 0.1) 0%,
+            rgba(56, 189, 248, 0) 50%
+          );
+        }
+      `}</style>
     </div>
   );
 }

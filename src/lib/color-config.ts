@@ -53,6 +53,16 @@ export function colorToString(color: Oklch): string {
 }
 
 export const defaultPalettes = {
+  // New QuestLog Theme - Dark Muted Blue Palette
+  questlog: {
+    primary: createOklch(0.55, 0.18, 250), // Bright blue (#3b82f6)
+    secondary: createOklch(0.35, 0.1, 250), // Darker blue shade
+    background: createOklch(0.207, 0.038, 265.07), // Deep blue background (#0f172a)
+    foreground: createOklch(0.9, 0.02, 240), // Light slate (#e2e8f0)
+    muted: createOklch(0.2595, 0.0756, 265.59), // Slightly lighter background (#131c33)
+    accent: createOklch(0.65, 0.2, 220), // Cyan blue accent (#38bdf8)
+    destructive: createOklch(0.5, 0.15, 10), // Accessible red
+  },
   // Warm, Earthy Natural Palette
   woodland: {
     primary: createOklch(0.4, 0.15, 100), // Warm olive green

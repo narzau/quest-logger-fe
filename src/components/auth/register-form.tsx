@@ -27,6 +27,7 @@ import {
   Mail,
   User,
   Lock,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -89,14 +90,21 @@ export function RegisterForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-md mx-auto p-6 space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800"
+      className="w-full max-w-md mx-auto p-6 space-y-6 bg-[#131c33] rounded-lg shadow-xl border border-blue-900/30"
     >
+      <div className="flex items-center justify-center mb-2">
+        <Shield className="h-8 w-8 text-blue-400 mr-2" />
+        <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+          QuestLog
+        </span>
+      </div>
+
       <div className="text-center">
         <motion.h2
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+          className="text-3xl font-bold tracking-tight text-slate-200"
         >
           Begin Your Adventure
         </motion.h2>
@@ -104,7 +112,7 @@ export function RegisterForm() {
           initial={{ y: -5, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
-          className="text-gray-600 dark:text-gray-400 mt-2"
+          className="text-slate-400 mt-2"
         >
           Create an account to start your quest
         </motion.p>
@@ -114,7 +122,7 @@ export function RegisterForm() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-3 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-start"
+          className="p-3 rounded-md bg-red-900/10 text-red-400 text-sm flex items-start"
         >
           <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
@@ -135,21 +143,19 @@ export function RegisterForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 dark:text-gray-300">
-                    Username
-                  </FormLabel>
+                  <FormLabel className="text-slate-300">Username</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                       <Input
                         placeholder="Choose a username"
-                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 pl-10"
+                        className="bg-[#0f172a] border-blue-900/30 text-slate-300 pl-10 focus:border-blue-500 focus:ring-blue-500/20"
                         disabled={isLoading}
                         {...field}
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -161,22 +167,20 @@ export function RegisterForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 dark:text-gray-300">
-                    Email
-                  </FormLabel>
+                  <FormLabel className="text-slate-300">Email</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                       <Input
                         placeholder="your@email.com"
                         type="email"
-                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 pl-10"
+                        className="bg-[#0f172a] border-blue-900/30 text-slate-300 pl-10 focus:border-blue-500 focus:ring-blue-500/20"
                         disabled={isLoading}
                         {...field}
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -188,16 +192,14 @@ export function RegisterForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 dark:text-gray-300">
-                    Password
-                  </FormLabel>
+                  <FormLabel className="text-slate-300">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                       <Input
                         placeholder="••••••••"
                         type={showPassword ? "text" : "password"}
-                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 pl-10"
+                        className="bg-[#0f172a] border-blue-900/30 text-slate-300 pl-10 focus:border-blue-500 focus:ring-blue-500/20"
                         disabled={isLoading}
                         {...field}
                       />
@@ -205,7 +207,7 @@ export function RegisterForm() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                        className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-slate-200"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -216,7 +218,7 @@ export function RegisterForm() {
                       </Button>
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -228,22 +230,22 @@ export function RegisterForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 dark:text-gray-300">
+                  <FormLabel className="text-slate-300">
                     Confirm Password
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                       <Input
                         placeholder="••••••••"
                         type={showPassword ? "text" : "password"}
-                        className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 pl-10"
+                        className="bg-[#0f172a] border-blue-900/30 text-slate-300 pl-10 focus:border-blue-500 focus:ring-blue-500/20"
                         disabled={isLoading}
                         {...field}
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -252,11 +254,11 @@ export function RegisterForm() {
           <motion.div variants={itemVariants} className="pt-2">
             <Button
               type="submit"
-              className="w-full bg-blue-900 hover:bg-blue-950 dark:bg-blue-800 dark:hover:bg-blue-900 relative group cursor-pointer"
+              className="w-full relative group cursor-pointer"
               disabled={isLoading}
             >
-              <span className="absolute -inset-0.5 bg-gradient-to-r from-blue-800 to-blue-700 dark:from-blue-700 dark:to-blue-600 rounded-md blur opacity-50 group-hover:opacity-75 transition duration-200"></span>
-              <span className="relative flex items-center justify-center">
+              <span className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-md blur opacity-50 group-hover:opacity-75 transition duration-200"></span>
+              <span className="relative flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-md py-2 px-4 w-full">
                 {isLoading ? "Creating account..." : "Create account"}
                 {!isLoading && (
                   <UserPlus className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
@@ -273,11 +275,11 @@ export function RegisterForm() {
         transition={{ delay: 0.6 }}
         className="mt-6 text-center"
       >
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-slate-400">
           Already have an account?{" "}
           <Link
             href="/auth/login"
-            className="font-medium text-blue-900 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 group inline-flex items-center"
+            className="font-medium text-blue-400 hover:text-blue-300 group inline-flex items-center"
           >
             Sign in
             <ArrowRight className="ml-1 h-3 w-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200" />
