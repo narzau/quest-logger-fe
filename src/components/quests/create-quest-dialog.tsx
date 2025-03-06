@@ -32,15 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CalendarIcon, Mic, Wand, Edit } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+
+import { Mic, Wand, Edit } from "lucide-react";
 import { AudioRecorder } from "./audio-recorder";
 import { AudioProcessingAnimation } from "@/components/ui/audio-processing-animation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,6 +41,7 @@ import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { SimpleDatePicker } from "../ui/simple-date-picker";
 type CreateQuestFormValues = z.infer<typeof createQuestSchema>;
 
 interface CreateQuestDialogProps {
@@ -366,30 +360,9 @@ export function CreateQuestDialog({
 
           <FormItem className="flex flex-col">
             <FormLabel>Due Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : "Select date"}
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <FormControl>
+              <SimpleDatePicker value={date} onChange={setDate} />
+            </FormControl>
           </FormItem>
         </div>
 
