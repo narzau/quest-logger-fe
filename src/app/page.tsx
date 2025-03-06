@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   Brain,
   Sparkles,
-  Shield,
   Calendar,
   BarChart,
   Award,
