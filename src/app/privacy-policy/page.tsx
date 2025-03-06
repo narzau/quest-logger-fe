@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Shield, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export default function PrivacyPolicyPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,7 +15,13 @@ export default function PrivacyPolicyPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 text-blue-400 mr-2" />
+              <Image
+                src="/logo.png"
+                alt="QuestLog Logo"
+                width={64}
+                height={64}
+                className=""
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 QuestLog
               </span>
@@ -660,7 +667,13 @@ export default function PrivacyPolicyPage() {
 
           <div className="border-t border-blue-900/30 pt-8 flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <Shield className="h-8 w-8 text-blue-400 mr-2" />
+              <Image
+                src="/logo.png"
+                alt="QuestLog Logo"
+                width={64}
+                height={64}
+                className=""
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 QuestLog
               </span>

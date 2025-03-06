@@ -2,9 +2,10 @@
 
 import { LoginForm } from "@/components/auth/login-form";
 import Link from "next/link";
-import { Shield, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
@@ -31,7 +32,13 @@ export default function LoginPage() {
               <span className="text-sm font-medium">Back to Home</span>
             </Link>
             <div className="flex items-center">
-              <Shield className="h-6 w-6 text-blue-400 mr-2" />
+              <Image
+                src="/logo.png"
+                alt="QuestLog Logo"
+                width={64}
+                height={64}
+                className=""
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 QuestLog
               </span>

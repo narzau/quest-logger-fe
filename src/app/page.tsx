@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import Image from "next/image";
 
 // Fade in animation variants
 const fadeIn = {
@@ -78,7 +79,13 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 text-blue-400 mr-2" />
+              <Image
+                src="/logo.png"
+                alt="QuestLog Logo"
+                width={64}
+                height={64}
+                className=""
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 QuestLog
               </span>
@@ -301,7 +308,13 @@ export default function HomePage() {
                   <div className="relative bg-[#131c33] p-4 rounded-lg shadow-xl border border-blue-500/20">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
-                        <Shield className="h-6 w-6 text-blue-400 mr-2" />
+                        <Image
+                          src="/logo.png"
+                          alt="QuestLog Logo"
+                          width={64}
+                          height={64}
+                          className=""
+                        />
                         <span className="font-bold text-slate-200">
                           Daily Quests
                         </span>
@@ -1099,7 +1112,13 @@ export default function HomePage() {
 
           <div className="border-t border-blue-900/30 pt-8 flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <Shield className="h-8 w-8 text-blue-400 mr-2" />
+              <Image
+                src="/logo.png"
+                alt="QuestLog Logo"
+                width={64}
+                height={64}
+                className=""
+              />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 QuestLog
               </span>

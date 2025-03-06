@@ -27,9 +27,9 @@ import {
   Mail,
   User,
   Lock,
-  Shield,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -93,7 +93,13 @@ export function RegisterForm() {
       className="w-full max-w-md mx-auto p-6 space-y-6 bg-[#131c33] rounded-lg shadow-xl border border-blue-900/30"
     >
       <div className="flex items-center justify-center mb-2">
-        <Shield className="h-8 w-8 text-blue-400 mr-2" />
+        <Image
+          src="/logo.png"
+          alt="QuestLog Logo"
+          width={64}
+          height={64}
+          className=""
+        />
         <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
           QuestLog
         </span>
