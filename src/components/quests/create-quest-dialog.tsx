@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuests } from "@/hooks/useQuests";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { createQuestSchema } from "@/lib/validators";
 import { CreateQuestPayload, QuestRarity, QuestType } from "@/types/quest";
 import {
@@ -33,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Mic, Wand, Edit } from "lucide-react";
+import { Mic, Wand, Edit, Calendar } from "lucide-react";
 import { AudioRecorder } from "./audio-recorder";
 import { AudioProcessingAnimation } from "@/components/ui/audio-processing-animation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -66,10 +67,13 @@ export function CreateQuestDialog({
     setAutoCreateQuestsFromVoice,
     animationsEnabled,
   } = useSettingsStore();
+  const { isConnected: isGoogleCalendarConnected } = useGoogleCalendar();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [mode, setMode] = useState<"voice" | "manual">("voice");
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
   const [successAnimation, setSuccessAnimation] = useState(false);
+  const [createGoogleCalendarEvent, setCreateGoogleCalendarEvent] =
+    useState(false);
 
   const form = useForm<CreateQuestFormValues>({
     resolver: zodResolver(createQuestSchema),
@@ -88,6 +92,7 @@ export function CreateQuestDialog({
       setMode("voice");
       setIsProcessingAudio(false);
       setSuccessAnimation(false);
+      setCreateGoogleCalendarEvent(false);
       form.reset({
         title: "",
         description: "",
@@ -188,6 +193,7 @@ export function CreateQuestDialog({
     const payload = {
       ...values,
       due_date: date ? date.toISOString() : undefined,
+      google_calendar: createGoogleCalendarEvent ? true : undefined,
     };
 
     const loadingToast = toast.loading("Creating quest...");
@@ -213,7 +219,9 @@ export function CreateQuestDialog({
             )}
           </div>,
           {
-            description: "Your quest has been added to your quest log.",
+            description: createGoogleCalendarEvent
+              ? "Your quest has been added to your quest log and Google Calendar."
+              : "Your quest has been added to your quest log.",
             duration: 5000,
             action: {
               label: "View Details",
@@ -225,6 +233,7 @@ export function CreateQuestDialog({
         form.reset();
         setDate(undefined);
         setMode("voice");
+        setCreateGoogleCalendarEvent(false);
         onOpenChange(false);
       },
       onError: (error) => {
@@ -237,6 +246,32 @@ export function CreateQuestDialog({
       },
     });
   };
+
+  // Google Calendar switch component (used only in manual mode)
+  const renderGoogleCalendarOption = () => (
+    <div
+      className={`flex flex-row h-auto min-h-9 items-center justify-between rounded-lg border p-1 gap-2 px-3 mt-4 ${
+        !isGoogleCalendarConnected ? "opacity-60" : ""
+      }`}
+    >
+      <div className="flex flex-col py-1">
+        <span className="text-sm font-medium whitespace-nowrap flex items-center">
+          <Calendar className="h-4 w-4 mr-2" />
+          Google Calendar
+        </span>
+        {!isGoogleCalendarConnected && (
+          <span className="text-xs text-muted-foreground mt-0.5">
+            Not connected
+          </span>
+        )}
+      </div>
+      <Switch
+        checked={createGoogleCalendarEvent}
+        onCheckedChange={(checked) => setCreateGoogleCalendarEvent(checked)}
+        disabled={!isGoogleCalendarConnected}
+      />
+    </div>
+  );
 
   // Render the form for manual entry
   const renderManualForm = () => (
@@ -366,6 +401,8 @@ export function CreateQuestDialog({
           </FormItem>
         </div>
 
+        {renderGoogleCalendarOption()}
+
         <DialogFooter>
           <Button
             type="button"
@@ -399,24 +436,49 @@ export function CreateQuestDialog({
           console.log("Recording cancelled");
         }}
       />
-      <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* First row - full width on desktop, single column on mobile */}
         <Button
           variant="outline"
           onClick={() => setMode("manual")}
-          className="flex items-center w-full sm:w-auto"
+          className="flex items-center justify-center w-full md:col-span-2"
         >
           <Edit className="h-4 w-4 mr-2" />
           Switch to Manual Entry
         </Button>
 
-        <div className="flex flex-row h-9 items-center justify-between rounded-lg border p-1 gap-4 px-4 w-full sm:w-auto">
-          <div className="flex items-center text-sm font-medium">
+        {/* Two switches - stack on mobile, side by side on desktop */}
+        <div className="flex flex-row h-9 items-center justify-between rounded-lg border p-1 gap-2 px-3">
+          <div className="flex items-center text-sm font-medium whitespace-nowrap">
             <Mic className="h-4 w-4 mr-2" />
             Auto Create
           </div>
           <Switch
             checked={autoCreateQuestsFromVoice}
             onCheckedChange={(checked) => setAutoCreateQuestsFromVoice(checked)}
+          />
+        </div>
+
+        <div
+          className={`flex flex-row h-auto min-h-9 items-center justify-between rounded-lg border p-1 gap-2 px-3 ${
+            !isGoogleCalendarConnected ? "opacity-60" : ""
+          }`}
+        >
+          <div className="flex flex-col py-1">
+            <span className="text-sm font-medium whitespace-nowrap flex items-center">
+              <Calendar className="h-4 w-4 mr-2" />
+              Google Calendar
+            </span>
+            {!isGoogleCalendarConnected && (
+              <span className="text-xs text-muted-foreground mt-0.5">
+                Not connected
+              </span>
+            )}
+          </div>
+          <Switch
+            checked={createGoogleCalendarEvent}
+            onCheckedChange={(checked) => setCreateGoogleCalendarEvent(checked)}
+            disabled={!isGoogleCalendarConnected}
           />
         </div>
       </div>
