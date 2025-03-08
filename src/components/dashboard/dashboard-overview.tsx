@@ -31,7 +31,7 @@ export function DashboardOverview() {
   const [createQuestOpen, setCreateQuestOpen] = useState(false);
 
   const levelInfo = user
-    ? calculateLevelInfo(user.experience)
+    ? calculateLevelInfo(user.level, user.experience)
     : {
         level: 1,
         currentXp: 0,

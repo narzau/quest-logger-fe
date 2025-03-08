@@ -98,42 +98,29 @@ export interface LevelInfo {
   progress: number;
 }
 
-export function calculateLevelInfo(experience: number): LevelInfo {
-  // Level calculation formula (can be adjusted)
-  // This formula makes level 1 at 0 XP, level 2 at 100 XP, level 3 at 300 XP, etc.
-  // The required XP increases with each level
-  let level = 1;
-  let xpForNextLevel = 100;
-  let accumulatedXp = 0;
+export function calculateLevelInfo(level: number, totalXp: number): LevelInfo {
+  // Calculate threshold XP for current level
+  const currentLevelThreshold =
+    level > 1 ? Math.floor(100 * (level - 1) ** 1.5) : 0;
 
-  // Calculate level based on XP
-  while (accumulatedXp + xpForNextLevel <= experience) {
-    accumulatedXp += xpForNextLevel;
-    level += 1;
-    // Next level requires more XP
-    xpForNextLevel = 100 * level;
-  }
+  // Calculate XP needed for the next level
+  const nextLevelThreshold = Math.floor(100 * level ** 1.5);
 
-  // Calculate progress to next level (as percentage)
-  const currentLevelXp = experience - accumulatedXp;
-  const progress = Math.min(100, (currentLevelXp / xpForNextLevel) * 100);
+  // Current XP is the amount beyond the threshold for the current level
+  const currentXp = totalXp - currentLevelThreshold;
+
+  // XP needed to reach next level is the gap between thresholds
+  const nextLevelXp = nextLevelThreshold - currentLevelThreshold;
+
+  // Calculate progress percentage toward the next level
+  const progress = Math.min(100, Math.floor((currentXp / nextLevelXp) * 100));
 
   return {
     level,
-    currentXp: currentLevelXp,
-    nextLevelXp: xpForNextLevel,
+    currentXp,
+    nextLevelXp,
     progress,
   };
-}
-
-// Function to determine if the date is today
-export function isToday(date: Date): boolean {
-  const today = new Date();
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
 }
 
 // Function to limit strings to a certain length with ellipsis

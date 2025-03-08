@@ -33,7 +33,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   // Calculate level progress
   const levelInfo = user
-    ? calculateLevelInfo(user.experience)
+    ? calculateLevelInfo(user.level, user.experience)
     : {
         level: 1,
         currentXp: 0,

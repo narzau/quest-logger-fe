@@ -40,7 +40,7 @@ export function UserProfile() {
   const { animationsEnabled } = useSettingsStore();
 
   const levelInfo = user
-    ? calculateLevelInfo(user.experience)
+    ? calculateLevelInfo(user.level, user.experience)
     : {
         level: 1,
         currentXp: 0,
