@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { StructuredData } from "./StructuredData";
-import ClientLayout from "./client-layout";
 import ServiceWorkerInit from "@/components/sw/sw-init"; // Import the client component
 
 const inter = Inter({ subsets: ["latin"] });
@@ -94,7 +93,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <ServiceWorkerInit />{" "}
             {/* Add the service worker initialization component */}
-            <ClientLayout>{children}</ClientLayout>
+            {children}
             <Toaster />
           </ThemeProvider>
         </QueryProvider>
