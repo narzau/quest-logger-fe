@@ -9,12 +9,10 @@ interface SettingsState {
   colorPaletteName: keyof typeof defaultPalettes;
   colorPalette: ColorPalette;
   autoCreateQuestsFromVoice: boolean;
-  googleCalendarEnabled: boolean;
   setAnimationsEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setColorPalette: (paletteName: keyof typeof defaultPalettes) => void;
   setAutoCreateQuestsFromVoice: (enabled: boolean) => void; // New setter
-  setGoogleCalendarEnabled: (enabled: boolean) => void; // New setter
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -25,7 +23,6 @@ export const useSettingsStore = create<SettingsState>()(
       colorPaletteName: "arctic",
       colorPalette: defaultPalettes.arctic,
       autoCreateQuestsFromVoice: false, // Default to false (review mode)
-      googleCalendarEnabled: false,
       setAnimationsEnabled: (enabled) => set({ animationsEnabled: enabled }),
       setNotificationsEnabled: (enabled) =>
         set({ notificationsEnabled: enabled }),
@@ -37,8 +34,6 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setAutoCreateQuestsFromVoice: (enabled) =>
         set({ autoCreateQuestsFromVoice: enabled }),
-      setGoogleCalendarEnabled: (enabled) =>
-        set({ googleCalendarEnabled: enabled }),
     }),
     {
       name: "adhd-quest-settings",
@@ -48,7 +43,6 @@ export const useSettingsStore = create<SettingsState>()(
         colorPaletteName: state.colorPaletteName,
         colorPalette: state.colorPalette,
         autoCreateQuestsFromVoice: state.autoCreateQuestsFromVoice,
-        googleCalendarEnabled: state.googleCalendarEnabled,
       }),
     }
   )

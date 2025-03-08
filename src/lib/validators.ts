@@ -98,7 +98,6 @@ export const settingsSchema = z.object({
     .enum(Object.keys(defaultPalettes) as [string, ...string[]])
     .optional(),
   autoCreateQuestsFromVoice: z.boolean(),
-  googleCalendarEnabled: z.boolean(),
 });
 
 // Optional: Color validation schema for custom color picking

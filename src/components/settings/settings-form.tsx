@@ -21,10 +21,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Bell, Mic, Sparkles, Calendar1Icon } from "lucide-react";
+import { Bell, Mic, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColorPaletteSelector } from "./color-palette-selector";
+import { GoogleCalendarIntegration } from "@/components/settings/google-calendar-integration";
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
@@ -33,11 +34,9 @@ export function SettingsForm() {
     animationsEnabled,
     notificationsEnabled,
     autoCreateQuestsFromVoice,
-    googleCalendarEnabled,
     setAnimationsEnabled,
     setNotificationsEnabled,
     setAutoCreateQuestsFromVoice,
-    setGoogleCalendarEnabled,
   } = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -47,7 +46,6 @@ export function SettingsForm() {
       animationsEnabled,
       notificationsEnabled,
       autoCreateQuestsFromVoice,
-      googleCalendarEnabled,
     },
   });
 
@@ -58,11 +56,11 @@ export function SettingsForm() {
     setAnimationsEnabled(values.animationsEnabled);
     setNotificationsEnabled(values.notificationsEnabled);
     setAutoCreateQuestsFromVoice(values.autoCreateQuestsFromVoice);
-    setGoogleCalendarEnabled(values.googleCalendarEnabled);
+
     // Show saved toast
     setTimeout(() => {
       setIsSaving(false);
-      toast("Settings saved", {
+      toast.success("Settings saved", {
         description: "Your preferences have been updated.",
       });
     }, 500);
@@ -145,8 +143,7 @@ export function SettingsForm() {
                   <FormField
                     control={form.control}
                     name="notificationsEnabled"
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    render={({ field }) => (
+                    render={({}) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                           <div className="flex items-center">
@@ -172,35 +169,6 @@ export function SettingsForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="googleCalendarEnabled"
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center">
-                            <Calendar1Icon className="h-4 w-4 mr-2 text-blue-500" />
-                            <FormLabel className="text-base">
-                              Google Calendar
-                              <span className="text-xs text-secondary">
-                                [coming soon]
-                              </span>
-                            </FormLabel>
-                          </div>
-                          <FormDescription>
-                            Sync your quests with your Google Calendar events
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={false} // {field.value}
-                            // onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
                 </div>
 
                 <Button type="submit" disabled={isSaving} className="w-full">
@@ -210,6 +178,9 @@ export function SettingsForm() {
             </Form>
           </CardContent>
         </Card>
+
+        {/* Google Calendar Integration Card */}
+        <GoogleCalendarIntegration />
 
         <ColorPaletteSelector />
       </div>

@@ -3,6 +3,13 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { AuthTokens, User } from "@/types/user";
 import { Quest, CreateQuestPayload, UpdateQuestPayload } from "@/types/quest";
 import { Achievement, UserAchievement } from "@/types/achievement";
+import {
+  GoogleCalendarStatusResponse,
+  ListGoogleCalendarsResponse,
+  SelectGoogleCalendarResponse,
+  DisconnectResponse,
+  GoogleAuthUrlResponse,
+} from "@/types/google-calendar";
 
 // Create a base axios instance with common configuration
 const axiosClient: AxiosInstance = axios.create({
@@ -209,11 +216,56 @@ export const achievementApi = {
   },
 };
 
+// Google Calendar API
+export const googleCalendarApi = {
+  getAuthUrl: async (): Promise<GoogleAuthUrlResponse> => {
+    const response = await axiosClient.get<GoogleAuthUrlResponse>(
+      "/auth/google/authorize"
+    );
+    console.log("Auth URL response:", response.data);
+    return response.data;
+  },
+
+  getStatus: async (): Promise<GoogleCalendarStatusResponse> => {
+    const response = await axiosClient.get<GoogleCalendarStatusResponse>(
+      "/auth/google/status"
+    );
+    return response.data;
+  },
+
+  disconnect: async (): Promise<DisconnectResponse> => {
+    const response = await axiosClient.delete<DisconnectResponse>(
+      "/auth/google/disconnect"
+    );
+    return response.data;
+  },
+
+  getCalendars: async (): Promise<ListGoogleCalendarsResponse> => {
+    const response = await axiosClient.get<ListGoogleCalendarsResponse>(
+      "/auth/google/calendars"
+    );
+    return response.data;
+  },
+
+  selectCalendar: async (
+    calendarId: string
+  ): Promise<SelectGoogleCalendarResponse> => {
+    const response = await axiosClient.post<SelectGoogleCalendarResponse>(
+      "/auth/google/calendars/select",
+      {
+        calendar_id: calendarId,
+      }
+    );
+    return response.data;
+  },
+};
+
 export const api = {
   auth: authApi,
   user: userApi,
   quest: questApi,
   achievement: achievementApi,
+  googleCalendar: googleCalendarApi,
 };
 
 export default api;
