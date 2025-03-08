@@ -3,12 +3,7 @@ const VERSION = "v" + (self.TIMESTAMP || new Date().getTime());
 const CACHE_NAME = "adhd-quest-tracker-" + VERSION;
 
 // Assets to cache on install
-const urlsToCache = [
-  "/",
-  "/manifest.json",
-  "/icons/icon-192x192.png",
-  // Add other critical assets
-];
+const urlsToCache = ["/", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
   console.log("[ServiceWorker] Install", VERSION);
