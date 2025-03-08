@@ -32,7 +32,7 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -40,7 +40,7 @@ export function LoginForm() {
   const onSubmit = (values: LoginFormValues) => {
     login(
       {
-        username: values.username,
+        email: values.email,
         password: values.password,
       },
       {
@@ -134,13 +134,13 @@ export function LoginForm() {
           <motion.div variants={itemVariants}>
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-300">Username</FormLabel>
+                  <FormLabel className="text-slate-300">Email</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter your username"
+                      placeholder="Enter your email"
                       className="bg-[#0f172a] border-blue-900/30 text-slate-300 focus:border-blue-500 focus:ring-blue-500/20"
                       disabled={isLoading}
                       {...field}

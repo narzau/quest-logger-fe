@@ -11,14 +11,14 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: async ({
-      username,
+      email,
       password,
     }: {
-      username: string;
+      email: string;
       password: string;
     }) => {
       try {
-        const authTokens = await api.auth.login(username, password);
+        const authTokens = await api.auth.login(email, password);
         setToken(authTokens.access_token);
         return authTokens.access_token;
       } catch (error) {

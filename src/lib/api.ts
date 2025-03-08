@@ -61,10 +61,10 @@ axiosClient.interceptors.response.use(
 
 // Authentication API
 export const authApi = {
-  login: async (username: string, password: string): Promise<AuthTokens> => {
+  login: async (email: string, password: string): Promise<AuthTokens> => {
     try {
       const response = await axiosClient.post<AuthTokens>("/access-token", {
-        username,
+        email,
         password,
       });
 

@@ -5,7 +5,10 @@ import { defaultPalettes } from "@/lib/color-config";
 
 // Login validation schema
 export const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z
+    .string()
+    .min(1, { message: "This field has to be filled." })
+    .email("This is not a valid email."),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -13,7 +16,10 @@ export const loginSchema = z.object({
 export const registerSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.string().email("Invalid email address"),
+    email: z
+      .string()
+      .min(1, { message: "This field has to be filled." })
+      .email("This is not a valid email."),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
