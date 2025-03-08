@@ -16,6 +16,8 @@ import {
   Swords,
   Trash,
   Award,
+  Calendar,
+  ExternalLink,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -233,6 +235,18 @@ export function QuestItem({
     setDeleteDialogOpen(false);
   };
 
+  // Open Google Calendar event
+  const openGoogleCalendarEvent = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the quest item from toggling open/closed
+
+    // Generate URL from event ID if available
+    if (quest.google_calendar_event_id) {
+      // The event ID may need to be encoded first, and the correct format is to use 'eventedit' rather than 'event'
+      const calendarUrl = `https://www.google.com/calendar/render?action=VIEW&eid=${quest.google_calendar_event_id}`;
+      window.open(calendarUrl, "_blank");
+    }
+  };
+
   return (
     <LayoutGroup>
       <motion.div
@@ -413,6 +427,25 @@ export function QuestItem({
                   </Tooltip>
                 </TooltipProvider>
               )}
+
+              {/* Google Calendar Link */}
+              {quest.google_calendar_event_id && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
+                        onClick={openGoogleCalendarEvent}
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>View in Google Calendar</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
 
             {/* Action buttons */}
@@ -458,6 +491,12 @@ export function QuestItem({
                     exit="closed"
                     transition={{ type: "spring", stiffness: 300 }}
                   >
+                    {quest.google_calendar_event_id && (
+                      <DropdownMenuItem onClick={openGoogleCalendarEvent}>
+                        <Calendar className="mr-2 h-4 w-4" />
+                        View in Calendar
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
                       <Trash className="mr-2 h-4 w-4" />
                       Delete
@@ -517,6 +556,21 @@ export function QuestItem({
                     <span className="font-semibold mr-2 ">Rarity:</span>
                     <span className={cn(rarityColor)}>{quest.rarity}</span>
                   </div>
+
+                  {/* Google Calendar Link in expanded view */}
+                  {quest.google_calendar_event_id && (
+                    <div className="flex items-center text-sm">
+                      <span className="font-semibold mr-2">Calendar:</span>
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-blue-500"
+                        onClick={openGoogleCalendarEvent}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View event
+                      </Button>
+                    </div>
+                  )}
                 </motion.div>
               </div>
             </motion.div>

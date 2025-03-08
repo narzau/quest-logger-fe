@@ -27,6 +27,7 @@ export interface Quest {
   owner_id: number;
   parent_quest_id?: number; // For quest chains/dependencies
   tracked: boolean;
+  google_calendar_event_id: string;
 }
 
 export interface CreateQuestPayload {
