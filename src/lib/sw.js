@@ -1,6 +1,8 @@
-// src/app/lib/sw.js
-const VERSION = "v" + new Date().getTime(); // Dynamic version based on build time
+// Use build timestamp for versioning
+const VERSION = "v" + (self.TIMESTAMP || new Date().getTime());
 const CACHE_NAME = "adhd-quest-tracker-" + VERSION;
+
+// Assets to cache on install
 const urlsToCache = [
   "/",
   "/manifest.json",
@@ -9,7 +11,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener("install", (event) => {
-  console.log("[ServiceWorker] Install");
+  console.log("[ServiceWorker] Install", VERSION);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[ServiceWorker] Caching app shell");
@@ -21,14 +23,17 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  console.log("[ServiceWorker] Activate");
+  console.log("[ServiceWorker] Activate", VERSION);
   event.waitUntil(
     caches
       .keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
+            if (
+              cacheName.startsWith("adhd-quest-tracker-") &&
+              cacheName !== CACHE_NAME
+            ) {
               console.log("[ServiceWorker] Removing old cache", cacheName);
               return caches.delete(cacheName);
             }
@@ -42,29 +47,83 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Modify the fetch event to use a network-first strategy for HTML pages
+// Use a network-first strategy for navigation and HTML requests
 self.addEventListener("fetch", (event) => {
-  // Parse the URL
-  const requestURL = new URL(event.request.url);
+  // Only handle GET requests
+  if (event.request.method !== "GET") return;
 
-  // For HTML pages (navigation requests), use network-first strategy
-  if (
+  // Special handling for navigation requests and HTML files
+  const isNavigationOrHTML =
     event.request.mode === "navigate" ||
-    (event.request.method === "GET" &&
-      event.request.headers.get("accept").includes("text/html"))
-  ) {
+    (event.request.headers.get("accept") &&
+      event.request.headers.get("accept").includes("text/html"));
+
+  if (isNavigationOrHTML) {
+    // Network-first strategy for navigation/HTML
     event.respondWith(
-      fetch(event.request).catch((error) => {
-        // Fall back to cache only if network fails
-        return caches.match(event.request);
-      })
+      fetch(event.request)
+        .then((response) => {
+          // Clone the response to store in cache
+          const responseToCache = response.clone();
+
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            })
+            .catch((err) => console.error("Cache put error:", err));
+
+          return response;
+        })
+        .catch(() => {
+          // If network fails, try cache
+          return caches.match(event.request);
+        })
     );
   } else {
-    // For other assets, use cache-first strategy
+    // Cache-first strategy for other assets (images, scripts, etc.)
     event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          // Return cached response, but also update cache in background
+          fetch(event.request)
+            .then((networkResponse) => {
+              caches
+                .open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, networkResponse);
+                })
+                .catch((err) =>
+                  console.error("Background cache update error:", err)
+                );
+            })
+            .catch(() => {});
+
+          return cachedResponse;
+        }
+
+        // If not in cache, fetch from network
+        return fetch(event.request).then((response) => {
+          // Clone the response to store in cache
+          const responseToCache = response.clone();
+
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            })
+            .catch((err) => console.error("Cache put error:", err));
+
+          return response;
+        });
       })
     );
+  }
+});
+
+// Handle messages from clients
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
   }
 });

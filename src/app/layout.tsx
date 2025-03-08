@@ -5,9 +5,9 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { StructuredData } from "./StructuredData";
-import { registerServiceWorker } from "@/lib/register-sw";
 import ClientLayout from "./client-layout";
-import { useEffect } from "react";
+import ServiceWorkerInit from "@/components/sw/sw-init"; // Import the client component
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -84,9 +84,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    registerServiceWorker();
-  }, []);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -95,6 +92,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <ServiceWorkerInit />{" "}
+            {/* Add the service worker initialization component */}
             <ClientLayout>{children}</ClientLayout>
             <Toaster />
           </ThemeProvider>
