@@ -1,8 +1,8 @@
 {
-  "name": "Quest Logger",
-  "short_name": "Quest Logger",
+  "name": "QuestLog",
+  "short_name": "QuestLog",
   "description": "Gamified task tracking app for people with ADHD",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#6D28D9",
