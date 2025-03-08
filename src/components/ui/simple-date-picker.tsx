@@ -1,6 +1,3 @@
-// Create a new component called SimpleDatePicker.tsx in your components folder
-// This is a simplified calendar that works in Firefox
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
@@ -16,6 +13,7 @@ import {
   isToday,
 } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface SimpleDatePickerProps {
   value?: Date;
@@ -30,26 +28,44 @@ export function SimpleDatePicker({
 }: SimpleDatePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(value || new Date());
   const [isOpen, setIsOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile view
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Check on initial load
+    checkMobile();
+
+    // Check on resize
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        !isDialogOpen // Only close if dialog is not open
       ) {
         setIsOpen(false);
       }
     };
 
-    if (isOpen) {
+    if (isOpen && !isDialogOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, isDialogOpen]);
 
   const nextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
@@ -71,11 +87,17 @@ export function SimpleDatePicker({
     ));
   };
 
+  const handleSelectDate = (selectedDate: Date) => {
+    onChange(selectedDate);
+    setIsOpen(false);
+    setIsDialogOpen(false);
+  };
+
   const renderCells = () => {
     const monthStart = startOfMonth(currentMonth);
     const startDate = startOfWeek(monthStart);
 
-    // Always create a 6-row calendar (6 weeks) for consistent height
+    // Create a consistent 6-row calendar
     const rows = [];
     let days = [];
     let day = startDate;
@@ -98,10 +120,7 @@ export function SimpleDatePicker({
               isCurrentMonth && "hover:bg-accent hover:text-accent-foreground",
               "cursor-pointer"
             )}
-            onClick={() => {
-              onChange(cloneDay);
-              setIsOpen(false);
-            }}
+            onClick={() => handleSelectDate(cloneDay)}
           >
             <div
               className={cn(
@@ -128,44 +147,88 @@ export function SimpleDatePicker({
     return rows;
   };
 
-  // Handle positioning based on viewport
-  useEffect(() => {
-    const checkPosition = () => {
-      if (!containerRef.current || !isOpen) return;
+  const handleClear = () => {
+    onChange(undefined);
+    setIsOpen(false);
+    setIsDialogOpen(false);
+  };
 
-      const rect = containerRef.current.getBoundingClientRect();
-      const dropdownEl = containerRef.current.querySelector(
-        "[data-calendar-dropdown]"
-      );
+  const handleToday = () => {
+    onChange(new Date());
+    setIsOpen(false);
+    setIsDialogOpen(false);
+  };
 
-      if (!dropdownEl) return;
+  const handleTomorrow = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    onChange(tomorrow);
+    setIsOpen(false);
+    setIsDialogOpen(false);
+  };
 
-      // Get viewport height
-      const viewportHeight = window.innerHeight;
+  const handleButtonClick = () => {
+    if (isMobile) {
+      setIsDialogOpen(true);
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
 
-      // Space above and below
-      const spaceAbove = rect.top;
-      const spaceBelow = viewportHeight - rect.bottom;
+  const renderCalendarContent = () => (
+    <>
+      <div className="flex justify-between items-center mb-4 mt-8">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={prevMonth}
+          className="h-7 w-7 p-0 flex items-center justify-center"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="font-semibold text-center px-4">
+          {format(currentMonth, "MMMM yyyy")}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={nextMonth}
+          className="h-7 w-7 p-0 flex items-center justify-center"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
 
-      // Get dropdown height
-      const dropdownHeight = (dropdownEl as HTMLElement).offsetHeight;
+      <div className="grid grid-cols-7 mb-1">{renderDays()}</div>
+      <div className="mb-3">{renderCells()}</div>
 
-      // Apply appropriate positioning class
-      if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
-        // Not enough space below, but enough above
-        dropdownEl.classList.add("bottom-full", "mb-1");
-        dropdownEl.classList.remove("top-full", "mt-1");
-      } else {
-        // Default: show below
-        dropdownEl.classList.add("top-full", "mt-1");
-        dropdownEl.classList.remove("bottom-full", "mb-1");
-      }
-    };
-
-    checkPosition();
-    window.addEventListener("resize", checkPosition);
-    return () => window.removeEventListener("resize", checkPosition);
-  }, [isOpen]);
+      <div className="flex justify-between pt-2 border-t">
+        <Button type="button" variant="ghost" size="sm" onClick={handleClear}>
+          Clear
+        </Button>
+        <div className="flex space-x-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleToday}
+          >
+            Today
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleTomorrow}
+          >
+            Tomorrow
+          </Button>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div className={cn("relative", className)} ref={containerRef}>
@@ -173,85 +236,25 @@ export function SimpleDatePicker({
         type="button"
         variant="outline"
         className="w-full justify-start text-left font-normal"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleButtonClick}
       >
         <CalendarIcon className="mr-2 h-4 w-4" />
         {value ? format(value, "PPP") : "Select date"}
       </Button>
 
-      {isOpen && (
-        <div
-          data-calendar-dropdown
-          className="absolute bottom-full left-0 right-0 md:right-auto md:w-auto z-50 mb-1 p-3 bg-background border rounded-md shadow-md min-w-[280px]"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={prevMonth}
-              className="h-7 w-7 p-0 flex items-center justify-center"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="font-semibold text-center px-4">
-              {format(currentMonth, "MMMM yyyy")}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={nextMonth}
-              className="h-7 w-7 p-0 flex items-center justify-center"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-7 mb-1">{renderDays()}</div>
-          <div className="mb-3 h-[240px]">{renderCells()}</div>
-
-          <div className="flex justify-between pt-2 border-t">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                onChange(undefined);
-                setIsOpen(false);
-              }}
-            >
-              Clear
-            </Button>
-            <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  onChange(new Date());
-                  setIsOpen(false);
-                }}
-              >
-                Today
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  const tomorrow = new Date();
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-                  onChange(tomorrow);
-                  setIsOpen(false);
-                }}
-              >
-                Tomorrow
-              </Button>
-            </div>
-          </div>
+      {/* Desktop dropdown */}
+      {isOpen && !isMobile && (
+        <div className="absolute right-0 bottom-full z-50 p-3 mb-1 bg-background border rounded-md shadow-md w-[280px]">
+          {renderCalendarContent()}
         </div>
       )}
+
+      {/* Mobile dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[320px] p-4">
+          {renderCalendarContent()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
