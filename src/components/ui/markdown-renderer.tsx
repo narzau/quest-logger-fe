@@ -1,4 +1,3 @@
-// src/components/ui/markdown-renderer.tsx
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -46,6 +45,15 @@ export function MarkdownRenderer({
         "prose-blockquote:border-border dark:prose-blockquote:border-border",
         "prose-code:text-foreground dark:prose-code:text-foreground",
         "prose-a:text-primary dark:prose-a:text-primary",
+        // Force removal of top margins on first elements
+        "[&>div:first-child>*:first-child]:!mt-0",
+        // Aggressive overrides for list spacing
+        "[&_ul]:!my-1 [&_ol]:!my-1",
+        "[&_li]:!my-0 [&_li]:!py-0",
+        "[&_li>p]:!my-0 [&_li>p]:!py-0",
+        "[&_li>*]:!my-0 [&_li>*]:!leading-tight",
+        // Apply more specific spacing overrides
+        "[&_ul>li]:!mt-0.5 [&_ol>li]:!mt-0.5",
         className
       )}
     >
@@ -61,7 +69,7 @@ export function MarkdownRenderer({
           return (
             <div
               key={`task-${lineIndex}`}
-              className="flex items-center gap-2 py-1 relative"
+              className="flex items-center gap-2 py-0.5 relative"
             >
               <div className="flex items-center justify-center flex-shrink-0 w-5 h-5">
                 <motion.div
@@ -121,29 +129,32 @@ export function MarkdownRenderer({
 
         // It's not a task, render it as markdown
         return (
-          <div key={`line-${lineIndex}`} className="text-foreground">
+          <div key={`line-${lineIndex}`} className="text-foreground py-0.5">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Component overrides remain unchanged
+                // Component overrides with aggressive margin/padding removal
                 p: ({ ...props }) => (
-                  <p className="text-foreground" {...props} />
+                  <p
+                    className="text-foreground !my-0 !py-0 !leading-normal"
+                    {...props}
+                  />
                 ),
                 h1: ({ ...props }) => (
                   <h1
-                    className="text-foreground text-2xl font-bold mt-6 mb-4"
+                    className="text-foreground text-2xl font-bold !mt-4 !mb-2"
                     {...props}
                   />
                 ),
                 h2: ({ ...props }) => (
                   <h2
-                    className="text-foreground text-xl font-bold mt-5 mb-3"
+                    className="text-foreground text-xl font-bold !mt-3 !mb-2"
                     {...props}
                   />
                 ),
                 h3: ({ ...props }) => (
                   <h3
-                    className="text-foreground text-lg font-bold mt-4 mb-2"
+                    className="text-foreground text-lg font-bold !mt-3 !mb-1"
                     {...props}
                   />
                 ),
@@ -158,21 +169,27 @@ export function MarkdownRenderer({
                 ),
                 blockquote: ({ ...props }) => (
                   <blockquote
-                    className="border-l-4 border-border pl-4 italic text-foreground/80"
+                    className="border-l-4 border-border pl-4 italic text-foreground/80 !my-2"
                     {...props}
                   />
                 ),
                 ul: ({ ...props }) => (
-                  <ul className="list-disc pl-5 text-foreground" {...props} />
+                  <ul
+                    className="list-disc pl-5 text-foreground !my-1 !py-0 !leading-tight"
+                    {...props}
+                  />
                 ),
                 ol: ({ ...props }) => (
                   <ol
-                    className="list-decimal pl-5 text-foreground"
+                    className="list-decimal pl-5 text-foreground !my-1 !py-0 !leading-tight"
                     {...props}
                   />
                 ),
                 li: ({ ...props }) => (
-                  <li className="text-foreground" {...props} />
+                  <li
+                    className="text-foreground !my-0 !py-0 !leading-tight"
+                    {...props}
+                  />
                 ),
               }}
             >
