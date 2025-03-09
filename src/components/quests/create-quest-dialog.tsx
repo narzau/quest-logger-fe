@@ -312,7 +312,7 @@ export function CreateQuestDialog({
               <FormControl>
                 {previewMode ? (
                   <div className="min-h-[100px] p-3 border rounded-md bg-muted/20">
-                    <MarkdownRenderer content={field.value} />
+                    {field.value && <MarkdownRenderer content={field.value} />}
                   </div>
                 ) : (
                   <Textarea
