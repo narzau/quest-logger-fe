@@ -446,9 +446,9 @@ export function QuestItem({
                 height: 0,
                 transition: { duration: 0.2 },
               }}
-              className="overflow-hidden mt-2"
+              className="overflow-hidden border-t border-border/40"
             >
-              <div className="border-t border-border/40 pt-2">
+              <div className="-mt-3 ">
                 <motion.div initial={{ y: -10 }} animate={{ y: 0 }}>
                   <MarkdownRenderer
                     content={quest.description || ""}
