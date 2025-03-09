@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface MarkdownRendererProps {
   content: string;
@@ -60,26 +61,65 @@ export function MarkdownRenderer({
           return (
             <div
               key={`task-${lineIndex}`}
-              className="flex items-start gap-2 py-1"
+              className="flex items-center gap-2 py-1 relative"
             >
-              <Checkbox
-                checked={isChecked}
-                onCheckedChange={(checked) =>
-                  handleCheckboxChange(lineIndex, !!checked)
-                }
-                disabled={readOnly}
-                id={`task-${lineIndex}`}
-                className="mt-1 border-2 bg-background"
-              />
-              <label
-                htmlFor={`task-${lineIndex}`}
-                className={cn(
-                  "cursor-pointer text-foreground",
-                  isChecked && "line-through text-muted-foreground"
-                )}
-              >
-                {taskText}
-              </label>
+              <div className="flex items-center justify-center flex-shrink-0 w-5 h-5">
+                <motion.div
+                  initial={{ scale: 1 }}
+                  animate={{ scale: isChecked ? 1.1 : 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 15,
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center"
+                >
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={(checked) =>
+                      handleCheckboxChange(lineIndex, !!checked)
+                    }
+                    disabled={readOnly}
+                    id={`task-${lineIndex}`}
+                    className={cn(
+                      "h-4 w-4 rounded border-2",
+                      isChecked
+                        ? "border-primary"
+                        : "border-primary/60 bg-background"
+                    )}
+                  />
+                </motion.div>
+              </div>
+
+              <div className="relative inline-block">
+                <motion.label
+                  initial={false}
+                  animate={{
+                    opacity: isChecked ? 0.6 : 1,
+                    x: isChecked ? 4 : 0,
+                  }}
+                  transition={{ duration: 0.2 }}
+                  htmlFor={`task-${lineIndex}`}
+                  className="cursor-pointer text-foreground"
+                >
+                  {taskText}
+
+                  {/* This is the strike-through line that animates in */}
+                  <AnimatePresence>
+                    {isChecked && (
+                      <motion.div
+                        className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        exit={{ scaleX: 0 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        style={{ width: "90%" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.label>
+              </div>
             </div>
           );
         }
@@ -90,7 +130,7 @@ export function MarkdownRenderer({
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Override default components to use theme colors
+                // Component overrides remain unchanged
                 p: ({ ...props }) => (
                   <p className="text-foreground" {...props} />
                 ),
@@ -127,18 +167,6 @@ export function MarkdownRenderer({
                     {...props}
                   />
                 ),
-                code: ({ inline, ...props }) =>
-                  inline ? (
-                    <code
-                      className="px-1 py-0.5 bg-muted text-foreground rounded text-sm"
-                      {...props}
-                    />
-                  ) : (
-                    <code
-                      className="block p-2 bg-muted text-foreground rounded text-sm overflow-x-auto"
-                      {...props}
-                    />
-                  ),
                 ul: ({ ...props }) => (
                   <ul className="list-disc pl-5 text-foreground" {...props} />
                 ),

@@ -543,11 +543,7 @@ export function QuestItem({
               className="overflow-hidden" // Added overflow-hidden only to the expandable content
             >
               <div className=" border-t border-border/40">
-                <motion.div
-                  initial={{ y: -10 }}
-                  animate={{ y: 0 }}
-                  className="mt-3"
-                >
+                <motion.div initial={{ y: -10 }} animate={{ y: 0 }}>
                   <MarkdownRenderer
                     content={quest.description || ""}
                     onTaskToggle={handleTaskToggle}
@@ -556,7 +552,7 @@ export function QuestItem({
                 </motion.div>
 
                 <motion.div
-                  className="mt-6 flex flex-wrap gap-4"
+                  className="mt-2 flex flex-wrap gap-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
