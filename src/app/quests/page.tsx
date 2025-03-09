@@ -23,10 +23,10 @@ import {
   Map,
   Crown,
   Swords,
+  CheckCircle2,
+  BookMarked,
 } from "lucide-react";
 import { QuestType, QuestRarity } from "@/types/quest";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 
@@ -35,34 +35,13 @@ export default function QuestsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [rarityFilter, setRarityFilter] = useState<string>("all");
-  const [completedFilter, setCompletedFilter] = useState({
-    completed: false,
-    notCompleted: true,
-  });
-  const [trackedFilter, setTrackedFilter] = useState({
-    tracked: true,
-    notTracked: false,
-  });
+  const [completionFilter, setCompletionFilter] = useState("not-completed");
+  const [trackingFilter, setTrackingFilter] = useState("tracked");
+  const [showFilters, setShowFilters] = useState(false);
   const { animationsEnabled } = useSettingsStore();
 
-  const handleCompletedChange = (
-    checked: boolean | "indeterminate",
-    type: "completed" | "notCompleted"
-  ) => {
-    if (checked === "indeterminate") return;
-    setCompletedFilter((prev) => ({ ...prev, [type]: checked }));
-  };
-
-  const handleTrackedChange = (
-    checked: boolean | "indeterminate",
-    type: "tracked" | "notTracked"
-  ) => {
-    if (checked === "indeterminate") return;
-    setTrackedFilter((prev) => ({ ...prev, [type]: checked }));
-  };
-
   const filteredQuests = quests.filter((quest) => {
-    // Existing search and rarity filters
+    // Search and rarity filters
     const matchesSearch =
       !searchTerm ||
       quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,16 +50,21 @@ export default function QuestsPage() {
     const matchesRarity =
       rarityFilter === "all" || quest.rarity === rarityFilter;
 
-    // New filters
-    const matchesCompleted =
-      (quest.is_completed && completedFilter.completed) ||
-      (!quest.is_completed && completedFilter.notCompleted);
+    // Completion status filter
+    const matchesCompletion =
+      completionFilter === "all" ||
+      (completionFilter === "completed" && quest.is_completed) ||
+      (completionFilter === "not-completed" && !quest.is_completed);
 
-    const matchesTracked =
-      (quest.tracked && trackedFilter.tracked) ||
-      (!quest.tracked && trackedFilter.notTracked);
+    // Tracking status filter
+    const matchesTracking =
+      trackingFilter === "all" ||
+      (trackingFilter === "tracked" && quest.tracked) ||
+      (trackingFilter === "not-tracked" && !quest.tracked);
 
-    return matchesSearch && matchesRarity && matchesCompleted && matchesTracked;
+    return (
+      matchesSearch && matchesRarity && matchesCompletion && matchesTracking
+    );
   });
 
   // Group quests by type
@@ -129,7 +113,7 @@ export default function QuestsPage() {
                 <Card className="border-accent/20">
                   {/* Sticky Header */}
                   <CardHeader className="bg-background sticky pt-4 -top-6 z-10 border-b border-border/30 pb-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-row gap-4">
                       <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -139,103 +123,284 @@ export default function QuestsPage() {
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
                       </div>
+                      {/* Desktop filters - only visible on larger screens */}
+                      <div className="hidden sm:flex  gap-3">
+                        {/* Completion Status Filter */}
+                        <div>
+                          <Select
+                            value={completionFilter}
+                            onValueChange={setCompletionFilter}
+                          >
+                            <SelectTrigger
+                              className={`w-full ${
+                                completionFilter !== "all"
+                                  ? "border-primary/50 bg-primary/5"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center">
+                                <CheckCircle2
+                                  className={`mr-2 h-4 w-4 ${
+                                    completionFilter === "completed"
+                                      ? "text-green-500"
+                                      : ""
+                                  }`}
+                                />
+                                <span>
+                                  {completionFilter === "all" && "Status: All"}
+                                  {completionFilter === "completed" &&
+                                    "Status: Completed"}
+                                  {completionFilter === "not-completed" &&
+                                    "Status: Not Completed"}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="completed">
+                                Completed
+                              </SelectItem>
+                              <SelectItem value="not-completed">
+                                Not Completed
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                      <div className="w-full sm:w-44">
-                        <Select
-                          value={rarityFilter}
-                          onValueChange={setRarityFilter}
+                        {/* Tracking Status Filter */}
+                        <div>
+                          <Select
+                            value={trackingFilter}
+                            onValueChange={setTrackingFilter}
+                          >
+                            <SelectTrigger
+                              className={`${
+                                trackingFilter !== "all"
+                                  ? "border-primary/50 bg-primary/5"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center">
+                                <BookMarked
+                                  className={`mr-2 h-4 w-4 ${
+                                    trackingFilter === "tracked"
+                                      ? "text-blue-500"
+                                      : ""
+                                  }`}
+                                />
+                                <span>
+                                  {trackingFilter === "all" && "Tracking: All"}
+                                  {trackingFilter === "tracked" &&
+                                    "Tracking: Tracked"}
+                                  {trackingFilter === "not-tracked" &&
+                                    "Tracking: Not Tracked"}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Tracking</SelectItem>
+                              <SelectItem value="tracked">Tracked</SelectItem>
+                              <SelectItem value="not-tracked">
+                                Not Tracked
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Desktop filter - only visible on larger screens */}
+                        <div className="">
+                          <Select
+                            value={rarityFilter}
+                            onValueChange={setRarityFilter}
+                          >
+                            <SelectTrigger
+                              className={
+                                rarityFilter !== "all"
+                                  ? "border-primary/50 bg-primary/5"
+                                  : ""
+                              }
+                            >
+                              <div className="flex items-center">
+                                <Filter className="mr-2 h-4 w-4" />
+                                <span>
+                                  {rarityFilter === "all"
+                                    ? "Rarity: All"
+                                    : `Rarity: ${
+                                        rarityFilter.charAt(0).toUpperCase() +
+                                        rarityFilter.slice(1)
+                                      }`}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Rarities</SelectItem>
+                              <SelectItem value={QuestRarity.COMMON}>
+                                Common
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.UNCOMMON}>
+                                Uncommon
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.RARE}>
+                                Rare
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.EPIC}>
+                                Epic
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.LEGENDARY}>
+                                Legendary
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {/* Filter toggle button for mobile - only visible on small screens */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowFilters(!showFilters)}
+                          className="sm:hidden relative"
                         >
-                          <SelectTrigger>
-                            <div className="flex items-center">
-                              <Filter className="mr-2 h-4 w-4" />
-                              <span>Rarity</span>
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Rarities</SelectItem>
-                            <SelectItem value={QuestRarity.COMMON}>
-                              Common
-                            </SelectItem>
-                            <SelectItem value={QuestRarity.UNCOMMON}>
-                              Uncommon
-                            </SelectItem>
-                            <SelectItem value={QuestRarity.RARE}>
-                              Rare
-                            </SelectItem>
-                            <SelectItem value={QuestRarity.EPIC}>
-                              Epic
-                            </SelectItem>
-                            <SelectItem value={QuestRarity.LEGENDARY}>
-                              Legendary
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <Filter className="h-4 w-4 mr-2" />
+                          Filters
+                          {(rarityFilter !== "all" ||
+                            completionFilter !== "all" ||
+                            trackingFilter !== "all") && (
+                            <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
+                          )}
+                        </Button>
                       </div>
                     </div>
-                    <div className="mt-3">
-                      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4">
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="not-completed"
-                            checked={completedFilter.notCompleted}
-                            onCheckedChange={(checked) =>
-                              handleCompletedChange(checked, "notCompleted")
-                            }
-                          />
-                          <Label
-                            htmlFor="not-completed"
-                            className="text-sm sm:text-base whitespace-nowrap"
+
+                    {/* Mobile filters - only visible when showFilters is true */}
+                    {showFilters && (
+                      <div className="mt-3 sm:hidden space-y-3 border-t pt-3 border-border/30 animate-in slide-in-from-top-2 duration-200">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">
+                            Active Filters
+                          </h4>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setRarityFilter("all");
+                              setCompletionFilter("not-completed");
+                              setTrackingFilter("tracked");
+                            }}
+                            className="h-8 text-xs"
                           >
-                            Not Completed
-                          </Label>
+                            Reset
+                          </Button>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="tracked"
-                            checked={trackedFilter.tracked}
-                            onCheckedChange={(checked) =>
-                              handleTrackedChange(checked, "tracked")
-                            }
-                          />
-                          <Label
-                            htmlFor="tracked"
-                            className="text-sm sm:text-base"
+
+                        <div>
+                          <Select
+                            value={rarityFilter}
+                            onValueChange={setRarityFilter}
                           >
-                            Tracked
-                          </Label>
+                            <SelectTrigger className="w-full h-9 text-sm">
+                              <div className="flex items-center">
+                                <Filter className="mr-2 h-4 w-4" />
+                                <span className="truncate">
+                                  {rarityFilter === "all"
+                                    ? "Rarity: All"
+                                    : `Rarity: ${
+                                        rarityFilter.charAt(0).toUpperCase() +
+                                        rarityFilter.slice(1)
+                                      }`}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Rarities</SelectItem>
+                              <SelectItem value={QuestRarity.COMMON}>
+                                Common
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.UNCOMMON}>
+                                Uncommon
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.RARE}>
+                                Rare
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.EPIC}>
+                                Epic
+                              </SelectItem>
+                              <SelectItem value={QuestRarity.LEGENDARY}>
+                                Legendary
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="completed"
-                            checked={completedFilter.completed}
-                            onCheckedChange={(checked) =>
-                              handleCompletedChange(checked, "completed")
-                            }
-                          />
-                          <Label
-                            htmlFor="completed"
-                            className="text-sm sm:text-base"
+
+                        <div>
+                          <Select
+                            value={completionFilter}
+                            onValueChange={setCompletionFilter}
                           >
-                            Completed
-                          </Label>
+                            <SelectTrigger className="w-full h-9 text-sm">
+                              <div className="flex items-center">
+                                <CheckCircle2
+                                  className={`mr-2 h-4 w-4 ${
+                                    completionFilter === "completed"
+                                      ? "text-green-500"
+                                      : ""
+                                  }`}
+                                />
+                                <span className="truncate">
+                                  {completionFilter === "all" && "Status: All"}
+                                  {completionFilter === "completed" &&
+                                    "Status: Completed"}
+                                  {completionFilter === "not-completed" &&
+                                    "Status: Not Completed"}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="completed">
+                                Completed
+                              </SelectItem>
+                              <SelectItem value="not-completed">
+                                Not Completed
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="not-tracked"
-                            checked={trackedFilter.notTracked}
-                            onCheckedChange={(checked) =>
-                              handleTrackedChange(checked, "notTracked")
-                            }
-                          />
-                          <Label
-                            htmlFor="not-tracked"
-                            className="text-sm sm:text-base whitespace-nowrap"
+
+                        <div>
+                          <Select
+                            value={trackingFilter}
+                            onValueChange={setTrackingFilter}
                           >
-                            Not Tracked
-                          </Label>
+                            <SelectTrigger className="w-full h-9 text-sm">
+                              <div className="flex items-center">
+                                <BookMarked
+                                  className={`mr-2 h-4 w-4 ${
+                                    trackingFilter === "tracked"
+                                      ? "text-blue-500"
+                                      : ""
+                                  }`}
+                                />
+                                <span className="truncate">
+                                  {trackingFilter === "all" && "Tracking: All"}
+                                  {trackingFilter === "tracked" &&
+                                    "Tracking: Tracked"}
+                                  {trackingFilter === "not-tracked" &&
+                                    "Tracking: Not Tracked"}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Tracking</SelectItem>
+                              <SelectItem value="tracked">Tracked</SelectItem>
+                              <SelectItem value="not-tracked">
+                                Not Tracked
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </CardHeader>
 
                   <CardContent className="pt-2">
