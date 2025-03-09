@@ -45,8 +45,12 @@ export function QuestCategory({
   // State to manage the sorted quests
   const [quests, setQuests] = useState<Quest[]>([]);
 
+  // Keep track of quest IDs to maintain custom ordering
+  const questOrderRef = useRef<number[]>([]);
+
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const initialLoadRef = useRef(true);
 
   // Handle scroll prevention during drag
   useEffect(() => {
@@ -67,13 +71,52 @@ export function QuestCategory({
     };
   }, [isDragging]);
 
-  // Sort quests by created_at whenever the initial quests change
+  // Initial sort and updating quests while preserving order
   useEffect(() => {
-    const sortedQuests = [...initialQuests].sort(
-      (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
-    setQuests(sortedQuests);
+    if (initialLoadRef.current) {
+      // For the very first load, sort by created_at (newest first)
+      const sortedQuests = [...initialQuests].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setQuests(sortedQuests);
+
+      // Store the initial order of IDs
+      questOrderRef.current = sortedQuests.map((quest) => quest.id);
+      initialLoadRef.current = false;
+    } else {
+      // For subsequent updates, maintain the user's custom order
+      const currentIds = questOrderRef.current;
+
+      // Create a map of quests for quick lookup
+      const questMap = new Map(initialQuests.map((quest) => [quest.id, quest]));
+
+      // First, handle quests that already exist in our order
+      const updatedQuests = currentIds
+        .filter((id) => questMap.has(id))
+        .map((id) => questMap.get(id)!);
+
+      // Now find any new quests that weren't in our previous order
+      const newQuests = initialQuests.filter(
+        (quest) => !currentIds.includes(quest.id)
+      );
+
+      if (newQuests.length > 0) {
+        // Sort new quests by created_at (newest first) before adding them
+        newQuests.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        // Add the new quests at the beginning of the list, not the end
+        updatedQuests.unshift(...newQuests);
+
+        // Update the order reference with new IDs
+        questOrderRef.current = updatedQuests.map((quest) => quest.id);
+      }
+
+      setQuests(updatedQuests);
+    }
   }, [initialQuests]);
 
   const hasQuests = quests.length > 0;
@@ -115,6 +158,9 @@ export function QuestCategory({
       const newIndex = items.findIndex((item) => item.id === over.id);
 
       const newItems = arrayMove(items, oldIndex, newIndex);
+
+      // Update the order reference
+      questOrderRef.current = newItems.map((quest) => quest.id);
 
       // Notify parent component if callback is provided
       if (onQuestsReorder) {
