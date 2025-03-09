@@ -1,11 +1,14 @@
 import { Metadata } from "next";
-import "./globals.css";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { StructuredData } from "./StructuredData";
 import ServiceWorkerInit from "@/components/sw/sw-init"; // Import the client component
+
+import "./globals.css";
+import "katex/dist/katex.min.css";
+import "highlight.js/styles/github-dark.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

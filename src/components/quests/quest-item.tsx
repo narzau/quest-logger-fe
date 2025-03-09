@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useSettingsStore } from "@/store/settingsStore";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
-
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 // Animation configurations
 const containerVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -120,7 +120,7 @@ export function QuestItem({
 }: QuestItemProps) {
   // Make a local copy of the quest to manipulate for animations
   const [localQuest, setLocalQuest] = useState<Quest>({ ...quest });
-  const { completeQuest, deleteQuest } = useQuests();
+  const { completeQuest, deleteQuest, updateQuest } = useQuests();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const { animationsEnabled } = useSettingsStore();
@@ -235,6 +235,35 @@ export function QuestItem({
     setDeleteDialogOpen(false);
   };
 
+  const handleTaskToggle = (lineIndex: number, checked: boolean) => {
+    // Only proceed if we have a description
+    if (!quest.description) return;
+
+    // Split the description into lines
+    const lines = quest.description.split("\n");
+
+    // Ensure lineIndex is valid
+    if (lineIndex < 0 || lineIndex >= lines.length) return;
+
+    // Get the line and check if it's a task
+    const line = lines[lineIndex];
+    const taskMatch = line.match(/^(\s*-\s+\[)([x ])(\]\s+.*)$/);
+
+    if (taskMatch) {
+      // Update the checkbox state
+      lines[lineIndex] = `${taskMatch[1]}${checked ? "x" : " "}${taskMatch[3]}`;
+
+      // Join the lines back together
+      const newDescription = lines.join("\n");
+
+      // Update the quest
+      updateQuest({
+        questId: quest.id,
+        quest: { description: newDescription },
+      });
+    }
+  };
+
   // Open Google Calendar event
   const openGoogleCalendarEvent = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent the quest item from toggling open/closed
@@ -341,7 +370,7 @@ export function QuestItem({
               <Checkbox
                 checked={localQuest.is_completed}
                 onCheckedChange={handleComplete}
-                className="h-5 w-5"
+                className="h-5 w-5 border-2"
                 disabled={localQuest.is_completed || isAnimating}
               />
             </motion.div>
@@ -378,17 +407,6 @@ export function QuestItem({
                   </motion.div>
                 </div>
               </motion.div>
-
-              {quest.description && (
-                <motion.p
-                  className="text-sm text-muted-foreground line-clamp-1 mt-1"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  {quest.description}
-                </motion.p>
-              )}
             </div>
           </div>
 
@@ -524,17 +542,21 @@ export function QuestItem({
               }}
               className="overflow-hidden" // Added overflow-hidden only to the expandable content
             >
-              <div className="mt-3 pt-3 border-t border-border/40">
+              <div className=" border-t border-border/40">
                 <motion.div
                   initial={{ y: -10 }}
                   animate={{ y: 0 }}
-                  className="text-sm text-muted-foreground whitespace-pre-wrap"
+                  className="mt-3"
                 >
-                  {quest.description}
+                  <MarkdownRenderer
+                    content={quest.description || ""}
+                    onTaskToggle={handleTaskToggle}
+                    readOnly={quest.is_completed || isAnimating}
+                  />
                 </motion.div>
 
                 <motion.div
-                  className="mt-3 flex flex-wrap gap-4"
+                  className="mt-6 flex flex-wrap gap-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}

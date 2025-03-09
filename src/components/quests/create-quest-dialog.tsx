@@ -22,6 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,7 +43,8 @@ import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { SimpleDatePicker } from "../ui/simple-date-picker";
+import { SimpleDatePicker } from "@/components/ui/simple-date-picker";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 type CreateQuestFormValues = z.infer<typeof createQuestSchema>;
 
 interface CreateQuestDialogProps {
@@ -74,6 +76,7 @@ export function CreateQuestDialog({
   const [successAnimation, setSuccessAnimation] = useState(false);
   const [createGoogleCalendarEvent, setCreateGoogleCalendarEvent] =
     useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   const form = useForm<CreateQuestFormValues>({
     resolver: zodResolver(createQuestSchema),
@@ -290,25 +293,48 @@ export function CreateQuestDialog({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <div className="flex justify-between items-center">
+                <FormLabel>Description</FormLabel>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPreviewMode(!previewMode)}
+                >
+                  {previewMode ? "Edit" : "Preview"}
+                </Button>
+              </div>
               <FormControl>
-                <Textarea
-                  placeholder="Enter quest details"
-                  className="resize-none"
-                  {...field}
-                />
+                {previewMode ? (
+                  <div className="min-h-[100px] p-3 border rounded-md bg-muted/20">
+                    <MarkdownRenderer content={field.value} />
+                  </div>
+                ) : (
+                  <Textarea
+                    placeholder="Supports markdown formatting"
+                    className="resize-none min-h-[100px] font-mono text-sm"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
               </FormControl>
+              <FormDescription>
+                You can use markdown formatting and create interactive subtasks:
+                <span className="text-xs bg-muted p-2 rounded mt-1 overflow-x-auto">
+                  {`## Subtasks
+- [ ] Incomplete subtask
+- [x] Completed subtask`}
+                </span>
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -371,7 +397,6 @@ export function CreateQuestDialog({
             )}
           />
         </div>
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -400,9 +425,7 @@ export function CreateQuestDialog({
             </FormControl>
           </FormItem>
         </div>
-
         {renderGoogleCalendarOption()}
-
         <DialogFooter>
           <Button
             type="button"
