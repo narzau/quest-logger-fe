@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuests } from "@/hooks/useQuests";
 import { Quest, QuestRarity } from "@/types/quest";
 import { Button } from "@/components/ui/button";
@@ -251,8 +251,8 @@ export function QuestItem({
         className={cn(
           "group flex flex-col px-2 rounded-lg border cursor-pointer relative",
           localQuest.is_completed
-            ? "bg-muted/30 border-muted"
-            : "bg-card border-border hover:border-primary/20",
+            ? "bg-muted/60 border-muted"
+            : "bg-muted/20 border-border hover:border-primary/20",
           showGlow && "shadow-[0_0_15px_rgba(59,130,246,0.3)]" // Glow effect
         )}
         style={{
@@ -332,26 +332,39 @@ export function QuestItem({
           {/* Title with adjusted vertical positioning */}
           <div className="ml-2 mr-auto flex-grow overflow-hidden">
             <div className="flex items-center">
-              <div className="relative overflow-hidden truncate">
+              <div className="relative overflow-hidden">
                 <div
                   className={cn(
-                    "font-medium text-sm sm:text-base leading-5 ", // Added padding-top for alignment
+                    "font-medium text-sm sm:text-base leading-5 sm:max-w-full max-w-40 whitespace-normal",
                     (localQuest.is_completed || showStrikethrough) &&
                       "text-muted-foreground"
                   )}
                 >
-                  {quest.title}
-
-                  {/* Strike-through line that matches text width exactly */}
-                  {showStrikethrough && (
-                    <motion.div
-                      className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.4, ease: "easeInOut" }}
-                      style={{ width: "100%" }}
-                    />
-                  )}
+                  {/* We'll wrap each word in a span to apply the strikethrough effect correctly */}
+                  {quest.title.split(" ").map((word, i) => (
+                    <React.Fragment key={i}>
+                      <span className="relative inline-block">
+                        {word}
+                        {showStrikethrough && (
+                          <motion.div
+                            className="absolute left-0 h-0.5 bg-primary/50 origin-left"
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{
+                              duration: 0.4,
+                              ease: "easeInOut",
+                              delay: i * 0.03,
+                            }}
+                            style={{
+                              width: "100%",
+                              top: "50%",
+                            }}
+                          />
+                        )}
+                      </span>
+                      {i < quest.title.split(" ").length - 1 && " "}
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
             </div>
@@ -422,11 +435,13 @@ export function QuestItem({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="flex pb-2 items-center text-xs text-muted-foreground mr-2 flex-shrink-0">
+            <div className="flex self-end place-self-end pb-2 items-center justify-end text-xs text-muted-foreground flex-shrink-0">
               <Clock className="h-3 w-3 mr-0.5 " />
-              {formatDistanceToNowStrict(new Date(quest.due_date), {
-                addSuffix: true,
-              })}
+              <p className="flex place-self-end self-end justify-end">
+                {formatDistanceToNowStrict(new Date(quest.due_date), {
+                  addSuffix: true,
+                })}
+              </p>
             </div>
           </div>
         </div>

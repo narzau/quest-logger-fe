@@ -22,10 +22,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -44,7 +42,8 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { SimpleDatePicker } from "@/components/ui/simple-date-picker";
-import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { MarkdownEditor } from "@/components/markdown/markdown-editor";
+import { cn } from "@/lib/utils";
 type CreateQuestFormValues = z.infer<typeof createQuestSchema>;
 
 interface CreateQuestDialogProps {
@@ -76,7 +75,6 @@ export function CreateQuestDialog({
   const [successAnimation, setSuccessAnimation] = useState(false);
   const [createGoogleCalendarEvent, setCreateGoogleCalendarEvent] =
     useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
 
   const form = useForm<CreateQuestFormValues>({
     resolver: zodResolver(createQuestSchema),
@@ -285,9 +283,13 @@ export function CreateQuestDialog({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel className="text-sm">Title *</FormLabel>
               <FormControl>
-                <Input placeholder="Enter quest title" {...field} />
+                <Input
+                  className="text-sm"
+                  placeholder="Enter quest title"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -298,44 +300,18 @@ export function CreateQuestDialog({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <div className="flex justify-between items-center">
-                <FormLabel>Description</FormLabel>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPreviewMode(!previewMode)}
-                >
-                  {previewMode ? "Edit" : "Preview"}
-                </Button>
-              </div>
               <FormControl>
-                {previewMode ? (
-                  <div className="min-h-[100px] p-3 border rounded-md bg-muted/20">
-                    {field.value && <MarkdownRenderer content={field.value} />}
-                  </div>
-                ) : (
-                  <Textarea
-                    placeholder="Supports markdown formatting"
-                    className="resize-none min-h-[100px] font-mono text-sm"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                )}
+                <MarkdownEditor
+                  value={field.value || ""}
+                  onChange={(value) => form.setValue("description", value)}
+                  placeholder="Describe your quest..."
+                />
               </FormControl>
-              <FormDescription>
-                You can use markdown formatting and create interactive subtasks:
-                <span className="text-xs bg-muted p-2 rounded mt-1 overflow-x-auto">
-                  {`## Subtasks
-- [ ] Incomplete subtask
-- [x] Completed subtask`}
-                </span>
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-3 grid-cols-2 sm:gap-4">
           <FormField
             control={form.control}
             name="quest_type"
@@ -397,7 +373,7 @@ export function CreateQuestDialog({
             )}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid  gap-3 grid-cols-2 sm:gap-4">
           <FormField
             control={form.control}
             name="priority"
@@ -426,15 +402,16 @@ export function CreateQuestDialog({
           </FormItem>
         </div>
         {renderGoogleCalendarOption()}
-        <DialogFooter>
+        <DialogFooter className="mt-2 sm:mt-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            className="h-9"
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isCreating}>
+          <Button type="submit" disabled={isCreating} className="h-9">
             {isCreating ? "Creating..." : "Create Quest"}
           </Button>
         </DialogFooter>
@@ -459,7 +436,7 @@ export function CreateQuestDialog({
           console.log("Recording cancelled");
         }}
       />
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="mt-6 flex flex-col gap-3">
         {/* First row - full width on desktop, single column on mobile */}
         <Button
           variant="outline"
@@ -474,7 +451,7 @@ export function CreateQuestDialog({
         <div className="flex flex-row h-9 items-center justify-between rounded-lg border p-1 gap-2 px-3">
           <div className="flex items-center text-sm font-medium whitespace-nowrap">
             <Mic className="h-4 w-4 mr-2" />
-            Auto Create
+            Create automatically on stop
           </div>
           <Switch
             checked={autoCreateQuestsFromVoice}
@@ -511,11 +488,15 @@ export function CreateQuestDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
+        <DialogContent
+          className={cn(
+            "max-h-[90vh] md:max-h-[85vh] overflow-y-auto p-4 sm:p-6",
+            mode == "voice" ? "sm:max-w-[350px]" : "sm:max-w-[500px]"
+          )}
+        >
+          <DialogHeader className="flex w-full items-center justify-center">
             <DialogTitle>Create a new quest</DialogTitle>
           </DialogHeader>
-
           {/* If we're showing success animation, show only that */}
           {successAnimation ? (
             <div className="flex flex-col items-center justify-center py-6">

@@ -235,11 +235,11 @@ export function SimpleDatePicker({
       <Button
         type="button"
         variant="outline"
-        className="w-full justify-start text-left font-normal"
+        className="w-full justify-start text-left sm:text-sm text-xs font-normal"
         onClick={handleButtonClick}
       >
-        <CalendarIcon className="mr-2 h-4 w-4" />
-        {value ? format(value, "PPP") : "Select date"}
+        <CalendarIcon className="h-4 w-4" />
+        {value ? format(value, "PP") : "Select date"}
       </Button>
 
       {/* Desktop dropdown */}

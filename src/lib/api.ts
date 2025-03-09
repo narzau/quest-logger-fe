@@ -176,6 +176,7 @@ export const questApi = {
   createQuestFromAudio: async (audioBlob: Blob): Promise<Quest> => {
     const formData = new FormData();
     formData.append("audio_file", audioBlob, "voice-recording.webm");
+    formData.append("language", "multi");
 
     const response = await axiosClient.post<Quest>(
       "/quests/voice-generation/auto",
@@ -190,6 +191,7 @@ export const questApi = {
   ): Promise<CreateQuestPayload> => {
     const formData = new FormData();
     formData.append("audio_file", audioBlob, "voice-recording.webm");
+    formData.append("language", "multi");
 
     const response = await axiosClient.post<CreateQuestPayload>(
       "/quests/voice-generation/suggest",
