@@ -167,24 +167,23 @@ export function QuestItem({
     setTimeout(() => {
       setShowCompletionBadge(true);
       setShowConfetti(true);
-    }, 200);
-
-    // Show XP badge after a slight delay
-    setTimeout(() => {
       setShowXpBadge(true);
-    }, 400);
+    }, 100);
+
+    // Delay quest completion to give time animation to play
+    setTimeout(() => {
+      completeQuest(quest.id);
+    }, 500);
 
     // Update backend after animations finish
     setTimeout(() => {
-      completeQuest(quest.id);
-
       // Hide all visual effects
       setShowCompletionBadge(false);
       setShowXpBadge(false);
       setShowConfetti(false);
       setShowGlow(false);
       setIsAnimating(false);
-    }, 2000);
+    }, 4000);
   };
 
   const handleComplete = () => {
