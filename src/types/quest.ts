@@ -19,7 +19,7 @@ export interface Quest {
   description?: string;
   is_completed: boolean;
   created_at: string; // ISO datetime
-  due_date?: string; // ISO datetime
+  due_date: string; // ISO datetime
   rarity: QuestRarity;
   quest_type: QuestType;
   priority: number; // 1-100

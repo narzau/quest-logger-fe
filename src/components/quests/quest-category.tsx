@@ -37,7 +37,7 @@ export function QuestCategory({
     >
       <div
         className={cn(
-          "flex items-center py-2 px-1 cursor-pointer border-b hover:bg-accent/10 transition-colors ",
+          "flex items-center py-2  cursor-pointer border-b hover:bg-accent/10 transition-colors ",
           hasQuests ? "border-accent/30" : "border-muted/30"
         )}
         onClick={() => setIsOpen(!isOpen)}
@@ -67,7 +67,7 @@ export function QuestCategory({
       </div>
 
       {isOpen && (
-        <div className="mt-2 pl-4 gap-2 flex flex-col">
+        <div className="mt-2 gap-2 flex flex-col">
           {hasQuests ? (
             quests.map((quest) => <QuestItem key={quest.id} quest={quest} />)
           ) : (

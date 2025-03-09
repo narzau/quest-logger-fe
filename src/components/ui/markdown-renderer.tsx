@@ -82,12 +82,7 @@ export function MarkdownRenderer({
                     }
                     disabled={readOnly}
                     id={`task-${lineIndex}`}
-                    className={cn(
-                      "h-4 w-4 rounded border-2",
-                      isChecked
-                        ? "border-primary"
-                        : "border-primary/60 bg-background"
-                    )}
+                    className={cn("h-4 w-4 rounded border-2")}
                   />
                 </motion.div>
               </div>

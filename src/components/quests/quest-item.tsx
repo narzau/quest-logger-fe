@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import { useQuests } from "@/hooks/useQuests";
-import { Quest, QuestRarity, QuestType } from "@/types/quest";
+import { Quest, QuestRarity } from "@/types/quest";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import {
-  CalendarDays,
   ChevronDown,
   Clock,
-  Crown,
   Info,
   MoreHorizontal,
-  Swords,
   Trash,
   Award,
   Calendar,
@@ -36,25 +33,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { QuestDetailsDialog } from "./quest-details-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useSettingsStore } from "@/store/settingsStore";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+
 // Animation configurations
 const containerVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, height: 0, marginBottom: 0 },
-};
-
-const checkVariants = {
-  unchecked: { scale: 1 },
-  checked: { scale: 1.2 },
 };
 
 const dropdownVariants = {
@@ -162,66 +149,42 @@ export function QuestItem({
     }
   };
 
-  // Get icon based on quest type
-  const getQuestTypeIcon = (type: QuestType) => {
-    switch (type) {
-      case QuestType.DAILY:
-        return CalendarDays;
-      case QuestType.REGULAR:
-        return Info;
-      case QuestType.EPIC:
-        return Crown;
-      case QuestType.BOSS:
-        return Swords;
-      default:
-        return Info;
-    }
-  };
-
-  const TypeIcon = getQuestTypeIcon(quest.quest_type);
   const rarityColor = getRarityColor(localQuest.rarity);
 
-  // Run the completion animation sequence
+  // Run the completion animation sequence - simplified to avoid position shifts
   const runCompletionAnimation = () => {
     if (localQuest.is_completed || isAnimating) return;
 
     setIsAnimating(true);
 
-    // 1. Start the glow effect
-    setShowGlow(true);
+    // Immediately update the local state for a smoother transition
+    setLocalQuest((prev) => ({ ...prev, is_completed: true }));
 
-    // 2. After a short delay, show the strikethrough
-    setTimeout(() => {
-      setShowStrikethrough(true);
-    }, 200);
+    // Show strikethrough immediately
+    setShowStrikethrough(true);
 
-    // 3. After another delay, show the completion badge
+    // Show completion effects
     setTimeout(() => {
       setShowCompletionBadge(true);
       setShowConfetti(true);
-    }, 500);
+    }, 200);
 
-    // 4. After another delay, show the XP badge
+    // Show XP badge after a slight delay
     setTimeout(() => {
       setShowXpBadge(true);
-    }, 800);
+    }, 400);
 
-    // 5. Update the local quest state to show completed UI (but don't update backend yet)
-    setTimeout(() => {
-      setLocalQuest((prev) => ({ ...prev, is_completed: true }));
-    }, 300);
-
-    // 6. After all animations finish, update the actual quest state
+    // Update backend after animations finish
     setTimeout(() => {
       completeQuest(quest.id);
 
-      // Hide the effects
+      // Hide all visual effects
       setShowCompletionBadge(false);
       setShowXpBadge(false);
       setShowConfetti(false);
       setShowGlow(false);
       setIsAnimating(false);
-    }, 2500); // Give plenty of time for the animations to finish
+    }, 2000);
   };
 
   const handleComplete = () => {
@@ -286,7 +249,7 @@ export function QuestItem({
         variants={containerVariants}
         transition={{ type: "spring", duration: 0.3 }}
         className={cn(
-          "group flex flex-col p-3 rounded-lg border cursor-pointer relative", // Removed overflow-hidden from here
+          "group flex flex-col px-2 rounded-lg border cursor-pointer relative",
           localQuest.is_completed
             ? "bg-muted/30 border-muted"
             : "bg-card border-border hover:border-primary/20",
@@ -354,146 +317,66 @@ export function QuestItem({
         {/* Confetti effect */}
         {showConfetti && <Confetti />}
 
-        <div className="flex flex-col sm:flex-row">
-          {/* Checkbox and Title Section */}
-          <div className="flex items-start flex-1 min-w-0">
-            <motion.div
-              animate={localQuest.is_completed ? "checked" : "unchecked"}
-              variants={checkVariants}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 10,
-              }}
-              className="flex mt-1"
-            >
-              <Checkbox
-                checked={localQuest.is_completed}
-                onCheckedChange={handleComplete}
-                className="h-5 w-5 border-2"
-                disabled={localQuest.is_completed || isAnimating}
-              />
-            </motion.div>
+        {/* Main content row - single row layout */}
+        <div className="flex items-center w-full">
+          {/* Checkbox aligned with the text */}
+          <div className="flex-shrink-0 flex items-center">
+            <Checkbox
+              checked={localQuest.is_completed}
+              onCheckedChange={handleComplete}
+              className="h-5 w-5 border-2"
+              disabled={localQuest.is_completed || isAnimating}
+            />
+          </div>
 
-            <div className="ml-3 flex-1 min-w-0">
-              <motion.div className="overflow-hidden">
-                <div className="relative inline-block">
-                  <motion.div
-                    layout="position"
-                    className={cn(
-                      "font-medium break-words pr-2",
-                      (localQuest.is_completed || showStrikethrough) &&
-                        "text-muted-foreground"
-                    )}
-                    initial={{ opacity: 1 }}
-                    animate={{
-                      opacity: localQuest.is_completed ? 0.6 : 1,
-                      x: localQuest.is_completed ? 4 : 0,
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {quest.title}
+          {/* Title with adjusted vertical positioning */}
+          <div className="ml-2 mr-auto flex-grow overflow-hidden">
+            <div className="flex items-center">
+              <div className="relative overflow-hidden truncate">
+                <div
+                  className={cn(
+                    "font-medium text-sm sm:text-base leading-5 ", // Added padding-top for alignment
+                    (localQuest.is_completed || showStrikethrough) &&
+                      "text-muted-foreground"
+                  )}
+                >
+                  {quest.title}
 
-                    {/* Strike-through line that matches text width exactly */}
-                    {showStrikethrough && (
-                      <motion.div
-                        className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
-                        style={{ width: "90%" }}
-                      />
-                    )}
-                  </motion.div>
+                  {/* Strike-through line that matches text width exactly */}
+                  {showStrikethrough && (
+                    <motion.div
+                      className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                      style={{ width: "100%" }}
+                    />
+                  )}
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons and Metadata - Stack on mobile, inline on desktop */}
-          <div className="flex sm:flex-row mt-2 sm:mt-0 ">
-            {/* Metadata section */}
-            <div className="flex flex-wrap items-center gap-2 sm:mb-0 sm:mr-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TypeIcon className={cn("h-4 w-4", rarityColor)} />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {quest.quest_type} quest - {quest.rarity} rarity
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {quest.due_date && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        className="flex items-center text-xs text-muted-foreground"
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formatDistanceToNow(new Date(quest.due_date), {
-                          addSuffix: true,
-                        })}
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Due: {new Date(quest.due_date).toLocaleDateString()}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* Google Calendar Link */}
-              {quest.google_calendar_event_id && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
-                        onClick={openGoogleCalendarEvent}
-                      >
-                        <Calendar className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>View in Google Calendar</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-
+          <div className="flex flex-col">
             {/* Action buttons */}
-            <div className="flex items-center ml-auto gap-1">
+            <div className="flex items-center gap-x-1 flex-shrink-0 self-end place-self-end">
               {!expanded && (
                 <motion.div
                   animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground flex items-center justify-center"
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-5 w-5" />
                 </motion.div>
               )}
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDetailsDialogOpen(true)}
-                className="h-8 w-8"
-              >
-                <Info className="h-4 w-4" />
-              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
-                    asChild
+                    className="h-7 w-7"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <motion.div whileTap={{ scale: 0.95 }}>
                       <MoreHorizontal className="h-4 w-4" />
@@ -509,13 +392,29 @@ export function QuestItem({
                     exit="closed"
                     transition={{ type: "spring", stiffness: 300 }}
                   >
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetailsDialogOpen(true);
+                      }}
+                    >
+                      <Info className="mr-2 h-4 w-4" />
+                      View Details
+                    </DropdownMenuItem>
+
                     {quest.google_calendar_event_id && (
                       <DropdownMenuItem onClick={openGoogleCalendarEvent}>
                         <Calendar className="mr-2 h-4 w-4" />
                         View in Calendar
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
                       <Trash className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
@@ -523,9 +422,16 @@ export function QuestItem({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <div className="flex pb-2 items-center text-xs text-muted-foreground mr-2 flex-shrink-0">
+              <Clock className="h-3 w-3 mr-0.5 " />
+              {formatDistanceToNowStrict(new Date(quest.due_date), {
+                addSuffix: true,
+              })}
+            </div>
           </div>
         </div>
 
+        {/* Expandable content */}
         <AnimatePresence>
           {(isOpen || expanded) && (
             <motion.div
@@ -540,9 +446,9 @@ export function QuestItem({
                 height: 0,
                 transition: { duration: 0.2 },
               }}
-              className="overflow-hidden" // Added overflow-hidden only to the expandable content
+              className="overflow-hidden mt-2"
             >
-              <div className=" border-t border-border/40">
+              <div className="border-t border-border/40 pt-2">
                 <motion.div initial={{ y: -10 }} animate={{ y: 0 }}>
                   <MarkdownRenderer
                     content={quest.description || ""}
@@ -552,33 +458,33 @@ export function QuestItem({
                 </motion.div>
 
                 <motion.div
-                  className="mt-2 flex flex-wrap gap-4"
+                  className="mt-2 pb-3 flex flex-wrap gap-2 text-xs sm:text-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <div className="flex items-center text-sm gap-2">
+                  <div className="flex items-center gap-1">
                     <span className="font-semibold">Priority:</span>
                     <AnimatedProgress
                       value={quest.priority}
-                      className="w-28 mt-1"
+                      className="w-20 sm:w-24 mt-1"
                     />
                   </div>
-                  <div className="flex items-center text-sm">
-                    <span className="font-semibold mr-2">Reward:</span>
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-1">Reward:</span>
                     <span className="text-muted-foreground">
                       {quest.exp_reward} XP
                     </span>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <span className="font-semibold mr-2 ">Rarity:</span>
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-1">Rarity:</span>
                     <span className={cn(rarityColor)}>{quest.rarity}</span>
                   </div>
 
                   {/* Google Calendar Link in expanded view */}
                   {quest.google_calendar_event_id && (
-                    <div className="flex items-center text-sm">
-                      <span className="font-semibold mr-2">Calendar:</span>
+                    <div className="flex items-center">
+                      <span className="font-semibold mr-1">Calendar:</span>
                       <Button
                         variant="link"
                         className="h-auto p-0 text-blue-500"
