@@ -40,7 +40,7 @@ export const createQuestSchema = z.object({
     .max(100, "Title must be at most 100 characters"),
   description: z
     .string()
-    .max(500, "Description must be at most 500 characters")
+    .max(99999, "Description must be at most 99999 characters")
     .optional(),
   due_date: z.string().optional(),
   rarity: z.nativeEnum(QuestRarity, {
@@ -62,7 +62,7 @@ export const updateQuestSchema = z.object({
     .optional(),
   description: z
     .string()
-    .max(500, "Description must be at most 500 characters")
+    .max(99999, "Description must be at most 99999 characters")
     .optional()
     .nullable(),
   is_completed: z.boolean().optional(),

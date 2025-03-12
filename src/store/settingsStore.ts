@@ -3,16 +3,23 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { defaultPalettes, ColorPalette } from "@/lib/color-config";
 
+interface DialogSize {
+  width: number;
+  height: number;
+}
+
 interface SettingsState {
   animationsEnabled: boolean;
   notificationsEnabled: boolean;
   colorPaletteName: keyof typeof defaultPalettes;
   colorPalette: ColorPalette;
   autoCreateQuestsFromVoice: boolean;
+  dialogSize: DialogSize;
   setAnimationsEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setColorPalette: (paletteName: keyof typeof defaultPalettes) => void;
-  setAutoCreateQuestsFromVoice: (enabled: boolean) => void; // New setter
+  setAutoCreateQuestsFromVoice: (enabled: boolean) => void;
+  setDialogSize: (size: DialogSize) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -22,7 +29,11 @@ export const useSettingsStore = create<SettingsState>()(
       notificationsEnabled: true,
       colorPaletteName: "arctic",
       colorPalette: defaultPalettes.arctic,
-      autoCreateQuestsFromVoice: false, // Default to false (review mode)
+      autoCreateQuestsFromVoice: false,
+      dialogSize: {
+        width: 500,
+        height: 600,
+      },
       setAnimationsEnabled: (enabled) => set({ animationsEnabled: enabled }),
       setNotificationsEnabled: (enabled) =>
         set({ notificationsEnabled: enabled }),
@@ -34,6 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setAutoCreateQuestsFromVoice: (enabled) =>
         set({ autoCreateQuestsFromVoice: enabled }),
+      setDialogSize: (size) => set({ dialogSize: size }),
     }),
     {
       name: "adhd-quest-settings",
@@ -43,6 +55,7 @@ export const useSettingsStore = create<SettingsState>()(
         colorPaletteName: state.colorPaletteName,
         colorPalette: state.colorPalette,
         autoCreateQuestsFromVoice: state.autoCreateQuestsFromVoice,
+        dialogSize: state.dialogSize,
       }),
     }
   )

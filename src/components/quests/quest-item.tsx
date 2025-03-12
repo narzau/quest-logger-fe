@@ -258,15 +258,6 @@ export function QuestItem({
           transform: showGlow ? "scale(1.02)" : "scale(1)",
           transition: "transform 0.3s, box-shadow 0.3s",
         }}
-        onClick={(e) => {
-          if (
-            !(e.target instanceof HTMLButtonElement) &&
-            !expanded &&
-            !isAnimating
-          ) {
-            setIsOpen(!isOpen);
-          }
-        }}
       >
         {/* Completion Effects */}
         {showCompletionBadge && (
@@ -317,7 +308,18 @@ export function QuestItem({
         {showConfetti && <Confetti />}
 
         {/* Main content row - single row layout */}
-        <div className="flex items-center w-full">
+        <div
+          className="flex items-center w-full"
+          onClick={(e) => {
+            if (
+              !(e.target instanceof HTMLButtonElement) &&
+              !expanded &&
+              !isAnimating
+            ) {
+              setIsOpen(!isOpen);
+            }
+          }}
+        >
           {/* Checkbox aligned with the text */}
           <div className="flex-shrink-0 flex items-center">
             <Checkbox
