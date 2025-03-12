@@ -35,14 +35,23 @@ export function QuestPageDesktopContent() {
   const handleQuestSelect = (quest: Quest) => {
     setSelectedQuest(quest);
     // Update URL with the selected quest ID for bookmarking/sharing
-    router.push(`/quests-2?id=${quest.id}`);
+    router.push(`/quests?id=${quest.id}`);
+  };
+
+  // Handle quest reordering (optional - you can implement persistence if needed)
+  const handleQuestsReorder = (newOrder: Quest[]) => {
+    console.log(
+      "Quests reordered:",
+      newOrder.map((q) => q.id)
+    );
+    // Here you would update your backend if you want to persist the order
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quest Log</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Quest Manager</h1>
           <p className="text-muted-foreground mt-1">
             {quests.filter((q) => !q.is_completed).length} active quests
           </p>
@@ -53,10 +62,9 @@ export function QuestPageDesktopContent() {
           New Quest
         </Button>
       </div>
-
-      {/* Split View Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[calc(100vh-13rem)]">
-        {/* Sidebar */}
+      {/* Split View Layout with adjusted widths */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 h-[calc(100vh-13rem)]">
+        {/* Sidebar - significantly larger now (1/3 of screen) */}
         <motion.div
           className="md:col-span-1 lg:col-span-1 overflow-hidden"
           initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
@@ -67,13 +75,14 @@ export function QuestPageDesktopContent() {
             quests={quests}
             selectedQuestId={selectedQuest?.id}
             onQuestSelect={handleQuestSelect}
+            onQuestsReorder={handleQuestsReorder}
             isLoading={isLoading}
           />
         </motion.div>
 
-        {/* Content */}
+        {/* Content - now only 2/3 of screen width */}
         <motion.div
-          className="md:col-span-2 lg:col-span-3 overflow-hidden"
+          className="md:col-span-2 lg:col-span-2 overflow-hidden"
           initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
           animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
           transition={{ duration: 0.3, delay: 0.1 }}

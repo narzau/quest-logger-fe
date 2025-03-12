@@ -11,7 +11,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Filter,
@@ -21,15 +20,31 @@ import {
   Crown,
   Swords,
   Bookmark,
+  Tags,
+  ArrowUpDown,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SortableQuestItem2 } from "./sortable-quest-item";
+import {
+  DndContext,
+  closestCenter,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface QuestSidebarProps {
   quests: Quest[];
   selectedQuestId?: number | null;
   onQuestSelect: (quest: Quest) => void;
+  onQuestsReorder?: (newOrder: Quest[]) => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +52,7 @@ export function QuestSidebar({
   quests,
   selectedQuestId,
   onQuestSelect,
+  onQuestsReorder,
   isLoading = false,
 }: QuestSidebarProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +60,20 @@ export function QuestSidebar({
   const [rarityFilter, setRarityFilter] = useState<string>("all");
   const [completedFilter, setCompletedFilter] =
     useState<string>("not-completed");
+  const [trackingFilter, setTrackingFilter] = useState<string>("all");
+  const [labelFilter, setLabelFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("type");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Set up DnD sensors
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 10 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    })
+  );
 
   // Filter quests based on selected filters
   const filteredQuests = quests.filter((quest) => {
@@ -61,6 +90,17 @@ export function QuestSidebar({
       (completedFilter === "completed" && quest.is_completed) ||
       (completedFilter === "not-completed" && !quest.is_completed);
 
+    // Tracking status filter
+    const matchesTracking =
+      trackingFilter === "all" ||
+      (trackingFilter === "tracked" && quest.tracked) ||
+      (trackingFilter === "not-tracked" && !quest.tracked);
+
+    // Label filter
+    const matchesLabel =
+      labelFilter === "all" ||
+      (quest.labels && quest.labels.includes(labelFilter));
+
     // Search term filter
     const matchesSearch =
       !searchTerm ||
@@ -68,33 +108,93 @@ export function QuestSidebar({
       (quest.description &&
         quest.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    return matchesType && matchesRarity && matchesCompletion && matchesSearch;
+    return (
+      matchesType &&
+      matchesRarity &&
+      matchesCompletion &&
+      matchesTracking &&
+      matchesLabel &&
+      matchesSearch
+    );
   });
 
-  // Group quests by type for organization
-  const dailyQuests = filteredQuests.filter(
-    (q) => q.quest_type === QuestType.DAILY
-  );
-  const bossQuests = filteredQuests.filter(
-    (q) => q.quest_type === QuestType.BOSS
-  );
-  const epicQuests = filteredQuests.filter(
-    (q) => q.quest_type === QuestType.EPIC
-  );
-  const regularQuests = filteredQuests.filter(
-    (q) => q.quest_type === QuestType.REGULAR
-  );
+  // Sort and group quests based on selected sort option
+  const sortedQuests = [...filteredQuests].sort((a, b) => {
+    switch (sortBy) {
+      case "type":
+        // Sort by type, then by title
+        if (a.quest_type === b.quest_type) {
+          return a.title.localeCompare(b.title);
+        }
+        // Custom type order: daily, boss, epic, regular
+        const typeOrder = {
+          [QuestType.DAILY]: 0,
+          [QuestType.BOSS]: 1,
+          [QuestType.EPIC]: 2,
+          [QuestType.REGULAR]: 3,
+        };
+        return (
+          typeOrder[a.quest_type as QuestType] -
+          typeOrder[b.quest_type as QuestType]
+        );
 
-  // Combined array for ordering
-  const orderedQuests = [
-    ...dailyQuests,
-    ...bossQuests,
-    ...epicQuests,
-    ...regularQuests,
-  ];
+      case "rarity":
+        // Sort by rarity (legendary to common), then by title
+        if (a.rarity === b.rarity) {
+          return a.title.localeCompare(b.title);
+        }
+        // Custom rarity order: legendary, epic, rare, uncommon, common
+        const rarityOrder = {
+          [QuestRarity.LEGENDARY]: 0,
+          [QuestRarity.EPIC]: 1,
+          [QuestRarity.RARE]: 2,
+          [QuestRarity.UNCOMMON]: 3,
+          [QuestRarity.COMMON]: 4,
+        };
+        return (
+          rarityOrder[a.rarity as QuestRarity] -
+          rarityOrder[b.rarity as QuestRarity]
+        );
+
+      case "priority":
+        // Sort by priority (high to low), then by title
+        if (a.priority === b.priority) {
+          return a.title.localeCompare(b.title);
+        }
+        return b.priority - a.priority;
+
+      case "due_date":
+        // Sort by due date (soonest first)
+        if (!a.due_date && !b.due_date) return a.title.localeCompare(b.title);
+        if (!a.due_date) return 1;
+        if (!b.due_date) return -1;
+        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+
+      case "tracking":
+        // Sort by tracked status (tracked first)
+        if ((a.tracked && b.tracked) || (!a.tracked && !b.tracked)) {
+          return a.title.localeCompare(b.title);
+        }
+        return a.tracked ? -1 : 1;
+
+      case "labels":
+        // Sort by label count, then alphabetically
+        const aLabels = a.labels || [];
+        const bLabels = b.labels || [];
+        if (aLabels.length === bLabels.length) {
+          return a.title.localeCompare(b.title);
+        }
+        return bLabels.length - aLabels.length;
+
+      case "alphabetical":
+      default:
+        // Sort alphabetically by title
+        return a.title.localeCompare(b.title);
+    }
+  });
 
   // Get quest type icon
-  const getQuestTypeIcon = (type: QuestType) => {
+  const getQuestTypeIcon = (type: string) => {
     switch (type) {
       case QuestType.DAILY:
         return <CalendarDays className="h-4 w-4 text-blue-500" />;
@@ -108,8 +208,83 @@ export function QuestSidebar({
     }
   };
 
+  // Get rarity color class
+  const getRarityColorClass = (rarity: string): string => {
+    switch (rarity) {
+      case QuestRarity.COMMON:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      case QuestRarity.UNCOMMON:
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case QuestRarity.RARE:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case QuestRarity.EPIC:
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+      case QuestRarity.LEGENDARY:
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  };
+
+  // Helper function to get available labels from quests
+  const getAvailableLabels = (quests: Quest[]): string[] => {
+    const labelsSet = new Set<string>();
+
+    quests.forEach((quest) => {
+      if (quest.labels && Array.isArray(quest.labels)) {
+        quest.labels.forEach((label) => labelsSet.add(label));
+      }
+    });
+
+    return Array.from(labelsSet).sort();
+  };
+
+  // Helper function to get sort label
+  const getSortLabel = (sortBy: string): string => {
+    switch (sortBy) {
+      case "type":
+        return "Type";
+      case "rarity":
+        return "Rarity";
+      case "priority":
+        return "Priority";
+      case "due_date":
+        return "Due Date";
+      case "tracking":
+        return "Tracking";
+      case "labels":
+        return "Labels";
+      case "alphabetical":
+        return "A-Z";
+      default:
+        return "Type";
+    }
+  };
+
+  // Handle drag end for reordering
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const activeIndex = sortedQuests.findIndex((q) => q.id === active.id);
+      const overIndex = sortedQuests.findIndex((q) => q.id === over.id);
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        // Create a new array with the item moved
+        const newOrder = [...sortedQuests];
+        const [movedItem] = newOrder.splice(activeIndex, 1);
+        newOrder.splice(overIndex, 0, movedItem);
+
+        // Call the callback if provided
+        if (onQuestsReorder) {
+          onQuestsReorder(newOrder);
+        }
+      }
+    }
+  };
+
   return (
-    <Card className="h-full border-muted flex flex-col bg-muted/30">
+    <Card className="h-full border-muted flex flex-col">
       <CardHeader className="px-3 py-3 space-y-2">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -132,12 +307,18 @@ export function QuestSidebar({
             {showFilters ? "Hide Filters" : "Show Filters"}
             {(typeFilter !== "all" ||
               rarityFilter !== "all" ||
-              completedFilter !== "all") && (
+              completedFilter !== "all" ||
+              trackingFilter !== "all" ||
+              labelFilter !== "all") && (
               <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                 {
-                  [typeFilter, rarityFilter, completedFilter].filter(
-                    (f) => f !== "all"
-                  ).length
+                  [
+                    typeFilter,
+                    rarityFilter,
+                    completedFilter,
+                    trackingFilter,
+                    labelFilter,
+                  ].filter((f) => f !== "all").length
                 }
               </span>
             )}
@@ -151,6 +332,24 @@ export function QuestSidebar({
 
         {showFilters && (
           <div className="space-y-2 animate-in slide-in-from-top-5 duration-150">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-8 text-xs">
+                <div className="flex items-center">
+                  <ArrowUpDown className="mr-2 h-3.5 w-3.5" />
+                  <span>Sort: {getSortLabel(sortBy)}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="type">By Type</SelectItem>
+                <SelectItem value="rarity">By Rarity</SelectItem>
+                <SelectItem value="priority">By Priority</SelectItem>
+                <SelectItem value="due_date">By Due Date</SelectItem>
+                <SelectItem value="tracking">By Tracking Status</SelectItem>
+                <SelectItem value="labels">By Labels</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="h-8 text-xs">
                 <div className="flex items-center">
@@ -217,6 +416,49 @@ export function QuestSidebar({
                 <SelectItem value="not-completed">Not Completed</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select value={trackingFilter} onValueChange={setTrackingFilter}>
+              <SelectTrigger className="h-8 text-xs">
+                <div className="flex items-center">
+                  <Bookmark className="mr-2 h-3.5 w-3.5" />
+                  <span>
+                    {trackingFilter === "all"
+                      ? "All Tracking"
+                      : trackingFilter === "tracked"
+                      ? "Tracked Only"
+                      : "Untracked Only"}
+                  </span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tracking</SelectItem>
+                <SelectItem value="tracked">Tracked Only</SelectItem>
+                <SelectItem value="not-tracked">Untracked Only</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {getAvailableLabels(quests).length > 0 && (
+              <Select value={labelFilter} onValueChange={setLabelFilter}>
+                <SelectTrigger className="h-8 text-xs">
+                  <div className="flex items-center">
+                    <Tags className="mr-2 h-3.5 w-3.5" />
+                    <span>
+                      {labelFilter === "all"
+                        ? "All Labels"
+                        : `Label: ${labelFilter}`}
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Labels</SelectItem>
+                  {getAvailableLabels(quests).map((label) => (
+                    <SelectItem key={label} value={label}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         )}
       </CardHeader>
@@ -243,7 +485,9 @@ export function QuestSidebar({
               {(searchTerm ||
                 typeFilter !== "all" ||
                 rarityFilter !== "all" ||
-                completedFilter !== "all") && (
+                completedFilter !== "all" ||
+                trackingFilter !== "all" ||
+                labelFilter !== "all") && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -253,6 +497,8 @@ export function QuestSidebar({
                     setTypeFilter("all");
                     setRarityFilter("all");
                     setCompletedFilter("not-completed");
+                    setTrackingFilter("all");
+                    setLabelFilter("all");
                   }}
                 >
                   Clear Filters
@@ -260,100 +506,33 @@ export function QuestSidebar({
               )}
             </div>
           ) : (
-            // Quest list
-            <div className="space-y-1.5">
-              {orderedQuests.map((quest) => (
-                <div
-                  key={quest.id}
-                  className={cn(
-                    "flex items-start p-2 rounded-md border cursor-pointer transition-colors gap-2",
-                    selectedQuestId === quest.id
-                      ? "bg-primary/10 border-primary/30"
-                      : "hover:bg-accent/50 border-transparent",
-                    quest.is_completed && "opacity-70 bg-muted/90"
-                  )}
-                  onClick={() => onQuestSelect(quest)}
-                >
-                  <div className="mt-0.5">
-                    {getQuestTypeIcon(quest.quest_type)}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-1.5">
-                      <h3
-                        className={cn(
-                          "text-sm font-medium leading-snug truncate",
-                          quest.is_completed &&
-                            "line-through text-muted-foreground"
-                        )}
-                      >
-                        {quest.title}
-                      </h3>
-
-                      {quest.tracked && (
-                        <Bookmark className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-[10px] px-1 py-0 h-4 bg-muted text-foreground"
-                        )}
-                      >
-                        {quest.rarity}
-                      </Badge>
-
-                      {quest.due_date && (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] px-1 py-0 h-4 flex items-center gap-0.5 bg-muted text-foreground"
-                        >
-                          <Clock className="h-2.5 w-2.5" />
-                          {new Date(quest.due_date).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </Badge>
-                      )}
-                      {quest.is_completed && (
-                        <Badge className="bg-muted text-green-700 dark:text-green-400 text-[10px] px-1 py-0 h-4 ">
-                          Done
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+            // Quest list with drag and drop
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={sortedQuests.map((quest) => quest.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-1.5">
+                  {sortedQuests.map((quest) => (
+                    <SortableQuestItem2
+                      key={quest.id}
+                      quest={quest}
+                      isSelected={selectedQuestId === quest.id}
+                      onSelect={() => onQuestSelect(quest)}
+                      getTypeIcon={getQuestTypeIcon}
+                      getRarityColorClass={getRarityColorClass}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </ScrollArea>
       </CardContent>
     </Card>
-  );
-}
-
-// Clock icon component for due dates
-function Clock(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
   );
 }

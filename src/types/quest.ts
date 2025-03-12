@@ -29,6 +29,7 @@ export interface Quest {
   tracked: boolean;
   google_calendar_event_id: string;
   completed_at: string;
+  labels?: string[]; // Array of labels for organizational purposes
 }
 
 export interface CreateQuestPayload {
