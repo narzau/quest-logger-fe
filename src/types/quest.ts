@@ -28,6 +28,7 @@ export interface Quest {
   parent_quest_id?: number; // For quest chains/dependencies
   tracked: boolean;
   google_calendar_event_id: string;
+  completed_at: string;
 }
 
 export interface CreateQuestPayload {
@@ -46,6 +47,7 @@ export interface UpdateQuestPayload {
   is_completed?: boolean;
   due_date?: string;
   rarity?: QuestRarity;
+  tracked?: boolean;
   quest_type?: QuestType;
   priority?: number;
   parent_quest_id?: number;
