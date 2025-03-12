@@ -266,18 +266,21 @@ export function QuestSidebar({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const activeIndex = sortedQuests.findIndex((q) => q.id === active.id);
-      const overIndex = sortedQuests.findIndex((q) => q.id === over.id);
+      // Create a new array reference for React to detect the change
+      const newQuests = [...quests];
 
-      if (activeIndex !== -1 && overIndex !== -1) {
-        // Create a new array with the item moved
-        const newOrder = [...sortedQuests];
-        const [movedItem] = newOrder.splice(activeIndex, 1);
-        newOrder.splice(overIndex, 0, movedItem);
+      // Find the indices of the dragged quest and drop target
+      const oldIndex = newQuests.findIndex((q) => q.id === active.id);
+      const newIndex = newQuests.findIndex((q) => q.id === over.id);
 
-        // Call the callback if provided
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Remove from old position and insert at new position
+        const [movedQuest] = newQuests.splice(oldIndex, 1);
+        newQuests.splice(newIndex, 0, movedQuest);
+
+        // Actually update the parent state - this is the critical line
         if (onQuestsReorder) {
-          onQuestsReorder(newOrder);
+          onQuestsReorder(newQuests);
         }
       }
     }

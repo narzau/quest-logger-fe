@@ -549,7 +549,7 @@ export function QuestContent({ quest, onQuestUpdated }: QuestContentProps) {
                     <Textarea
                       value={editedDescription}
                       onChange={(e) => setEditedDescription(e.target.value)}
-                      className="min-h-[200px] font-mono text-sm"
+                      className="min-h-[400px] font-mono text-sm"
                       placeholder="Enter quest description (supports Markdown with task lists - use '- [ ]' for tasks)"
                     />
                   ) : quest.description ? (
@@ -656,8 +656,8 @@ export function QuestContent({ quest, onQuestUpdated }: QuestContentProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete the quest &ldquo;{quest.title}&ldquo;. This
-                  action cannot be undone.
+                  This will permanently delete the quest &ldquo;{quest.title}
+                  &ldquo;. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
