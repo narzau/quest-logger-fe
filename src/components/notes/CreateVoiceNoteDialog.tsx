@@ -182,7 +182,7 @@ export default function CreateVoiceNoteDialog({
                       position="popper"
                     >
                       {folders.length === 0 ? (
-                        <SelectItem value="" disabled>
+                        <SelectItem value="no_folders" disabled>
                           {isFoldersLoading ? "Loading folders..." : "No folders found"}
                         </SelectItem>
                       ) : (
@@ -257,6 +257,12 @@ export default function CreateVoiceNoteDialog({
               Cancel
             </Button>
            
+            <Button 
+              type="submit"
+              disabled={isProcessing || !audioBlob}
+            >
+              Create Voice Note
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
