@@ -54,6 +54,7 @@ export function MarkdownRenderer({
         "[&_li>*]:!my-0 [&_li>*]:!leading-tight",
         // Apply more specific spacing overrides
         "[&_ul>li]:!mt-0.5 [&_ol>li]:!mt-0.5",
+        " px-4 py-2",
         className
       )}
     >

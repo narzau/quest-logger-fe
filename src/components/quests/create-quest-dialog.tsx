@@ -75,6 +75,7 @@ export function CreateQuestDialog({
   const [mode, setMode] = useState<"voice" | "manual">("voice");
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
   const [successAnimation, setSuccessAnimation] = useState(false);
+  const [errorAnimation, setErrorAnimation] = useState(false);
   const [createGoogleCalendarEvent, setCreateGoogleCalendarEvent] =
     useState(false);
 
@@ -105,6 +106,7 @@ export function CreateQuestDialog({
       setMode("voice");
       setIsProcessingAudio(false);
       setSuccessAnimation(false);
+      setErrorAnimation(false);
       setCreateGoogleCalendarEvent(false);
       form.reset({
         title: "",
@@ -170,18 +172,21 @@ export function CreateQuestDialog({
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  const handleAudioCaptured = async (audioBlob: Blob) => {
-    if (!audioBlob?.size) {
+
+
+  const handleAudioSubmit = async (blob: Blob) => {
+    if (!blob?.size) {
       toast.error("No audio recorded");
       return;
     }
 
     try {
       setIsProcessingAudio(true);
+      setErrorAnimation(false);
 
       if (autoCreateQuestsFromVoice) {
         // Auto-create using hook mutation
-        generateQuestFromAudio(audioBlob, {
+        generateQuestFromAudio(blob, {
           onSuccess: (createdQuest) => {
             setSuccessAnimation(true);
             setTimeout(() => onOpenChange(false), 5000);
@@ -214,11 +219,14 @@ export function CreateQuestDialog({
               }
             );
           },
+          onError: () => {
+            setErrorAnimation(true);
+          },
           onSettled: () => setIsProcessingAudio(false),
         });
       } else {
         // Use suggestion mutation from hook
-        suggestQuestFromAudio(audioBlob, {
+        suggestQuestFromAudio(blob, {
           onSuccess: (suggestedQuest) => {
             populateForm(suggestedQuest);
             setMode("manual");
@@ -227,12 +235,21 @@ export function CreateQuestDialog({
               description: "Review and make changes before creating.",
             });
           },
-          onError: () => handleAudioError(),
+          onError: () => {
+            setErrorAnimation(true);
+            toast.error("Error processing audio", {
+              description: "Please try again or use the form.",
+            });
+          },
           onSettled: () => setIsProcessingAudio(false),
         });
       }
-    } catch {
-      handleAudioError();
+    } catch  {
+      setErrorAnimation(true);
+      setIsProcessingAudio(false);
+      toast.error("Error processing audio", {
+        description: "Please try again or use the form.",
+      });
     }
   };
 
@@ -246,13 +263,6 @@ export function CreateQuestDialog({
     if (suggestedQuest.priority)
       form.setValue("priority", suggestedQuest.priority);
     if (suggestedQuest.due_date) setDate(new Date(suggestedQuest.due_date));
-  };
-
-  const handleAudioError = (error?: Error) => {
-    setIsProcessingAudio(false);
-    toast.error("Error processing audio", {
-      description: error?.message || "Please try again or use the form.",
-    });
   };
 
   const onSubmit = (values: CreateQuestFormValues) => {
@@ -494,8 +504,12 @@ export function CreateQuestDialog({
         </p>
       </div>
       <AudioRecorder
-        onAudioCaptured={handleAudioCaptured}
-        onProcessingStateChange={setIsProcessingAudio}
+        onSubmit={handleAudioSubmit}
+        isProcessing={isProcessingAudio}
+        isSuccess={successAnimation}
+        isError={errorAnimation}
+        submitButtonLabel={autoCreateQuestsFromVoice ? "Create Quest" : "Generate Draft"}
+        autoSubmit={false}
         onCancel={() => {
           // If user cancels recording, don't do anything special
           console.log("Recording cancelled");

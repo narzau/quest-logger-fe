@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import { ArrowRight, Mail, Send, Phone } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 // Reuse the GridBackground component from landing page
 const GridBackground = () => (
@@ -41,15 +47,64 @@ const fadeIn = {
 };
 
 export default function ContactPage() {
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated } = useAuthStore();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name || !email || !subject || !message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // Here you would typically send the data to your API
+      // For now, we'll just simulate a successful submission
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Message sent",
+        description: "We've received your message and will get back to you soon.",
+        variant: "success",
+      });
+      
+      // Clear form
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0f172a] text-slate-200">
@@ -270,59 +325,71 @@ export default function ContactPage() {
 
                 {/* Contact Form */}
                 <div className="bg-[#131c33] p-6 rounded-lg border border-blue-900/30">
-                  <form className="space-y-6">
-                    <div>
-                      <label className="block text-slate-300 mb-2">Name</label>
-                      <input
-                        type="text"
-                        className="w-full bg-[#0f172a] border border-blue-900/30 rounded-md px-4 py-3 text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        required
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input 
+                          id="name" 
+                          value={name} 
+                          onChange={(e) => setName(e.target.value)} 
+                          placeholder="Your name"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={email} 
+                          onChange={(e) => setEmail(e.target.value)} 
+                          placeholder="Your email address"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Subject</Label>
+                      <Input 
+                        id="subject" 
+                        value={subject} 
+                        onChange={(e) => setSubject(e.target.value)} 
+                        placeholder="What is your inquiry about?"
+                        disabled={isSubmitting}
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-slate-300 mb-2">Email</label>
-                      <input
-                        type="email"
-                        className="w-full bg-[#0f172a] border border-blue-900/30 rounded-md px-4 py-3 text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        required
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="message">Message</Label>
+                      <Textarea 
+                        id="message" 
+                        value={message} 
+                        onChange={(e) => setMessage(e.target.value)} 
+                        placeholder="Please describe your issue or question in detail"
+                        rows={6}
+                        disabled={isSubmitting}
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-slate-300 mb-2">
-                        Subject
-                      </label>
-                      <select
-                        className="w-full bg-[#0f172a] border border-blue-900/30 rounded-md px-4 py-3 text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        required
-                      >
-                        <option value="">Select a subject</option>
-                        <option>Support</option>
-                        <option>Partnerships</option>
-                        <option>Legal Inquiry</option>
-                        <option>Feature Request</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-slate-300 mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        rows={4}
-                        className="w-full bg-[#0f172a] border border-blue-900/30 rounded-md px-4 py-3 text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full px-6 py-3 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium flex items-center justify-center"
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
                     >
-                      Send Message
-                      <Send className="ml-2 h-5 w-5" />
-                    </button>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" />
+                          Send Message
+                        </>
+                      )}
+                    </Button>
                   </form>
                 </div>
               </motion.div>

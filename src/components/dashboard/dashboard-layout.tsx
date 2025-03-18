@@ -4,7 +4,6 @@ import { ReactNode, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/dashboard/sidebar";
-import { TopBar } from "@/components/dashboard/top-bar";
 import { useSettingsStore } from "@/store/settingsStore";
 
 interface DashboardLayoutProps {
@@ -28,7 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {sidebarOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 "
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -48,22 +47,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </AnimatePresence>
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar onOpenSidebar={() => setSidebarOpen(true)} />
+      <div className="flex flex-col flex-1 overflow-hidden pt-6">
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-0 sm:p-2 md:p-4">
           {animationsEnabled ? (
             <motion.div
               key={pathname}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="container mx-auto max-w-6xl"
+              className="h-full"
             >
               {children}
             </motion.div>
           ) : (
-            <div className="container mx-auto max-w-6xl">{children}</div>
+            <div className="h-full">{children}</div>
           )}
         </main>
       </div>

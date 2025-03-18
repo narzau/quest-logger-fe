@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import {
   Home,
   ListTodo,
-  Award,
   User,
   Settings,
   LogOut,
   X,
-  BarChart,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -44,8 +44,8 @@ export function Sidebar({ onClose }: SidebarProps) {
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Quests", href: "/quests", icon: ListTodo },
-    { name: "Achievements", href: "/achievements", icon: Award },
-    { name: "Stats", href: "/stats", icon: BarChart },
+    { name: "Notes", href: "/notes", icon: FileText },
+    { name: "Billing", href: "/subscription", icon: CreditCard },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ];

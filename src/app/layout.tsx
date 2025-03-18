@@ -1,10 +1,13 @@
+import "./globals.css";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { StructuredData } from "./StructuredData";
-import ServiceWorkerInit from "@/components/sw/sw-init"; // Import the client component
+import ServiceWorkerInit from "@/components/sw/sw-init";
+import { cn } from "@/lib/utils";
+import TrialNotification from "@/components/subscription/TrialNotification";
 
 import "./globals.css";
 import "katex/dist/katex.min.css";
@@ -91,12 +94,26 @@ export default function RootLayout({
       <head>
         <StructuredData />
       </head>
-      <body className={inter.className}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.className
+        )}
+      >
         <QueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <ServiceWorkerInit />{" "}
-            {/* Add the service worker initialization component */}
-            {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="fixed top-0 left-0 right-0 z-50">
+              <TrialNotification />
+            </div>
+            <ServiceWorkerInit />
+            <main className="relative">
+              {children}
+            </main>
             <Toaster />
           </ThemeProvider>
         </QueryProvider>
