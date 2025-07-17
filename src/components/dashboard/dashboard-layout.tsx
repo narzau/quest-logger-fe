@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/dashboard/sidebar";
@@ -12,14 +12,36 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { animationsEnabled } = useSettingsStore();
   const pathname = usePathname();
+
+  // Load collapsed state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState !== null) {
+      setSidebarCollapsed(JSON.parse(savedState));
+    }
+  }, []);
+
+  const handleToggleCollapse = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    // Persist the state to localStorage
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(newState));
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar for desktop */}
-      <div className="hidden md:block md:w-64 bg-card border-r border-border overflow-y-auto">
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+      <div className={`hidden md:block bg-card border-r border-border overflow-y-auto transition-all duration-300 ${
+        sidebarCollapsed ? "md:w-16" : "md:w-64"
+      }`}>
+        <Sidebar 
+          onClose={() => setSidebarOpen(false)} 
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+        />
       </div>
 
       {/* Mobile sidebar */}

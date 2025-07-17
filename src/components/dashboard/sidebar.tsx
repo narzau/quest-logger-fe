@@ -13,6 +13,8 @@ import {
   X,
   CreditCard,
   FileText,
+  ChevronRight,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -24,12 +26,17 @@ import { calculateLevelInfo } from "@/lib/utils";
 
 interface SidebarProps {
   onClose: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ onClose }: SidebarProps) {
+export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
   const { logout } = useAuth();
+
+  // Debug logging
+  console.log('Sidebar props:', { isCollapsed, hasToggleFunction: !!onToggleCollapse });
 
   // Calculate level progress
   const levelInfo = user
@@ -52,16 +59,50 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <div className="flex flex-col h-full py-4">
-      <div className="px-4 flex justify-between items-center md:hidden">
-        <Link href="/dashboard" className="text-lg font-bold">
-          Quest Logger
-        </Link>
+      {/* Toggle button - Always visible */}
+      {onToggleCollapse && (
+        <div className={cn(
+          "flex px-2 mb-4",
+          isCollapsed ? "justify-center" : "justify-between"
+        )}>
+          {!isCollapsed && (
+            <Link href="/dashboard" className="text-lg font-bold px-2">
+              Quest Logger
+            </Link>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onToggleCollapse}
+            className="h-9 w-9 bg-primary/10 border border-primary/20 hover:bg-primary/20"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+      )}
+
+      <div className={cn(
+        "px-4 flex items-center md:hidden",
+        isCollapsed ? "justify-center" : "justify-between"
+      )}>
+        {!isCollapsed && !onToggleCollapse && (
+          <Link href="/dashboard" className="text-lg font-bold">
+            Quest Logger
+          </Link>
+        )}
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-5 w-5" />
         </Button>
       </div>
 
-      {user && (
+
+
+      {user && !isCollapsed && (
         <Card className="mx-4 my-4 p-4 bg-card">
           <div className="flex items-center space-x-3">
             <Avatar className="h-10 w-10">
@@ -86,6 +127,17 @@ export function Sidebar({ onClose }: SidebarProps) {
         </Card>
       )}
 
+      {/* Collapsed user avatar */}
+      {user && isCollapsed && (
+        <div className="flex justify-center mx-2 my-4">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {user.username?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      )}
+
       <nav className="mt-2 flex-1 px-2 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -97,21 +149,24 @@ export function Sidebar({ onClose }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center px-2 py-2 text-sm font-medium rounded-md group transition-colors",
+                "flex items-center text-sm font-medium rounded-md group transition-colors relative",
+                isCollapsed ? "px-2 py-3 justify-center" : "px-2 py-2",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-foreground hover:bg-primary/5"
               )}
+              title={isCollapsed ? item.name : undefined}
             >
               <Icon
                 className={cn(
-                  "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
+                  "h-5 w-5 flex-shrink-0 transition-colors",
+                  isCollapsed ? "mr-0" : "mr-3",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground group-hover:text-foreground"
                 )}
               />
-              {item.name}
+              {!isCollapsed && item.name}
 
               {isActive && (
                 <motion.div
@@ -125,14 +180,21 @@ export function Sidebar({ onClose }: SidebarProps) {
         })}
       </nav>
 
-      <div className="mt-auto px-4 py-2">
+      <div className={cn(
+        "mt-auto py-2",
+        isCollapsed ? "px-2" : "px-4"
+      )}>
         <Button
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+          className={cn(
+            "text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10",
+            isCollapsed ? "w-10 h-10 p-0" : "w-full justify-start"
+          )}
           onClick={() => logout()}
+          title={isCollapsed ? "Logout" : undefined}
         >
-          <LogOut className="mr-3 h-5 w-5" />
-          Logout
+          <LogOut className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+          {!isCollapsed && "Logout"}
         </Button>
       </div>
     </div>

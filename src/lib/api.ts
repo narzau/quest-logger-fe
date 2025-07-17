@@ -72,6 +72,8 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.request.use((config) => {
   console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  console.log("Base URL:", config.baseURL);
+  console.log("Full URL would be:", axios.getUri(config));
   console.log("Headers:", config.headers);
   return config;
 });

@@ -43,7 +43,7 @@ export default function CreateVoiceNoteDialog({
   } = useNotes();
   
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [folder, setFolder] = useState<string>("");
+  const [folder, setFolder] = useState<string>("none");
   const [tagsList, setTagsList] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -61,7 +61,7 @@ export default function CreateVoiceNoteDialog({
   // Handle "new_folder" selection
   useEffect(() => {
     if (folder === "new_folder") {
-      setFolder("");
+      setFolder("none");
       setShowNewFolder(true);
     }
   }, [folder]);
@@ -86,7 +86,7 @@ export default function CreateVoiceNoteDialog({
   };
 
   const resetForm = () => {
-    setFolder("");
+    setFolder("none");
     setTagsList([]);
     setAudioBlob(null);
     setShowNewFolder(false);
@@ -188,7 +188,7 @@ export default function CreateVoiceNoteDialog({
                       ) : (
                         <>
                           <SelectItem value="none">No folder</SelectItem>
-                          {folders.map((folderName) => (
+                          {folders.filter(folderName => folderName && folderName.trim() !== "").map((folderName) => (
                             <SelectItem key={folderName} value={folderName}>
                               {folderName}
                             </SelectItem>

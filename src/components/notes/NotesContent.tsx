@@ -78,7 +78,7 @@ export default function NotesContent() {
 
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [folder, setFolder] = useState<string>("");
+  const [folder, setFolder] = useState<string>("none");
   const [tagsList, setTagsList] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
@@ -128,7 +128,7 @@ export default function NotesContent() {
   // Handle "new_folder" selection 
   useEffect(() => {
     if (folder === "new_folder") {
-      setFolder("");
+      setFolder("none");
       setShowNewFolder(true);
     }
   }, [folder]);
@@ -138,7 +138,7 @@ export default function NotesContent() {
     if (note && !isEditing) {
       setTitle(note.title);
       setContent(note.content || "");
-      setFolder(note.folder || "none");
+      setFolder(!note.folder || note.folder.trim() === "" ? "none" : note.folder);
       setTagsList(note.tags ? note.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
       setIsShared(!!note.share_id);
     }
@@ -364,7 +364,7 @@ export default function NotesContent() {
                   onClick={() => {
                     setTitle(note.title);
                     setContent(note.content || "");
-                    setFolder(note.folder || "none");
+                    setFolder(!note.folder || note.folder.trim() === "" ? "none" : note.folder);
                     setTagsList(note.tags ? note.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
                     setIsEditing(false);
                   }}
@@ -403,13 +403,13 @@ export default function NotesContent() {
                           position="popper"
                         >
                           {folders.length === 0 ? (
-                            <SelectItem value="" disabled>
+                            <SelectItem value="__loading__" disabled>
                               {isFoldersLoading ? "Loading folders..." : "No folders found"}
                             </SelectItem>
                           ) : (
                             <>
                               <SelectItem value="none">No folder</SelectItem>
-                              {folders.map((folderName) => (
+                              {folders.filter(folderName => folderName && folderName.trim() !== "").map((folderName) => (
                                 <SelectItem key={folderName} value={folderName}>
                                   {folderName}
                                 </SelectItem>

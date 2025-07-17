@@ -44,7 +44,7 @@ export default function CreateNoteDialog({
   
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [folder, setFolder] = useState<string>("");
+  const [folder, setFolder] = useState<string>("none");
   const [tagsList, setTagsList] = useState<string[]>([]);
   const [showNewFolder, setShowNewFolder] = useState<boolean>(false);
   const [newFolder, setNewFolder] = useState<string>("");
@@ -59,7 +59,7 @@ export default function CreateNoteDialog({
   // Handle "new_folder" selection
   useEffect(() => {
     if (folder === "new_folder") {
-      setFolder("");
+      setFolder("none");
       setShowNewFolder(true);
     }
   }, [folder]);
@@ -67,7 +67,7 @@ export default function CreateNoteDialog({
   const resetForm = () => {
     setTitle("");
     setContent("");
-    setFolder("");
+    setFolder("none");
     setTagsList([]);
     setShowNewFolder(false);
     setNewFolder("");
@@ -147,13 +147,13 @@ export default function CreateNoteDialog({
                       position="popper"
                     >
                       {folders.length === 0 ? (
-                        <SelectItem value="" disabled>
+                        <SelectItem value="__loading__" disabled>
                           {isFoldersLoading ? "Loading folders..." : "No folders found"}
                         </SelectItem>
                       ) : (
                         <>
                           <SelectItem value="none">No folder</SelectItem>
-                          {folders.map((folderName) => (
+                          {folders.filter(folderName => folderName && folderName.trim() !== "").map((folderName) => (
                             <SelectItem key={folderName} value={folderName}>
                               {folderName}
                             </SelectItem>

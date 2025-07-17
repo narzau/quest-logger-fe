@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   const apiUrl =
     (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
   console.log("apiUrl", apiUrl);
-  const url = new URL(request.nextUrl.pathname, apiUrl);
+  const url = new URL(request.nextUrl.pathname, 'https://api.questlog.site/api/v1');
 
   // Copy all search parameters
   for (const [key, value] of request.nextUrl.searchParams.entries()) {
