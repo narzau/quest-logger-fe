@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "echo \"const TIMESTAMP = '$(date +%s)';\" > public/sw-timestamp.js && next build && cat public/sw-timestamp.js src/lib/sw.js > public/sw.js && rm public/sw-timestamp.js",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
