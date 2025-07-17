@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Notes Page
+ * 
+ * URL Parameters:
+ * - create-note: Opens the voice note creation dialog
+ * - record=true: Automatically starts recording when create-note dialog opens
+ * 
+ * Examples:
+ * - /notes?create-note=true - Opens voice note dialog
+ * - /notes?create-note=true&record=true - Opens voice note dialog and auto-starts recording
+ */
+
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNotes } from "@/hooks/useNotes";
@@ -20,11 +32,14 @@ function NotesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showCreate = searchParams.get("showCreate");
+  const createNote = searchParams.get("create-note");
+  const autoRecord = searchParams.get("record") === "true";
   const { animationsEnabled } = useSettingsStore();
   
   // Dialogs state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
   const [isVoiceNoteDialogOpen, setIsVoiceNoteDialogOpen] = useState<boolean>(false);
+  const [shouldAutoRecord, setShouldAutoRecord] = useState<boolean>(false);
 
   // Initialize create dialog if URL param is present
   useEffect(() => {
@@ -34,6 +49,23 @@ function NotesPageContent() {
     }
   }, [showCreate, router]);
 
+  // Initialize voice note dialog if create-note param is present
+  useEffect(() => {
+    if (createNote) {
+      setShouldAutoRecord(autoRecord); // Preserve the autoRecord value
+      setIsVoiceNoteDialogOpen(true);
+      
+      // Clean up URL immediately after preserving the state
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.delete("create-note");
+      newSearchParams.delete("record");
+      const newUrl = newSearchParams.toString() 
+        ? `/notes?${newSearchParams.toString()}` 
+        : "/notes";
+      router.replace(newUrl);
+    }
+  }, [createNote, router, searchParams, autoRecord]);
+
   const handleCreateNote = useCallback((note: Note) => {
     setIsCreateDialogOpen(false);
     // Update URL with the new note ID
@@ -42,6 +74,7 @@ function NotesPageContent() {
   
   const handleCreateVoiceNote = useCallback((note: Note) => {
     setIsVoiceNoteDialogOpen(false);
+    setShouldAutoRecord(false); // Reset the auto-record state
     // Update URL with the new note ID
     router.push(`/notes?id=${note.id}`);
   }, [router]);
@@ -115,8 +148,12 @@ function NotesPageContent() {
           
           <CreateVoiceNoteDialog
             isOpen={isVoiceNoteDialogOpen}
-            onClose={() => setIsVoiceNoteDialogOpen(false)}
+            onClose={() => {
+              setIsVoiceNoteDialogOpen(false);
+              setShouldAutoRecord(false); // Reset when manually closed
+            }}
             onSave={handleCreateVoiceNote}
+            autoRecord={shouldAutoRecord}
           />
         </div>
       </DashboardLayout>

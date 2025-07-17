@@ -28,13 +28,17 @@ interface CreateVoiceNoteDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (note: Note) => void;
+  autoRecord?: boolean;
 }
 
 export default function CreateVoiceNoteDialog({
   isOpen,
   onClose,
   onSave,
+  autoRecord = false,
 }: CreateVoiceNoteDialogProps) {
+  console.log('📝 CreateVoiceNoteDialog rendered with autoRecord:', autoRecord, 'isOpen:', isOpen);
+  
   const { 
     createVoiceNote, 
     folders,
@@ -165,6 +169,7 @@ export default function CreateVoiceNoteDialog({
                 isError={isError}
                 submitButtonLabel="Create Voice Note"
                 onCancel={() => setAudioBlob(null)}
+                autoRecord={autoRecord}
               />
             </div>
 

@@ -23,6 +23,7 @@ interface AudioRecorderProps {
   submitButtonLabel?: string;
   autoSubmit?: boolean;
   showControls?: boolean;
+  autoRecord?: boolean;
 }
 
 // Constants for audio visualization
@@ -48,7 +49,10 @@ export function AudioRecorder({
   submitButtonLabel = "Submit",
   autoSubmit = false,
   showControls = true,
+  autoRecord = false,
 }: AudioRecorderProps) {
+  console.log('🎤 AudioRecorder rendered with autoRecord:', autoRecord);
+  
   const [viewState, setViewState] = useState<ViewState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevels, setAudioLevels] = useState<number[]>(INITIAL_LEVELS);
@@ -64,7 +68,6 @@ export function AudioRecorder({
   const timerRef = useRef<number>(0);
   const animationFrameRef = useRef<number>(0);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
-
 
   // Notify parent when we have a valid audio blob
   useEffect(() => {
@@ -237,6 +240,20 @@ export function AudioRecorder({
       resetRecorder("error");
     }
   }, [resetRecorder, setupAudioContext]);
+
+  // Auto-start recording when autoRecord is true
+  useEffect(() => {
+    if (autoRecord && viewState === "idle") {
+      // Add a small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        startRecording().catch((error) => {
+          console.error('Auto-recording failed:', error);
+        });
+      }, 1000); // Increased delay to ensure everything is ready
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoRecord, viewState, startRecording]);
 
   const pauseRecording = useCallback(() => {
     if (viewState !== "recording") return;
