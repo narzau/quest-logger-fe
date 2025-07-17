@@ -12,6 +12,7 @@ const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    console.log("apiUrl", apiUrl);
     return [
       {
         source: "/api/v1/:path*",

@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
   // Get the API URL from environment variables or use default
   const apiUrl =
     (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
+  console.log("apiUrl", apiUrl);
   const url = new URL(request.nextUrl.pathname, apiUrl);
 
   // Copy all search parameters

@@ -29,9 +29,11 @@ import {
 } from "@/types/subscription";
 
 // Create a base axios instance with common configuration
+const apiUrl =
+  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
+console.log("apiUrl", apiUrl);
 const axiosClient: AxiosInstance = axios.create({
-  baseURL:
-    (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1",
+  baseURL: apiUrl,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
