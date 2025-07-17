@@ -29,11 +29,9 @@ import {
 } from "@/types/subscription";
 
 // Create a base axios instance with common configuration
-const apiUrl =
-  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
-console.log("apiUrl", apiUrl);
+// Use the Next.js proxy endpoint instead of direct API URL to avoid CORS issues
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: apiUrl,
+  baseURL: "/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
