@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { StructuredData } from "./StructuredData";
-import ServiceWorkerInit from "@/components/sw/sw-init";
 import { cn } from "@/lib/utils";
 import TrialNotification from "@/components/subscription/TrialNotification";
 
@@ -110,7 +109,6 @@ export default function RootLayout({
             <div className="fixed top-0 left-0 right-0 z-50">
               <TrialNotification />
             </div>
-            <ServiceWorkerInit />
             <main className="relative">
               {children}
             </main>
