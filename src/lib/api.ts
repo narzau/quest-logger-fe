@@ -29,9 +29,17 @@ import {
 } from "@/types/subscription";
 
 // Create a base axios instance with common configuration
-// Use the Next.js proxy endpoint instead of direct API URL to avoid CORS issues
+// Make direct requests to the API
+const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
+
+// Debug logging to see what URL is being used
+if (typeof window !== 'undefined') {
+  console.log('API URL from env:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('Final API URL:', apiUrl);
+}
+
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: "/api/v1",
+  baseURL: "https://api.questlog.site/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
