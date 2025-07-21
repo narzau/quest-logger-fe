@@ -12,7 +12,8 @@ import {
   X,
   FolderOpen, 
   Tag,
-  Check
+  Check,
+  Archive
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -38,6 +39,7 @@ export default function NotesFilter() {
     selectedTags, 
     sortBy, 
     sortOrder,
+    showArchived,
     setSearchQuery, 
     setSelectedFolder, 
     toggleTag, 
@@ -45,6 +47,7 @@ export default function NotesFilter() {
     setSelectedTags,
     setSortBy, 
     setSortOrder,
+    setShowArchived,
     resetFilters
   } = useFilterStore();
 
@@ -259,8 +262,21 @@ export default function NotesFilter() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Archive Toggle */}
+        <Button
+          variant={showArchived ? "default" : "outline"}
+          size="sm"
+          onClick={() => setShowArchived(!showArchived)}
+          className="gap-1"
+        >
+          <Archive size={16} />
+          <span className="hidden sm:inline">
+            {showArchived ? "Showing Archived" : "Show Archived"}
+          </span>
+        </Button>
+
         {/* Reset Filters Button - only show if any filter is active */}
-        {(selectedFolder || selectedTags.length > 0 || searchQuery) && (
+        {(selectedFolder || selectedTags.length > 0 || searchQuery || showArchived) && (
           <Button 
             variant="ghost" 
             size="icon" 

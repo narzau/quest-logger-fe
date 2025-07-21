@@ -142,7 +142,7 @@ export const defaultPalettes = {
   warmDawn: {
     primary: createOklch(0.45, 0.1, 40), // Warm taupe
     secondary: createOklch(0.55, 0.08, 60), // Soft beige
-    background: createOklch(0.9, 0.04, 60), // Warm white
+    background: createOklch(0.98, 0.04, 60), // Warm white
     foreground: createOklch(0.2, 0.1, 40), // Chocolate brown
     muted: createOklch(0.75, 0.06, 50), // Warm gray
     accent: createOklch(0.5, 0.12, 30), // Terracotta

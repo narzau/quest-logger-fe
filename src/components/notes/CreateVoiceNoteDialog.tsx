@@ -59,6 +59,15 @@ export default function CreateVoiceNoteDialog({
   useEffect(() => {
     if (!isOpen) {
       resetForm();
+    } else {
+      // When dialog opens, set today's date as a default tag
+      const today = new Date();
+      const dateTag = today.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      }).replace(/,/g, ''); // Format: "Dec 19 2024"
+      setTagsList([dateTag]);
     }
   }, [isOpen]);
   

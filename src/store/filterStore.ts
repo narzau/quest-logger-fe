@@ -10,6 +10,7 @@ interface FilterState {
   page: number;
   limit: number;
   lastSearchUpdate: number;  // Track the last time search was updated
+  showArchived: boolean;     // Toggle to show/hide archived notes
   
   // Actions
   setSearchQuery: (query: string) => void;
@@ -21,6 +22,7 @@ interface FilterState {
   setSortBy: (sortBy: string) => void;
   setSortOrder: (sortOrder: 'asc' | 'desc') => void;
   setPage: (page: number) => void;
+  setShowArchived: (show: boolean) => void;
   resetFilters: () => void;
   // New batched update methods
   updateFilters: (updates: Partial<{
@@ -30,6 +32,7 @@ interface FilterState {
     sortBy: string;
     sortOrder: 'asc' | 'desc';
     page: number;
+    showArchived: boolean;
   }>) => void;
 }
 
@@ -46,6 +49,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   page: 1,
   limit: 10,
   lastSearchUpdate: 0,
+  showArchived: false,
   
   // Actions
   setSearchQuery: (query) => {
@@ -103,11 +107,13 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   setSortBy: (sortBy) => set({ sortBy }),
   setSortOrder: (sortOrder) => set({ sortOrder }),
   setPage: (page) => set({ page }),
+  setShowArchived: (show) => set({ showArchived: show, page: 1 }),
   resetFilters: () => set({ 
     searchQuery: '', 
     selectedFolder: null, 
     selectedTags: [],
-    page: 1 
+    page: 1,
+    showArchived: false 
   }),
   // New method to batch update multiple filters at once
   updateFilters: (updates) => {

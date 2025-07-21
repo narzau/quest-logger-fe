@@ -18,10 +18,12 @@ const NoteItem = memo(({ note }: { note: Note }) => {
   const searchParams = useSearchParams();
   const selectedNoteId = searchParams.get('id') ? parseInt(searchParams.get('id')!) : null;
   
-  // Helper to get tag count from comma-separated string
+  // Helper to get tag count from comma-separated string (excluding hidden tags)
   const getTagCount = useCallback((tagsString?: string) => {
     if (!tagsString) return 0;
-    return tagsString.split(',').length;
+    return tagsString.split(',')
+      .map(t => t.trim())
+      .filter(t => t && !t.startsWith('_')).length;
   }, []);
 
   // Memoize the click handler to prevent unnecessary re-renders
@@ -107,25 +109,41 @@ const NotesList = memo(function NotesList() {
     sortBy,
     sortOrder,
     page,
-    limit
+    limit,
+    showArchived
   } = useFilterStore();
   
   // Calculate skip for pagination
   const skip = useMemo(() => (page - 1) * limit, [page, limit]);
   
   // Build query parameters from filter state
-  const queryParams = useMemo(() => ({
-    skip,
-    limit,
-    folder: selectedFolder || undefined,
-    tag: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
-    search: searchQuery || undefined,
-    sortBy,
-    sortOrder
-  }), [skip, limit, selectedFolder, selectedTags, searchQuery, sortBy, sortOrder]);
+  const queryParams = useMemo(() => {
+    // Handle archived notes through tags
+    // When showArchived is false, we'll filter results client-side to exclude archived
+    const tagsToFilter = [...selectedTags];
+    
+    return {
+      skip,
+      limit,
+      folder: selectedFolder || undefined,
+      tag: tagsToFilter.length > 0 ? tagsToFilter.join(',') : undefined,
+      search: searchQuery || undefined,
+      sortBy,
+      sortOrder
+    };
+  }, [skip, limit, selectedFolder, selectedTags, searchQuery, sortBy, sortOrder]);
   
   // Use the query parameters when calling useNotes
-  const { notes } = useNotes(queryParams);
+  const { notes: allNotes } = useNotes(queryParams);
+  
+  // Filter out archived notes if not showing archived
+  const notes = useMemo(() => {
+    if (showArchived) {
+      return allNotes;
+    }
+    // Filter out notes that have the _archived tag
+    return allNotes.filter(note => !note.tags?.includes('_archived'));
+  }, [allNotes, showArchived]);
 
   // Handle error case (convert error object to string)
   if (notes === undefined) {

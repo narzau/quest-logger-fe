@@ -18,9 +18,13 @@ import { useNotes } from "@/hooks/useNotes";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import NotesSidebar from "@/components/notes/NotesSidebar";
+import NotesBoardView from "@/components/notes/NotesBoardView";
+import NotesCompactView from "@/components/notes/NotesCompactView";
 import CreateNoteDialog from "@/components/notes/CreateNoteDialog";
 import CreateVoiceNoteDialog from "@/components/notes/CreateVoiceNoteDialog";
 import NotesContent from "@/components/notes/NotesContent";
+import NotesFilter from "@/components/notes/NotesFilter";
+import ViewModeToggle from "@/components/notes/ViewModeToggle";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { Note } from "@/types/note";
@@ -34,7 +38,7 @@ function NotesPageContent() {
   const showCreate = searchParams.get("showCreate");
   const createNote = searchParams.get("create-note");
   const autoRecord = searchParams.get("record") === "true";
-  const { animationsEnabled } = useSettingsStore();
+  const { animationsEnabled, notesViewMode } = useSettingsStore();
   
   // Dialogs state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
@@ -79,6 +83,80 @@ function NotesPageContent() {
     router.push(`/notes?id=${note.id}`);
   }, [router]);
 
+  // Render the appropriate view based on the selected mode
+  const renderNotesView = () => {
+    switch (notesViewMode) {
+      case "board":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
+            <motion.div
+              className="lg:col-span-2 overflow-hidden h-full"
+              initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3 }}
+            >
+              <NotesBoardView />
+            </motion.div>
+            <motion.div
+              className="lg:col-span-1 overflow-hidden h-full"
+              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <NotesContent />
+            </motion.div>
+          </div>
+        );
+
+      case "compact":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 h-full">
+            <motion.div
+              className="lg:col-span-3 overflow-hidden h-full"
+              initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3 }}
+            >
+              <NotesCompactView />
+            </motion.div>
+            <motion.div
+              className="lg:col-span-2 overflow-hidden h-full"
+              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <NotesContent />
+            </motion.div>
+          </div>
+        );
+      case "list":
+      default:
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 h-full">
+            {/* Notes list with its own scrollbar */}
+            <motion.div
+              className="md:col-span-1 lg:col-span-1 overflow-hidden flex flex-col h-full"
+              initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3 }}
+            >              
+              <NotesSidebar />
+            </motion.div>
+            
+            {/* Note content with its own scrollbar */}
+            <motion.div
+              className="md:col-span-2 lg:col-span-2 overflow-hidden h-full"
+              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <NotesContent />
+            </motion.div>
+          </div>
+        );
+    }
+  };
+
   return (
     <AuthGuard>
       <DashboardLayout>
@@ -94,7 +172,8 @@ function NotesPageContent() {
                 </p>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <ViewModeToggle />
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
                   className="flex items-center gap-2"
@@ -112,31 +191,18 @@ function NotesPageContent() {
                 </Button>
               </div>
             </div>
+            
+            {/* Show filters for non-list views */}
+            {notesViewMode !== "list" && (
+              <div className="mb-2">
+                <NotesFilter />
+              </div>
+            )}
           </div>
           
           {/* Content section with flex-grow to fill remaining space */}
           <div className="px-2 sm:px-3 flex-grow overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 h-full">
-              {/* Notes list with its own scrollbar */}
-              <motion.div
-                className="md:col-span-1 lg:col-span-1 overflow-hidden flex flex-col h-full"
-                initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
-                animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
-                transition={{ duration: 0.3 }}
-              >              
-                <NotesSidebar />
-              </motion.div>
-              
-              {/* Note content with its own scrollbar */}
-              <motion.div
-                className="md:col-span-2 lg:col-span-2 overflow-hidden h-full"
-                initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
-                animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <NotesContent />
-              </motion.div>
-            </div>
+            {renderNotesView()}
           </div>
           
           {/* Dialogs */}

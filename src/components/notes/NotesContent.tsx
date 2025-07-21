@@ -17,7 +17,9 @@ import {
   MoreHorizontal,
   Tag,
   Mic,
-  Folder
+  Folder,
+  Archive,
+  ArchiveRestore
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
@@ -210,6 +212,38 @@ export default function NotesContent() {
     unshareNote(note.id, {
       onSuccess: () => {
         setIsShared(false);
+      }
+    });
+  };
+
+  const handleArchive = () => {
+    if (!note) return;
+    
+    // Check if note has the _archived tag
+    const currentTags = note.tags ? note.tags.split(',').map(t => t.trim()) : [];
+    const isArchived = currentTags.includes('_archived');
+    
+    let newTags: string;
+    if (isArchived) {
+      // Remove _archived tag
+      const filteredTags = currentTags.filter(t => t !== '_archived');
+      newTags = filteredTags.join(',');
+    } else {
+      // Add _archived tag
+      currentTags.push('_archived');
+      newTags = currentTags.join(',');
+    }
+    
+    updateNote({ 
+      noteId: note.id, 
+      data: { tags: newTags } 
+    }, {
+      onSuccess: () => {
+        toast.success(isArchived ? "Note restored from archive" : "Note archived");
+        // If archiving and not showing archived, redirect to notes list
+        if (!isArchived) {
+          router.push("/notes");
+        }
       }
     });
   };
@@ -588,6 +622,19 @@ export default function NotesContent() {
                       Process Audio
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={handleArchive}>
+                    {note.tags?.includes('_archived') ? (
+                      <>
+                        <ArchiveRestore size={16} className="mr-2" />
+                        Restore from Archive
+                      </>
+                    ) : (
+                      <>
+                        <Archive size={16} className="mr-2" />
+                        Archive Note
+                      </>
+                    )}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </motion.div>
@@ -603,33 +650,24 @@ export default function NotesContent() {
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <div className="flex flex-wrap gap-2">
-                {note.folder && (
-                  <motion.div 
-                    className="flex items-center gap-1 text-sm text-muted-foreground bg-accent/20 rounded-full px-3 py-1"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2, delay: 0.25 }}
-                  >
-                    <Folder size={14} className="text-accent/80 mt-0.5" />
-                    <div className="text-accent/80 text-xs flex items-center gap-2">
-                      {note.folder}
-                    </div>
-                  </motion.div>
-                )}
+               
                 
                 {note.tags && note.tags.length > 0 && (
-                  note.tags.split(',').map((tag, index) => (
-                    <motion.div 
-                      key={tag} 
-                      className="flex items-center gap-1 text-sm text-muted bg-accent/20 rounded-full px-3 py-1"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, delay: 0.25 + (0.05 * index) }}
-                    >
-                      <div className="text-accent/80 flex items-center gap-2">
-                      <Tag size={14} className="mt-0.5" />{tag.trim()}</div>
-                    </motion.div>
-                  ))
+                  note.tags.split(',')
+                    .map(t => t.trim())
+                    .filter(tag => tag && !tag.startsWith('_')) // Filter out hidden tags
+                    .map((tag, index) => (
+                      <motion.div 
+                        key={tag} 
+                        className="flex items-center gap-1 text-sm text-muted bg-accent/20 rounded-full px-3 py-1"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.2, delay: 0.25 + (0.05 * index) }}
+                      >
+                        <div className="text-accent/80 flex items-center gap-2">
+                        <Tag size={14} className="mt-0.5" />{tag}</div>
+                      </motion.div>
+                    ))
                 )}
               </div>
             </motion.div>
@@ -651,27 +689,7 @@ export default function NotesContent() {
                   </audio>
                 </div>
               )}
-              
-              {/* Show processing status for voice notes */}
-              {note.processing_status && note.processing_status !== "completed" && (
-                <div className={`p-4 rounded-lg mb-4 `}>
-                  {note.processing_status === "processing" && (
-                    <div className="flex items-center">
-                      <div className="mr-2 h-4 w-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin dark:border-blue-400 dark:border-t-transparent"></div>
-                      <p>Your audio is being processed. This may take a few minutes.</p>
-                    </div>
-                  )}
-                  {note.processing_status === "pending" && (
-                    <p>Your audio is queued for processing.</p>
-                  )}
-                  {note.processing_status === "error" && (
-                    <div>
-                      <p className="font-medium">Error processing your audio.</p>
-                      {note.processing_error && <p className="text-sm mt-1">{note.processing_error}</p>}
-                    </div>
-                  )}
-                </div>
-              )}
+             
 
               <div className="prose dark:prose-invert max-w-none">
                 {note.content ? (

@@ -12,6 +12,7 @@ export interface Note {
   share_id?: string;
   processing_status?: "pending" | "processing" | "completed" | "error";
   processing_error?: string;
+  archived?: boolean;
 }
 
 export interface NoteList {
@@ -28,6 +29,7 @@ export interface NoteCreate {
   tags?: string;
   note_style?: string;
   quest_id?: number;
+  archived?: boolean;
 }
 
 export interface NoteUpdate {
@@ -37,6 +39,7 @@ export interface NoteUpdate {
   tags?: string;
   note_style?: string;
   quest_id?: number;
+  archived?: boolean;
 }
 
 export interface VoiceNoteCreate {

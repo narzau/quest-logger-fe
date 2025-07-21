@@ -8,6 +8,8 @@ interface DialogSize {
   height: number;
 }
 
+export type NotesViewMode = "list" | "board" | "compact";
+
 interface SettingsState {
   animationsEnabled: boolean;
   notificationsEnabled: boolean;
@@ -15,11 +17,13 @@ interface SettingsState {
   colorPalette: ColorPalette;
   autoCreateQuestsFromVoice: boolean;
   dialogSize: DialogSize;
+  notesViewMode: NotesViewMode;
   setAnimationsEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setColorPalette: (paletteName: keyof typeof defaultPalettes) => void;
   setAutoCreateQuestsFromVoice: (enabled: boolean) => void;
   setDialogSize: (size: DialogSize) => void;
+  setNotesViewMode: (mode: NotesViewMode) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -34,6 +38,7 @@ export const useSettingsStore = create<SettingsState>()(
         width: 500,
         height: 600,
       },
+      notesViewMode: "list",
       setAnimationsEnabled: (enabled) => set({ animationsEnabled: enabled }),
       setNotificationsEnabled: (enabled) =>
         set({ notificationsEnabled: enabled }),
@@ -46,6 +51,7 @@ export const useSettingsStore = create<SettingsState>()(
       setAutoCreateQuestsFromVoice: (enabled) =>
         set({ autoCreateQuestsFromVoice: enabled }),
       setDialogSize: (size) => set({ dialogSize: size }),
+      setNotesViewMode: (mode) => set({ notesViewMode: mode }),
     }),
     {
       name: "adhd-quest-settings",
@@ -56,6 +62,7 @@ export const useSettingsStore = create<SettingsState>()(
         colorPalette: state.colorPalette,
         autoCreateQuestsFromVoice: state.autoCreateQuestsFromVoice,
         dialogSize: state.dialogSize,
+        notesViewMode: state.notesViewMode,
       }),
     }
   )
