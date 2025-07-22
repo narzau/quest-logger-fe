@@ -10,9 +10,11 @@ import {
   CreateTimeEntryDialog,
   TimeTrackingActiveSession,
   TimeTrackingSettings,
+  InvoiceSummaryDialog,
+  TimeTrackingDetailedMetrics,
 } from "@/components/time-tracking";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings as SettingsIcon } from "lucide-react";
+import { Plus, Settings as SettingsIcon, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 
@@ -20,6 +22,7 @@ export default function TimeTrackingPage() {
   const { animationsEnabled } = useSettingsStore();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   
   const {
     entries,
@@ -90,6 +93,13 @@ export default function TimeTrackingPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                onClick={() => setIsInvoiceDialogOpen(true)}
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Invoice Summary
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setIsSettingsOpen(true)}
               >
                 <SettingsIcon className="h-4 w-4 mr-2" />
@@ -120,11 +130,20 @@ export default function TimeTrackingPage() {
             <TimeTrackingStats stats={stats} isLoading={isStatsLoading} />
           </motion.div>
 
-          {/* Time Entries Table */}
+          {/* Detailed Metrics */}
           <motion.div
             initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
             animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
             transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <TimeTrackingDetailedMetrics />
+          </motion.div>
+
+          {/* Time Entries Table */}
+          <motion.div
+            initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
+            animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
+            transition={{ duration: 0.3, delay: 0.2 }}
           >
             <TimeTrackingTable entries={entries} isLoading={isLoading} />
           </motion.div>
@@ -141,6 +160,11 @@ export default function TimeTrackingPage() {
             onOpenChange={setIsSettingsOpen}
             settings={settings}
             isLoading={isSettingsLoading}
+          />
+          
+          <InvoiceSummaryDialog
+            open={isInvoiceDialogOpen}
+            onOpenChange={setIsInvoiceDialogOpen}
           />
         </div>
       </DashboardLayout>

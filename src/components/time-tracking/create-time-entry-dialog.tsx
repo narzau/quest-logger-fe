@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
 import { PaymentStatus } from "@/types/time-tracking";
+import { getTodayInTimezone, userTimezoneToUtc } from "@/lib/timezone-utils";
 import {
   Dialog,
   DialogContent,
@@ -61,8 +62,10 @@ export function CreateTimeEntryDialog({
   onOpenChange,
   defaultHourlyRate,
 }: CreateTimeEntryDialogProps) {
-  const { createEntry, isCreating } = useTimeTracking();
+  const { createEntry, isCreating, settings } = useTimeTracking();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  
+  const timezone = settings?.timezone || "UTC-3";
 
   const form = useForm<CreateTimeEntryFormValues>({
     resolver: zodResolver(createTimeEntrySchema),
@@ -76,15 +79,30 @@ export function CreateTimeEntryDialog({
     },
   });
 
+  // Update default date to today in user's timezone
+  useEffect(() => {
+    if (open && timezone) {
+      const todayStr = getTodayInTimezone(timezone);
+      const todayDate = new Date(todayStr + "T12:00:00");
+      form.setValue("date", todayDate);
+    }
+  }, [open, timezone, form]);
+
   const onSubmit = (values: CreateTimeEntryFormValues) => {
     const dateStr = format(values.date, "yyyy-MM-dd");
-    const startDateTime = `${dateStr}T${values.start_time}:00`;
-    const endDateTime = `${dateStr}T${values.end_time}:00`;
+    
+    // Create local date times
+    const localStartDateTime = new Date(`${dateStr}T${values.start_time}:00`);
+    const localEndDateTime = new Date(`${dateStr}T${values.end_time}:00`);
+    
+    // Convert to UTC
+    const utcStartDateTime = userTimezoneToUtc(localStartDateTime, timezone);
+    const utcEndDateTime = userTimezoneToUtc(localEndDateTime, timezone);
 
     createEntry({
       date: dateStr,
-      start_time: startDateTime,
-      end_time: endDateTime,
+      start_time: utcStartDateTime.toISOString(),
+      end_time: utcEndDateTime.toISOString(),
       hourly_rate: values.hourly_rate,
       payment_status: values.payment_status,
       notes: values.notes,

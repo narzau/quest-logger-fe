@@ -3,7 +3,8 @@ import { api } from "@/lib/api";
 import { 
   CreateTimeEntryPayload, 
   UpdateTimeEntryPayload,
-  PaymentStatus 
+  PaymentStatus,
+  TimeEntry 
 } from "@/types/time-tracking";
 import { toast } from "sonner";
 
@@ -19,7 +20,11 @@ export function useTimeTracking(filters?: {
   // Get time entries
   const entriesQuery = useQuery({
     queryKey: ["timeEntries", filters],
-    queryFn: () => api.timeTracking.getTimeEntries(filters),
+    queryFn: async () => {
+      const response = await api.timeTracking.getTimeEntries(filters);
+      console.log("Time entries API response:", response);
+      return response;
+    },
     staleTime: 60 * 1000, // 1 minute
   });
   
@@ -87,7 +92,8 @@ export function useTimeTracking(filters?: {
   
   // Start session
   const startSessionMutation = useMutation({
-    mutationFn: (hourlyRate: number) => api.timeTracking.startSession(hourlyRate),
+    mutationFn: ({ hourlyRate, timezone }: { hourlyRate: number; timezone?: string }) => 
+      api.timeTracking.startSession(hourlyRate, timezone),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activeSession"] });
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
@@ -125,9 +131,16 @@ export function useTimeTracking(filters?: {
     },
   });
   
+  // Handle different response formats from backend
+  type PaginatedResponse = { items?: TimeEntry[]; results?: TimeEntry[] };
+  const entriesData = entriesQuery.data as TimeEntry[] | PaginatedResponse | undefined;
+  const entries: TimeEntry[] = Array.isArray(entriesData) 
+    ? entriesData 
+    : (entriesData as PaginatedResponse)?.items || (entriesData as PaginatedResponse)?.results || [];
+
   return {
     // Data
-    entries: entriesQuery.data || [],
+    entries,
     activeSession: activeSessionQuery.data,
     stats: statsQuery.data,
     settings: settingsQuery.data,
@@ -148,7 +161,10 @@ export function useTimeTracking(filters?: {
     createEntry: createEntryMutation.mutate,
     updateEntry: updateEntryMutation.mutate,
     deleteEntry: deleteEntryMutation.mutate,
-    startSession: startSessionMutation.mutate,
+    startSession: (hourlyRate: number) => startSessionMutation.mutate({ 
+      hourlyRate, 
+      timezone: settingsQuery.data?.timezone 
+    }),
     stopSession: stopSessionMutation.mutate,
     updateSettings: updateSettingsMutation.mutate,
     

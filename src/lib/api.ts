@@ -492,8 +492,11 @@ export const timeTrackingApi = {
   },
 
   // Start a new time session
-  startSession: async (hourlyRate: number): Promise<TimeEntry> => {
-    const response = await axiosClient.post<TimeEntry>("/time-tracking/sessions/start", { hourly_rate: hourlyRate });
+  startSession: async (hourlyRate: number, timezone?: string): Promise<TimeEntry> => {
+    const response = await axiosClient.post<TimeEntry>("/time-tracking/sessions/start", { 
+      hourly_rate: hourlyRate,
+      timezone: timezone 
+    });
     return response.data;
   },
 

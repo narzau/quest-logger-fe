@@ -49,10 +49,12 @@ The frontend makes requests to these endpoints (all under `/api/v1/time-tracking
 - Request body:
 ```json
 {
-  "hourly_rate": 50
+  "hourly_rate": 50,
+  "timezone": "UTC-3"
 }
 ```
 - Expected: Returns a time entry with no end_time (active session)
+- Note: The timezone parameter helps the backend set the correct date for the entry
 
 **POST /api/v1/time-tracking/sessions/{entry_id}/stop**
 - No body required
@@ -87,7 +89,8 @@ The frontend makes requests to these endpoints (all under `/api/v1/time-tracking
 ```json
 {
   "default_hourly_rate": 50.0,
-  "currency": "USD"
+  "currency": "USD",
+  "timezone": "UTC-3"
 }
 ```
 
@@ -164,4 +167,16 @@ Please implement this feature following your project's existing patterns for:
 - Error handling
 - Database migrations
 
-The key is that the API responses match the JSON structures shown above exactly, as the frontend TypeScript types are already defined and expect these specific field names and formats. 
+The key is that the API responses match the JSON structures shown above exactly, as the frontend TypeScript types are already defined and expect these specific field names and formats.
+
+## Timezone Handling
+
+1. **Storage**: All timestamps should be stored in UTC in the database
+2. **Date Field**: The `date` field represents the local date in the user's timezone when the work was performed
+3. **Creating Sessions**: When starting a session with timezone "UTC-3":
+   - If current UTC time is "2024-07-22 03:00:00" 
+   - The local time is "2024-07-22 00:00:00" (midnight)
+   - The `date` field should be "2024-07-22"
+   - The `start_time` should be "2024-07-22T03:00:00Z" (stored as UTC)
+4. **Backend Calculation**: Use the timezone parameter to determine the correct local date
+5. **Response Format**: Always return timestamps in ISO 8601 format with timezone info (e.g., "2024-07-22T15:30:00Z") 

@@ -7,6 +7,8 @@ import { TimeEntry } from "@/types/time-tracking";
 import { Play, Square, Clock, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { formatInTimezone } from "@/lib/timezone-utils";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 interface TimeTrackingActiveSessionProps {
   activeSession: TimeEntry | null | undefined;
@@ -25,28 +27,82 @@ export function TimeTrackingActiveSession({
 }: TimeTrackingActiveSessionProps) {
   const [duration, setDuration] = useState<string>("00:00:00");
   const [earned, setEarned] = useState<number>(0);
+  const { settings } = useTimeTracking();
+  const timezone = settings?.timezone || "UTC-3";
 
   useEffect(() => {
     if (!activeSession?.start_time) return;
+    
+    console.log("Active session effect triggered:", activeSession);
 
     const updateDuration = () => {
-      const start = new Date(activeSession.start_time);
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - start.getTime()) / 1000);
-      
-      const hours = Math.floor(diff / 3600);
-      const minutes = Math.floor((diff % 3600) / 60);
-      const seconds = diff % 60;
-      
-      setDuration(
-        `${hours.toString().padStart(2, "0")}:${minutes
+      try {
+        // Parse the start time - if no timezone indicator, assume it's already UTC
+        let start: Date;
+        const hasTimezone = activeSession.start_time.endsWith('Z') || 
+                           activeSession.start_time.match(/[+-]\d{2}:\d{2}$/) || 
+                           activeSession.start_time.match(/[+-]\d{4}$/);
+        
+        if (hasTimezone) {
+          // Has timezone info, parse normally
+          start = new Date(activeSession.start_time);
+        } else {
+          // No timezone info, assume it's UTC and add Z
+          start = new Date(activeSession.start_time + 'Z');
+        }
+        const now = new Date();
+        
+        // Check if dates are valid
+        if (isNaN(start.getTime()) || isNaN(now.getTime())) {
+          console.error("Invalid date in active session:", {
+            start_time: activeSession.start_time,
+            parsed_start: start.toString(),
+            now: now.toString()
+          });
+          return;
+        }
+        
+        // Calculate difference in milliseconds
+        const diffMs = now.getTime() - start.getTime();
+        const diffSeconds = Math.floor(diffMs / 1000);
+        
+        // Log every 10 seconds for debugging
+        if (diffSeconds % 10 === 0) {
+          console.log("Active session timer update:", {
+            start_time: activeSession.start_time,
+            start: start.toISOString(),
+            now: now.toISOString(),
+            diff_ms: diffMs,
+            diff_seconds: diffSeconds
+          });
+        }
+        
+        // Ensure positive difference
+        if (diffSeconds < 0) {
+          console.warn("Negative time difference, using 0");
+          setDuration("00:00:00");
+          setEarned(0);
+          return;
+        }
+        
+        const hours = Math.floor(diffSeconds / 3600);
+        const minutes = Math.floor((diffSeconds % 3600) / 60);
+        const seconds = diffSeconds % 60;
+        
+        const newDuration = `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
-          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-      );
-      
-      // Calculate earned amount
-      const hoursWorked = diff / 3600;
-      setEarned(hoursWorked * activeSession.hourly_rate);
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        
+        setDuration(newDuration);
+        
+        // Calculate earned amount
+        const hoursWorked = diffSeconds / 3600;
+        const newEarned = hoursWorked * activeSession.hourly_rate;
+        setEarned(newEarned);
+        
+      } catch (error) {
+        console.error("Error updating duration:", error, activeSession);
+      }
     };
 
     updateDuration();
@@ -65,7 +121,9 @@ export function TimeTrackingActiveSession({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Active Session</p>
+                <p className="text-sm text-muted-foreground">
+                  Active Session • Started at {formatInTimezone(activeSession.start_time, timezone, "HH:mm")}
+                </p>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-green-500" />

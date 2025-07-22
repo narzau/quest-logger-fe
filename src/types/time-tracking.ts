@@ -53,4 +53,5 @@ export interface TimeTrackingStats {
 export interface TimeTrackingSettings {
   default_hourly_rate: number;
   currency: string;
+  timezone: string;
 } 

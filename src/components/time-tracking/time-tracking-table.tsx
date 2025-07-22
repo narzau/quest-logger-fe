@@ -32,8 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Edit, Trash, Calendar, Clock } from "lucide-react";
-import { format } from "date-fns";
 import { EditTimeEntryDialog } from "@/components/time-tracking/edit-time-entry-dialog";
+import { formatInTimezone } from "@/lib/timezone-utils";
 
 interface TimeTrackingTableProps {
   entries: TimeEntry[];
@@ -41,9 +41,11 @@ interface TimeTrackingTableProps {
 }
 
 export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps) {
-  const { deleteEntry, isDeleting } = useTimeTracking();
+  const { deleteEntry, isDeleting, settings } = useTimeTracking();
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<TimeEntry | null>(null);
+  
+  const timezone = settings?.timezone || "UTC-3";
 
   const formatDuration = (start: string, end?: string) => {
     if (!end) return "Ongoing";
@@ -58,9 +60,7 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
     return `${diff.toFixed(2)}h`;
   };
 
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), "HH:mm");
-  };
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -160,18 +160,18 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {format(new Date(entry.date), "MMM dd, yyyy")}
+                          {formatInTimezone(entry.start_time, timezone, "MMM dd, yyyy")}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          {formatTime(entry.start_time)}
+                          {formatInTimezone(entry.start_time, timezone, "HH:mm")}
                         </div>
                       </TableCell>
                       <TableCell>
                         {entry.end_time ? (
-                          formatTime(entry.end_time)
+                          formatInTimezone(entry.end_time, timezone, "HH:mm")
                         ) : (
                           <Badge variant="outline" className="text-green-600">
                             Ongoing
