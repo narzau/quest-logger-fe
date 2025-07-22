@@ -15,6 +15,7 @@ import {
   FileText,
   ChevronRight,
   Menu,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -52,6 +53,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Quests", href: "/quests", icon: ListTodo },
     { name: "Notes", href: "/notes", icon: FileText },
+    { name: "Time Tracking", href: "/time-tracking", icon: Clock },
     { name: "Billing", href: "/subscription", icon: CreditCard },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },

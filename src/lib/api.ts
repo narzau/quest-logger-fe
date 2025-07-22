@@ -27,6 +27,13 @@ import {
   SubscriptionCreateResponse,
   SubscriptionUpdateResponse,
 } from "@/types/subscription";
+import {
+  TimeEntry,
+  CreateTimeEntryPayload,
+  UpdateTimeEntryPayload,
+  TimeTrackingStats,
+  TimeTrackingSettings,
+} from "@/types/time-tracking";
 
 // Create a base axios instance with common configuration
 // Make direct requests to the API
@@ -440,6 +447,86 @@ export const subscriptionApi = {
   },
 };
 
+// Time Tracking API
+export const timeTrackingApi = {
+  // Get time entries with optional filters
+  getTimeEntries: async (params?: {
+    start_date?: string;
+    end_date?: string;
+    payment_status?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<TimeEntry[]> => {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params)
+        .filter(([, value]) => value !== undefined)
+        .forEach(([key, value]) => queryParams.append(key, String(value)));
+    }
+    
+    const response = await axiosClient.get<TimeEntry[]>(`/time-tracking/entries?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  // Get single time entry
+  getTimeEntry: async (entryId: number): Promise<TimeEntry> => {
+    const response = await axiosClient.get<TimeEntry>(`/time-tracking/entries/${entryId}`);
+    return response.data;
+  },
+
+  // Create new time entry
+  createTimeEntry: async (entry: CreateTimeEntryPayload): Promise<TimeEntry> => {
+    const response = await axiosClient.post<TimeEntry>("/time-tracking/entries", entry);
+    return response.data;
+  },
+
+  // Update time entry
+  updateTimeEntry: async (entryId: number, entry: UpdateTimeEntryPayload): Promise<TimeEntry> => {
+    const response = await axiosClient.put<TimeEntry>(`/time-tracking/entries/${entryId}`, entry);
+    return response.data;
+  },
+
+  // Delete time entry
+  deleteTimeEntry: async (entryId: number): Promise<void> => {
+    await axiosClient.delete(`/time-tracking/entries/${entryId}`);
+  },
+
+  // Start a new time session
+  startSession: async (hourlyRate: number): Promise<TimeEntry> => {
+    const response = await axiosClient.post<TimeEntry>("/time-tracking/sessions/start", { hourly_rate: hourlyRate });
+    return response.data;
+  },
+
+  // Stop active session
+  stopSession: async (entryId: number): Promise<TimeEntry> => {
+    const response = await axiosClient.post<TimeEntry>(`/time-tracking/sessions/${entryId}/stop`);
+    return response.data;
+  },
+
+  // Get active session
+  getActiveSession: async (): Promise<TimeEntry | null> => {
+    const response = await axiosClient.get<TimeEntry | null>("/time-tracking/sessions/active");
+    return response.data;
+  },
+
+  // Get statistics
+  getStats: async (period?: "day" | "week" | "month" | "year"): Promise<TimeTrackingStats> => {
+    const response = await axiosClient.get<TimeTrackingStats>(`/time-tracking/stats${period ? `?period=${period}` : ""}`);
+    return response.data;
+  },
+
+  // Get/Update settings
+  getSettings: async (): Promise<TimeTrackingSettings> => {
+    const response = await axiosClient.get<TimeTrackingSettings>("/time-tracking/settings");
+    return response.data;
+  },
+
+  updateSettings: async (settings: Partial<TimeTrackingSettings>): Promise<TimeTrackingSettings> => {
+    const response = await axiosClient.put<TimeTrackingSettings>("/time-tracking/settings", settings);
+    return response.data;
+  },
+};
+
 export const api = {
   auth: authApi,
   user: userApi,
@@ -448,6 +535,7 @@ export const api = {
   googleCalendar: googleCalendarApi,
   note: noteApi,
   subscription: subscriptionApi,
+  timeTracking: timeTrackingApi,
 };
 
 export default api;
