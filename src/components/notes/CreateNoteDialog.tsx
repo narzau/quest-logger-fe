@@ -65,6 +65,19 @@ export default function CreateNoteDialog({
     }
   }, [isOpen]);
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmit(e as unknown as React.FormEvent);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, title, content, folder, tagsList]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Handle "new_folder" selection
   useEffect(() => {
     if (folder === "new_folder") {
@@ -141,6 +154,9 @@ export default function CreateNoteDialog({
                 placeholder="Write your note content here..."
                 rows={8}
               />
+              <p className="text-xs text-muted-foreground">
+                Press Ctrl+Enter to create
+              </p>
             </div>
 
             <div className="space-y-2">

@@ -4,6 +4,7 @@ interface FilterState {
   // Filter states
   searchQuery: string;
   selectedFolder: string | null;
+  selectedFolders: string[];  // New: multiple folder selection
   selectedTags: string[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
@@ -15,6 +16,10 @@ interface FilterState {
   // Actions
   setSearchQuery: (query: string) => void;
   setSelectedFolder: (folder: string | null) => void;
+  setSelectedFolders: (folders: string[]) => void;
+  addFolder: (folder: string) => void;
+  removeFolder: (folder: string) => void;
+  toggleFolder: (folder: string) => void;
   setSelectedTags: (tags: string[]) => void;
   addTag: (tag: string) => void;
   removeTag: (tag: string) => void;
@@ -28,6 +33,7 @@ interface FilterState {
   updateFilters: (updates: Partial<{
     searchQuery: string;
     selectedFolder: string | null;
+    selectedFolders: string[];
     selectedTags: string[];
     sortBy: string;
     sortOrder: 'asc' | 'desc';
@@ -43,6 +49,7 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   // Initial state
   searchQuery: '',
   selectedFolder: null,
+  selectedFolders: [],
   selectedTags: [],
   sortBy: 'updated_at',
   sortOrder: 'desc',
@@ -79,6 +86,30 @@ export const useFilterStore = create<FilterState>((set, get) => ({
     }
   },
   setSelectedFolder: (folder) => set({ selectedFolder: folder, page: 1 }),
+  setSelectedFolders: (folders) => set({ selectedFolders: folders, page: 1 }),
+  addFolder: (folder) => set((state) => {
+    if (!state.selectedFolders.includes(folder)) {
+      return { selectedFolders: [...state.selectedFolders, folder], page: 1 };
+    }
+    return state;
+  }),
+  removeFolder: (folder) => set((state) => ({ 
+    selectedFolders: state.selectedFolders.filter(f => f !== folder),
+    page: 1
+  })),
+  toggleFolder: (folder) => set((state) => {
+    if (state.selectedFolders.includes(folder)) {
+      return { 
+        selectedFolders: state.selectedFolders.filter(f => f !== folder),
+        page: 1 
+      };
+    } else {
+      return { 
+        selectedFolders: [...state.selectedFolders, folder],
+        page: 1 
+      };
+    }
+  }),
   setSelectedTags: (tags) => set({ selectedTags: tags, page: 1 }),
   addTag: (tag) => set((state) => {
     // Only add if not already present
@@ -110,7 +141,8 @@ export const useFilterStore = create<FilterState>((set, get) => ({
   setShowArchived: (show) => set({ showArchived: show, page: 1 }),
   resetFilters: () => set({ 
     searchQuery: '', 
-    selectedFolder: null, 
+    selectedFolder: null,
+    selectedFolders: [], 
     selectedTags: [],
     page: 1,
     showArchived: false 

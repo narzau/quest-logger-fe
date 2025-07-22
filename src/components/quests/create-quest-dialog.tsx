@@ -119,6 +119,19 @@ export function CreateQuestDialog({
     }
   }, [open, form, defaultQuestType]);
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (open && mode === "manual" && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        form.handleSubmit(onSubmit)();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, mode, form]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Update size when mode changes, respecting stored size preferences
   useEffect(() => {
     if (dialogSize) {
@@ -478,17 +491,24 @@ export function CreateQuestDialog({
         </div>
         {renderGoogleCalendarOption()}
         <DialogFooter className="mt-2 sm:mt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="h-9"
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isCreating} className="h-9">
-            {isCreating ? "Creating..." : "Create Quest"}
-          </Button>
+          <div className="flex items-center justify-between w-full">
+            <p className="text-xs text-muted-foreground">
+              Press Ctrl+Enter to create
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="h-9"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isCreating} className="h-9">
+                {isCreating ? "Creating..." : "Create Quest"}
+              </Button>
+            </div>
+          </div>
         </DialogFooter>
       </form>
     </Form>

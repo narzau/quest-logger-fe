@@ -69,9 +69,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </AnimatePresence>
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden pt-6">
+      <div className="flex flex-col flex-1 overflow-hidden pt-2">
 
-        <main className="flex-1 overflow-y-auto p-0 sm:p-2 md:p-4">
+        <main className="flex-1 overflow-y-auto p-0 sm:p-1 md:p-2">
           {animationsEnabled ? (
             <motion.div
               key={pathname}

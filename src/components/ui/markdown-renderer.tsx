@@ -70,60 +70,61 @@ export function MarkdownRenderer({
           return (
             <div
               key={`task-${lineIndex}`}
-              className="flex items-center gap-2 py-0.5 relative"
+              className="flex items-start gap-2 py-0.5 relative"
             >
-              <div className="flex items-center justify-center flex-shrink-0 w-5 h-5">
-                <motion.div
-                  initial={{ scale: 1 }}
-                  animate={{ scale: isChecked ? 1.1 : 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 15,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center"
-                >
-                  <Checkbox
-                    checked={isChecked}
-                    onCheckedChange={(checked) =>
-                      handleCheckboxChange(lineIndex, !!checked)
-                    }
-                    disabled={readOnly}
-                    id={`task-${lineIndex}`}
-                    className={cn("h-4 w-4 rounded border-2")}
-                  />
-                </motion.div>
-              </div>
+              <motion.label
+                htmlFor={`task-${lineIndex}`}
+                className="flex items-start gap-2 flex-1 cursor-pointer"
+                initial={false}
+                animate={{
+                  opacity: isChecked ? 0.6 : 1,
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center justify-center flex-shrink-0 w-5 h-5 mt-0.5">
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    animate={{ scale: isChecked ? 1.1 : 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 15,
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center justify-center"
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(lineIndex, !!checked)
+                      }
+                      disabled={readOnly}
+                      id={`task-${lineIndex}`}
+                      className={cn("h-4 w-4 rounded border-2")}
+                    />
+                  </motion.div>
+                </div>
 
-              <div className="relative inline-block">
-                <motion.label
-                  initial={false}
-                  animate={{
-                    opacity: isChecked ? 0.6 : 1,
-                    x: isChecked ? 4 : 0,
-                  }}
-                  transition={{ duration: 0.2 }}
-                  htmlFor={`task-${lineIndex}`}
-                  className="cursor-pointer text-foreground"
-                >
-                  {taskText}
+                <div className="relative inline-block flex-1">
+                  <span className="text-foreground">
+                    {taskText}
 
-                  {/* This is the strike-through line that animates in */}
-                  <AnimatePresence>
-                    {isChecked && (
-                      <motion.div
-                        className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        exit={{ scaleX: 0 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
-                        style={{ width: "90%" }}
-                      />
-                    )}
-                  </AnimatePresence>
-                </motion.label>
-              </div>
+                    {/* This is the strike-through line that animates in */}
+                    <AnimatePresence>
+                      {isChecked && (
+                        <motion.div
+                          className="absolute left-0 top-1/2 h-0.5 bg-primary/50 -translate-y-1/2 origin-left"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          exit={{ scaleX: 0 }}
+                          transition={{ duration: 0.4, ease: "easeInOut" }}
+                          style={{ width: "90%" }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </span>
+                </div>
+              </motion.label>
             </div>
           );
         }

@@ -16,7 +16,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNotes } from "@/hooks/useNotes";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, PanelRightOpen } from "lucide-react";
 import NotesSidebar from "@/components/notes/NotesSidebar";
 import NotesBoardView from "@/components/notes/NotesBoardView";
 import NotesCompactView from "@/components/notes/NotesCompactView";
@@ -28,8 +28,10 @@ import ViewModeToggle from "@/components/notes/ViewModeToggle";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { Note } from "@/types/note";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
+import { cn } from "@/lib/utils";
+import { useRef } from "react";
 
 // Component that uses useSearchParams
 function NotesPageContent() {
@@ -44,6 +46,54 @@ function NotesPageContent() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
   const [isVoiceNoteDialogOpen, setIsVoiceNoteDialogOpen] = useState<boolean>(false);
   const [shouldAutoRecord, setShouldAutoRecord] = useState<boolean>(false);
+  const [isContentCollapsed, setIsContentCollapsed] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  
+  // Use a ref to track if we're manually collapsing
+  const isManuallyCollapsing = useRef(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Get selected note ID from URL
+  const selectedNoteId = searchParams.get('id') ? parseInt(searchParams.get('id')!) : null;
+
+  // Auto-expand content when a note is selected, but not on mobile or when manually collapsing
+  useEffect(() => {
+    if (selectedNoteId && isContentCollapsed && !isMobile && !isManuallyCollapsing.current) {
+      setIsContentCollapsed(false);
+    }
+    // Reset the manual collapsing flag after URL changes
+    if (!selectedNoteId) {
+      isManuallyCollapsing.current = false;
+    }
+  }, [selectedNoteId, isContentCollapsed, isMobile]);
+
+  const handleToggleCollapse = useCallback(() => {
+    if (!isContentCollapsed) {
+      // Mark that we're manually collapsing
+      isManuallyCollapsing.current = true;
+      // Set collapsed state
+      setIsContentCollapsed(true);
+      // Clear the note ID from URL
+      router.push('/notes');
+    } else {
+      // When expanding, just update the state
+      setIsContentCollapsed(false);
+    }
+  }, [isContentCollapsed, router]);
+
+  const handleMobileBack = useCallback(() => {
+    router.push('/notes');
+  }, [router]);
 
   // Initialize create dialog if URL param is present
   useEffect(() => {
@@ -85,57 +135,93 @@ function NotesPageContent() {
 
   // Render the appropriate view based on the selected mode
   const renderNotesView = () => {
+    // On mobile, show either the list or the content, not both
+    if (isMobile && selectedNoteId) {
+      return (
+        <motion.div
+          className="h-full"
+          initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+          animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+          transition={{ duration: 0.3 }}
+        >
+          <NotesContent onToggleCollapse={handleMobileBack} />
+        </motion.div>
+      );
+    }
+
     switch (notesViewMode) {
       case "board":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
+          <div className={cn(
+            "h-full",
+            isMobile ? "" : "grid grid-cols-1 lg:grid-cols-3 gap-2"
+          )}>
             <motion.div
-              className="lg:col-span-2 overflow-hidden h-full"
+              className={cn(
+                "overflow-hidden h-full transition-all duration-300",
+                !isMobile && (isContentCollapsed ? "lg:col-span-3" : "lg:col-span-2")
+              )}
               initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
               animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
               transition={{ duration: 0.3 }}
             >
               <NotesBoardView />
             </motion.div>
-            <motion.div
-              className="lg:col-span-1 overflow-hidden h-full"
-              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
-              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <NotesContent />
-            </motion.div>
+            {!isMobile && !isContentCollapsed && (
+              <motion.div
+                className="overflow-hidden h-full transition-all duration-300 lg:col-span-1"
+                initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+                animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <NotesContent onToggleCollapse={handleToggleCollapse} />
+              </motion.div>
+            )}
           </div>
         );
 
       case "compact":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 h-full">
+          <div className={cn(
+            "h-full",
+            isMobile ? "" : "grid grid-cols-1 lg:grid-cols-5 gap-2"
+          )}>
             <motion.div
-              className="lg:col-span-3 overflow-hidden h-full"
+              className={cn(
+                "overflow-hidden h-full transition-all duration-300",
+                !isMobile && (isContentCollapsed ? "lg:col-span-5" : "lg:col-span-3")
+              )}
               initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
               animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
               transition={{ duration: 0.3 }}
             >
               <NotesCompactView />
             </motion.div>
-            <motion.div
-              className="lg:col-span-2 overflow-hidden h-full"
-              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
-              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <NotesContent />
-            </motion.div>
+            {!isMobile && !isContentCollapsed && (
+              <motion.div
+                className="overflow-hidden h-full transition-all duration-300 lg:col-span-2"
+                initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+                animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <NotesContent onToggleCollapse={handleToggleCollapse} />
+              </motion.div>
+            )}
           </div>
         );
       case "list":
       default:
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 h-full">
+          <div className={cn(
+            "h-full",
+            isMobile ? "" : "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2"
+          )}>
             {/* Notes list with its own scrollbar */}
             <motion.div
-              className="md:col-span-1 lg:col-span-1 overflow-hidden flex flex-col h-full"
+              className={cn(
+                "overflow-hidden flex flex-col h-full transition-all duration-300",
+                !isMobile && (isContentCollapsed ? "md:col-span-3 lg:col-span-3" : "md:col-span-1 lg:col-span-1")
+              )}
               initial={animationsEnabled ? { opacity: 0, x: -20 } : false}
               animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
               transition={{ duration: 0.3 }}
@@ -144,14 +230,16 @@ function NotesPageContent() {
             </motion.div>
             
             {/* Note content with its own scrollbar */}
-            <motion.div
-              className="md:col-span-2 lg:col-span-2 overflow-hidden h-full"
-              initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
-              animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <NotesContent />
-            </motion.div>
+            {!isMobile && !isContentCollapsed && (
+              <motion.div
+                className="overflow-hidden h-full transition-all duration-300 md:col-span-2 lg:col-span-2"
+                initial={animationsEnabled ? { opacity: 0, x: 20 } : false}
+                animate={animationsEnabled ? { opacity: 1, x: 0 } : false}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <NotesContent onToggleCollapse={handleToggleCollapse} />
+              </motion.div>
+            )}
           </div>
         );
     }
@@ -163,11 +251,11 @@ function NotesPageContent() {
         {/* Use a fixed height container to prevent main page scrolling */}
         <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
           {/* Header section with fixed height */}
-          <div className="px-2 sm:px-3 py-2 flex-shrink-0">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+          <div className="px-2 sm:px-3 py-1 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
               <div>
-                <h1 className="text-3xl font-bold">Notes</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-2xl font-bold">Notes</h1>
+                <p className="text-muted-foreground text-sm">
                   <TotalNotesCount />
                 </p>
               </div>
@@ -194,15 +282,37 @@ function NotesPageContent() {
             
             {/* Show filters for non-list views */}
             {notesViewMode !== "list" && (
-              <div className="mb-2">
+              <div className="mb-1">
                 <NotesFilter />
               </div>
             )}
           </div>
           
           {/* Content section with flex-grow to fill remaining space */}
-          <div className="px-2 sm:px-3 flex-grow overflow-hidden">
+          <div className="px-2 sm:px-3 pb-2 flex-grow overflow-hidden relative">
             {renderNotesView()}
+            
+            {/* Floating expand button when content is collapsed */}
+            <AnimatePresence>
+              {isContentCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute bottom-4 right-4"
+                >
+                  <Button
+                    onClick={() => setIsContentCollapsed(false)}
+                    size="lg"
+                    className="shadow-lg flex items-center gap-2"
+                  >
+                    <PanelRightOpen size={20} />
+                    <span>Show Note</span>
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
           {/* Dialogs */}

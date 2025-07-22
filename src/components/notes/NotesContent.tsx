@@ -19,7 +19,9 @@ import {
   Mic,
   Folder,
   Archive,
-  ArchiveRestore
+  ArchiveRestore,
+  PanelRightClose,
+  ArrowLeft
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
@@ -60,7 +62,11 @@ import CreateVoiceNoteDialog from "./CreateVoiceNoteDialog";
 import { Note } from "@/types/note";
 import { toast } from "sonner";
 
-export default function NotesContent() {
+interface NotesContentProps {
+  onToggleCollapse?: () => void;
+}
+
+export default function NotesContent({ onToggleCollapse }: NotesContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const noteId = searchParams.get("id") ? parseInt(searchParams.get("id")!) : null;
@@ -92,6 +98,9 @@ export default function NotesContent() {
   const [isAudioSuccess, setIsAudioSuccess] = useState<boolean>(false);
   const [isAudioError, setIsAudioError] = useState<boolean>(false);
   const [isVoiceNoteDialogOpen, setIsVoiceNoteDialogOpen] = useState<boolean>(false);
+
+  // Store local content for optimistic updates
+  const [localContent, setLocalContent] = useState<string>("");
 
   // Enhanced animation variants
   const contentVariants = {
@@ -140,11 +149,25 @@ export default function NotesContent() {
     if (note && !isEditing) {
       setTitle(note.title);
       setContent(note.content || "");
+      setLocalContent(note.content || "");
       setFolder(!note.folder || note.folder.trim() === "" ? "none" : note.folder);
       setTagsList(note.tags ? note.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
       setIsShared(!!note.share_id);
     }
   }, [note, isEditing]);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditing && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing, title, content, folder, tagsList]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = () => {
     if (!title.trim() || !note) {
@@ -174,6 +197,7 @@ export default function NotesContent() {
         setIsEditing(false);
         setShowNewFolder(false);
         setNewFolder("");
+        setLocalContent(content); // Update local content after successful save
       }
     });
   };
@@ -247,6 +271,32 @@ export default function NotesContent() {
       }
     });
   };
+
+  const handleTaskToggle = useCallback((lineIndex: number, checked: boolean) => {
+    if (!note || !localContent) return;
+    
+    const lines = localContent.split('\n');
+    const taskMatch = lines[lineIndex].match(/^(\s*-\s+\[)([x ])(\]\s+.*)$/);
+    
+    if (taskMatch) {
+      lines[lineIndex] = `${taskMatch[1]}${checked ? 'x' : ' '}${taskMatch[3]}`;
+      const updatedContent = lines.join('\n');
+      
+      // Update local state immediately for instant feedback
+      setLocalContent(updatedContent);
+      
+      // Update server
+      updateNote({ 
+        noteId: note.id, 
+        data: { content: updatedContent } 
+      }, {
+        onError: () => {
+          // Revert on error
+          setLocalContent(note.content || "");
+        }
+      });
+    }
+  }, [note, localContent, updateNote]);
 
   const handleExport = async (format: string = "text") => {
     if (!note) return;
@@ -327,6 +377,17 @@ export default function NotesContent() {
   if (!note) {
     return (
       <Card className="h-full bg-card flex flex-col items-center justify-center text-center p-4">
+        {onToggleCollapse && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleCollapse}
+            className="absolute top-2 right-2"
+            title="Collapse panel"
+          >
+            <PanelRightClose size={20} />
+          </Button>
+        )}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -520,6 +581,9 @@ export default function NotesContent() {
                     rows={15}
                     className="min-h-[300px] resize-none h-[calc(100vh-25rem)]"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Press Ctrl+Enter to save
+                  </p>
                 </div>
               </motion.div>
             </CardContent>
@@ -547,6 +611,17 @@ export default function NotesContent() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
+              {onToggleCollapse && typeof onToggleCollapse === 'function' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleCollapse}
+                  className="md:hidden"
+                  title="Back to notes"
+                >
+                  <ArrowLeft size={20} />
+                </Button>
+              )}
               <div className="text-2xl font-bold">{note.title}</div>
               {note.folder && (
                   <motion.div 
@@ -569,6 +644,18 @@ export default function NotesContent() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
+              {onToggleCollapse && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleCollapse}
+                  title="Collapse panel"
+                  className="hidden md:block"
+                >
+                  <PanelRightClose size={20} />
+                </Button>
+              )}
+              
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(true)}
@@ -692,8 +779,12 @@ export default function NotesContent() {
              
 
               <div className="prose dark:prose-invert max-w-none">
-                {note.content ? (
-                  <MarkdownRenderer content={note.content} readOnly={true} />
+                {localContent ? (
+                  <MarkdownRenderer 
+                    content={localContent} 
+                    readOnly={false}
+                    onTaskToggle={handleTaskToggle}
+                  />
                 ) : note.transcription ? (
                   <div>
                     <h3 className="font-medium text-lg mb-2">Transcription</h3>

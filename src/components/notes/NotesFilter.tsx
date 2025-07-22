@@ -35,13 +35,15 @@ export default function NotesFilter() {
   const { folders, tags } = useNotes();
   const { 
     searchQuery, 
-    selectedFolder, 
+    selectedFolders, 
     selectedTags, 
     sortBy, 
     sortOrder,
     showArchived,
     setSearchQuery, 
-    setSelectedFolder, 
+    setSelectedFolders,
+    toggleFolder,
+    removeFolder, 
     toggleTag, 
     removeTag,
     setSelectedTags,
@@ -71,7 +73,7 @@ export default function NotesFilter() {
   );
 
   return (
-    <div className="w-full mb-4">
+    <div className="w-full mb-2">
       <div className="flex flex-wrap items-center gap-2">
         {/* Search Bar */}
         <div className="flex-1 min-w-[200px] relative">
@@ -88,14 +90,23 @@ export default function NotesFilter() {
         <Popover open={folderPopoverOpen} onOpenChange={setFolderPopoverOpen}>
           <PopoverTrigger asChild>
             <Button 
-              variant={selectedFolder ? "default" : "outline"} 
+              variant={selectedFolders.length > 0 ? "default" : "outline"} 
               className="gap-1"
               aria-expanded={folderPopoverOpen}
             >
               <FolderOpen size={16} />
               <span className="hidden sm:inline">
-                {selectedFolder ? `Folder: ${selectedFolder}` : "Folders"}
+                {selectedFolders.length > 0 
+                  ? selectedFolders.length === 1 
+                    ? `Folder: ${selectedFolders[0]}` 
+                    : `Folders: ${selectedFolders.length}` 
+                  : "Folders"}
               </span>
+              {selectedFolders.length > 0 && (
+                <span className="flex sm:hidden items-center justify-center bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px]">
+                  {selectedFolders.length}
+                </span>
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="p-2 w-64" align="end">
@@ -114,33 +125,49 @@ export default function NotesFilter() {
                   </div>
                 ) : (
                   <div className="py-1">
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                      Select multiple folders (AND filter)
+                    </div>
                     <button
                       className="w-full flex items-center justify-between px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground"
                       onClick={() => {
-                        setSelectedFolder(null);
+                        setSelectedFolders([]);
                         setFolderPopoverOpen(false);
                       }}
                     >
                       <span>All Folders</span>
-                      {!selectedFolder && <Check size={16} />}
+                      {selectedFolders.length === 0 && <Check size={16} />}
                     </button>
                     
                     {filteredFolders.map((folder) => (
                       <button
                         key={folder}
                         className="w-full flex items-center justify-between px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground"
-                        onClick={() => {
-                          setSelectedFolder(folder);
-                          setFolderPopoverOpen(false);
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFolder(folder);
+                          // Don't close the popover to allow multiple selections
                         }}
                       >
                         <span>{folder}</span>
-                        {selectedFolder === folder && <Check size={16} />}
+                        {selectedFolders.includes(folder) && <Check size={16} />}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+              
+              {selectedFolders.length > 0 && (
+                <div className="flex justify-end mt-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => setFolderPopoverOpen(false)}
+                  >
+                    Apply {selectedFolders.length > 0 && `(${selectedFolders.length})`}
+                  </Button>
+                </div>
+              )}
             </div>
           </PopoverContent>
         </Popover>
@@ -276,7 +303,7 @@ export default function NotesFilter() {
         </Button>
 
         {/* Reset Filters Button - only show if any filter is active */}
-        {(selectedFolder || selectedTags.length > 0 || searchQuery || showArchived) && (
+        {(selectedFolders.length > 0 || selectedTags.length > 0 || searchQuery || showArchived) && (
           <Button 
             variant="ghost" 
             size="icon" 
@@ -289,23 +316,23 @@ export default function NotesFilter() {
       </div>
 
       {/* Active Filters Display with fixed height - always present */}
-      <div className="h-10 mt-2 overflow-y-auto">
-        {(selectedFolder || selectedTags.length > 0) && (
+      <div className="h-8 mt-1 overflow-y-auto">
+        {(selectedFolders.length > 0 || selectedTags.length > 0) && (
           <div className="flex flex-wrap gap-2">
-            {selectedFolder && (
-              <Badge variant="secondary" className="flex items-center gap-1 px-3 py-1">
+            {selectedFolders.map((folder) => (
+              <Badge key={folder} variant="secondary" className="flex items-center gap-1 px-3 py-1">
                 <FolderOpen size={12} />
-                <span>{selectedFolder}</span>
+                <span>{folder}</span>
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   className="h-4 w-4 ml-1 p-0 hover:bg-muted/50"
-                  onClick={() => setSelectedFolder(null)}
+                  onClick={() => removeFolder(folder)}
                 >
                   <X size={10} />
                 </Button>
               </Badge>
-            )}
+            ))}
             
             {selectedTags.map((tag) => (
               <Badge key={tag} variant="secondary" className="flex items-center gap-1 px-3 py-1">

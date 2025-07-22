@@ -21,6 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +44,7 @@ import { CalendarIcon, Crown, CalendarDays, Info, Swords } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
 
 type UpdateQuestFormValues = z.infer<typeof updateQuestSchema>;
 
@@ -97,6 +99,19 @@ export function QuestDetailsDialog({
       }
     );
   };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (open && isEditing && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        form.handleSubmit(onSubmit)();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, isEditing, form]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get color based on rarity
   const getRarityColor = (rarity: QuestRarity) => {
@@ -175,6 +190,9 @@ export function QuestDetailsDialog({
                         value={field.value || ""}
                       />
                     </FormControl>
+                    <FormDescription className="text-xs text-muted-foreground">
+                      Press Ctrl+Enter to save
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
