@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
+import { isWithinInterval, startOfMonth, endOfMonth } from "date-fns";
 import {
   TimeTrackingTable,
   TimeTrackingStats,
@@ -12,9 +13,11 @@ import {
   TimeTrackingSettings,
   InvoiceSummaryDialog,
   TimeTrackingDetailedMetrics,
+  ImportDataDialog,
+  TimeTrackingMonthFilter,
 } from "@/components/time-tracking";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings as SettingsIcon, FileSpreadsheet } from "lucide-react";
+import { Plus, Settings as SettingsIcon, FileSpreadsheet, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 
@@ -23,11 +26,16 @@ export default function TimeTrackingPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [monthFilter, setMonthFilter] = useState<{ start: Date; end: Date }>({
+    start: startOfMonth(new Date()),
+    end: endOfMonth(new Date()),
+  });
   
   const {
     entries,
     activeSession,
-    stats,
     settings,
     isLoading,
     isStatsLoading,
@@ -49,6 +57,63 @@ export default function TimeTrackingPage() {
 
     return () => clearInterval(interval);
   }, [activeSession, refetchActiveSession]);
+
+  // Filter entries by selected month
+  const filteredEntries = useMemo(() => {
+    if (!entries) return [];
+    return entries.filter(entry => {
+      // Parse date string as local date, not UTC
+      // entry.date is "YYYY-MM-DD" format
+      const [year, month, day] = entry.date.split('-').map(Number);
+      const entryDate = new Date(year, month - 1, day); // month is 0-indexed in JS
+      return isWithinInterval(entryDate, { start: monthFilter.start, end: monthFilter.end });
+    });
+  }, [entries, monthFilter]);
+
+  // Calculate stats for filtered month
+  const filteredStats = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Get start of week (Sunday)
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    
+    // Filter entries for today
+    const todayEntries = filteredEntries.filter(e => e.date === todayStr);
+    const todayHours = todayEntries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
+    const todayEarned = todayEntries.reduce((sum, e) => sum + (e.total_earned || 0), 0);
+    
+    // Filter entries for this week
+    const weekEntries = filteredEntries.filter(e => {
+      const [year, month, day] = e.date.split('-').map(Number);
+      const entryDate = new Date(year, month - 1, day);
+      return entryDate >= weekStart && entryDate <= today;
+    });
+    const weekHours = weekEntries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
+    const weekEarned = weekEntries.reduce((sum, e) => sum + (e.total_earned || 0), 0);
+    
+    // Month totals (all filtered entries)
+    const monthHours = filteredEntries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
+    const monthEarned = filteredEntries.reduce((sum, e) => sum + (e.total_earned || 0), 0);
+    
+    return {
+      total_hours_today: todayHours,
+      total_earned_today: todayEarned,
+      total_hours_week: weekHours,
+      total_earned_week: weekEarned,
+      total_hours_month: monthHours,
+      total_earned_month: monthEarned,
+      unpaid_amount: filteredEntries.filter(e => e.payment_status === "not_paid").reduce((sum, e) => sum + (e.total_earned || 0), 0),
+      invoiced_amount: filteredEntries.filter(e => e.payment_status.includes("invoiced")).reduce((sum, e) => sum + (e.total_earned || 0), 0),
+      paid_amount: filteredEntries.filter(e => e.payment_status === "paid").reduce((sum, e) => sum + (e.total_earned || 0), 0),
+    };
+  }, [filteredEntries]);
+
+  const handleMonthChange = useCallback((start: Date, end: Date) => {
+    setMonthFilter({ start, end });
+  }, []);
 
   const handleStartSession = () => {
     const defaultRate = settings?.default_hourly_rate || 50;
@@ -93,6 +158,13 @@ export default function TimeTrackingPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                onClick={() => setIsImportDialogOpen(true)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setIsInvoiceDialogOpen(true)}
               >
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
@@ -112,6 +184,13 @@ export default function TimeTrackingPage() {
             </div>
           </div>
 
+          {/* Month Filter */}
+          <TimeTrackingMonthFilter
+            currentMonth={currentMonth}
+            onCurrentMonthChange={setCurrentMonth}
+            onMonthChange={handleMonthChange}
+          />
+
           {/* Active Session */}
           <TimeTrackingActiveSession
             activeSession={activeSession}
@@ -127,7 +206,7 @@ export default function TimeTrackingPage() {
             animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
             transition={{ duration: 0.3 }}
           >
-            <TimeTrackingStats stats={stats} isLoading={isStatsLoading} />
+            <TimeTrackingStats stats={filteredStats} isLoading={isStatsLoading} />
           </motion.div>
 
           {/* Detailed Metrics */}
@@ -145,7 +224,7 @@ export default function TimeTrackingPage() {
             animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <TimeTrackingTable entries={entries} isLoading={isLoading} />
+            <TimeTrackingTable entries={filteredEntries} isLoading={isLoading} />
           </motion.div>
 
           {/* Dialogs */}
@@ -165,6 +244,12 @@ export default function TimeTrackingPage() {
           <InvoiceSummaryDialog
             open={isInvoiceDialogOpen}
             onOpenChange={setIsInvoiceDialogOpen}
+          />
+          
+          <ImportDataDialog
+            open={isImportDialogOpen}
+            onOpenChange={setIsImportDialogOpen}
+            defaultHourlyRate={settings?.default_hourly_rate || 50}
           />
         </div>
       </DashboardLayout>

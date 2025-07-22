@@ -21,7 +21,9 @@ export function useTimeTracking(filters?: {
   const entriesQuery = useQuery({
     queryKey: ["timeEntries", filters],
     queryFn: async () => {
-      const response = await api.timeTracking.getTimeEntries(filters);
+      // Add a high limit to ensure we get all entries
+      const paramsWithLimit = { ...filters, limit: 1000 };
+      const response = await api.timeTracking.getTimeEntries(paramsWithLimit);
       console.log("Time entries API response:", response);
       return response;
     },

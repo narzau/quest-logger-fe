@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
 import { TimeEntry, PaymentStatus } from "@/types/time-tracking";
+import { userTimezoneToUtc } from "@/lib/timezone-utils";
 import {
   Dialog,
   DialogContent,
@@ -61,7 +62,8 @@ export function EditTimeEntryDialog({
   open,
   onOpenChange,
 }: EditTimeEntryDialogProps) {
-  const { updateEntry, isUpdating } = useTimeTracking();
+  const { updateEntry, isUpdating, settings } = useTimeTracking();
+  const timezone = settings?.timezone || "UTC-3";
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const form = useForm<EditTimeEntryFormValues>({
@@ -94,13 +96,17 @@ export function EditTimeEntryDialog({
     const dateStr = format(values.date, "yyyy-MM-dd");
     const startDateTime = `${dateStr}T${values.start_time}:00`;
     const endDateTime = values.end_time ? `${dateStr}T${values.end_time}:00` : undefined;
+    
+    // Convert to UTC before sending
+    const startTimeUtc = userTimezoneToUtc(new Date(startDateTime), timezone);
+    const endTimeUtc = endDateTime ? userTimezoneToUtc(new Date(endDateTime), timezone) : undefined;
 
     updateEntry({
       entryId: entry.id,
       data: {
-        date: dateStr,
-        start_time: startDateTime,
-        end_time: endDateTime,
+        // Don't include date - backend derives it from start_time
+        start_time: startTimeUtc.toISOString(),
+        end_time: endTimeUtc?.toISOString(),
         hourly_rate: values.hourly_rate,
         payment_status: values.payment_status,
         notes: values.notes,

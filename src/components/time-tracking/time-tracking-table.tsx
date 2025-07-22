@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TimeEntry, PaymentStatus } from "@/types/time-tracking";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -44,6 +45,8 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
   const { deleteEntry, isDeleting, settings } = useTimeTracking();
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<TimeEntry | null>(null);
+  const [selectedEntries, setSelectedEntries] = useState<Set<number>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   const timezone = settings?.timezone || "UTC-3";
 
@@ -108,6 +111,43 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
     }
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedEntries(new Set(entries.map(e => e.id)));
+    } else {
+      setSelectedEntries(new Set());
+    }
+  };
+
+  const handleSelectEntry = (entryId: number, checked: boolean) => {
+    const newSelected = new Set(selectedEntries);
+    if (checked) {
+      newSelected.add(entryId);
+    } else {
+      newSelected.delete(entryId);
+    }
+    setSelectedEntries(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkDeleting(true);
+    const selectedArray = Array.from(selectedEntries);
+    
+    for (const entryId of selectedArray) {
+      await new Promise<void>((resolve) => {
+        deleteEntry(entryId, {
+          onSuccess: () => resolve(),
+          onError: () => resolve(), // Continue even on error
+        });
+      });
+      // Small delay between deletions
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    setSelectedEntries(new Set());
+    setIsBulkDeleting(false);
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -129,13 +169,36 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Time Entries</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Time Entries</CardTitle>
+            {selectedEntries.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedEntries.size} selected
+                </span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeletingEntry({ id: -1 } as TimeEntry)} // Trigger bulk delete dialog
+                  disabled={isBulkDeleting}
+                >
+                  {isBulkDeleting ? "Deleting..." : "Delete Selected"}
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={entries.length > 0 && selectedEntries.size === entries.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Start Time</TableHead>
                   <TableHead>End Time</TableHead>
@@ -150,13 +213,19 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
               <TableBody>
                 {entries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                       No time entries yet. Start tracking your time to see entries here.
                     </TableCell>
                   </TableRow>
                 ) : (
                   entries.map((entry) => (
                     <TableRow key={entry.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedEntries.has(entry.id)}
+                          onCheckedChange={(checked) => handleSelectEntry(entry.id, !!checked)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -235,19 +304,23 @@ export function TimeTrackingTable({ entries, isLoading }: TimeTrackingTableProps
       <AlertDialog open={!!deletingEntry} onOpenChange={(open) => !open && setDeletingEntry(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Time Entry</AlertDialogTitle>
+            <AlertDialogTitle>
+              {deletingEntry?.id === -1 ? `Delete ${selectedEntries.size} Time Entries` : "Delete Time Entry"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this time entry? This action cannot be undone.
+              {deletingEntry?.id === -1
+                ? `Are you sure you want to delete ${selectedEntries.size} selected entries? This action cannot be undone.`
+                : "Are you sure you want to delete this time entry? This action cannot be undone."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
+              onClick={deletingEntry?.id === -1 ? handleBulkDelete : handleDelete}
+              disabled={isDeleting || isBulkDeleting}
               className="bg-red-600 hover:bg-red-700"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting || isBulkDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

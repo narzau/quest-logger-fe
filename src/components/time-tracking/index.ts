@@ -5,4 +5,6 @@ export { CreateTimeEntryDialog } from "./create-time-entry-dialog";
 export { EditTimeEntryDialog } from "./edit-time-entry-dialog";
 export { TimeTrackingSettings } from "./time-tracking-settings";
 export { InvoiceSummaryDialog } from "./invoice-summary-dialog";
-export { TimeTrackingDetailedMetrics } from "./time-tracking-detailed-metrics"; 
+export { TimeTrackingDetailedMetrics } from "./time-tracking-detailed-metrics";
+export { ImportDataDialog } from "./import-data-dialog";
+export { TimeTrackingMonthFilter } from "./time-tracking-month-filter"; 
