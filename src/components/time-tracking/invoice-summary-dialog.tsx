@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { TimeEntry, PaymentStatus } from "@/types/time-tracking";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
+import { api } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Calendar, Clock, DollarSign } from "lucide-react";
+import { Copy, Calendar, Clock, DollarSign, Link2, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { formatInTimezone } from "@/lib/timezone-utils";
 import { toast } from "sonner";
@@ -26,8 +27,18 @@ export function InvoiceSummaryDialog({
   open,
   onOpenChange,
 }: InvoiceSummaryDialogProps) {
-  const { entries, settings } = useTimeTracking();
+  const { entries, settings, refetchEntries } = useTimeTracking();
   const timezone = settings?.timezone || "UTC-3";
+  const [publicUrl, setPublicUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Refetch entries when dialog opens to ensure fresh data
+  useEffect(() => {
+    if (open) {
+      refetchEntries();
+      setPublicUrl(null); // Reset public URL when reopening
+    }
+  }, [open, refetchEntries]);
   
   // Filter only unpaid and not invoiced entries
   const invoiceEntries = useMemo(() => {
@@ -43,19 +54,22 @@ export function InvoiceSummaryDialog({
     return invoiceEntries.reduce((acc, entry) => {
       const hours = entry.total_hours || 0;
       const earned = entry.total_earned || 0;
+      const date = entry.start_time.split('T')[0];
       return {
         hours: acc.hours + hours,
         earned: acc.earned + earned,
-        days: acc.days.add(entry.date),
+        days: acc.days.add(date),
       };
     }, { hours: 0, earned: 0, days: new Set<string>() });
   }, [invoiceEntries]);
 
-  // Group entries by date
+  // Group entries by date (using start_time to get accurate date)
   const entriesByDate = useMemo(() => {
     const grouped = new Map<string, TimeEntry[]>();
     invoiceEntries.forEach(entry => {
-      const date = entry.date;
+      // Extract date from start_time instead of using entry.date
+      // This ensures we show the correct date even if backend hasn't updated the date field
+      const date = entry.start_time.split('T')[0];
       if (!grouped.has(date)) {
         grouped.set(date, []);
       }
@@ -68,6 +82,35 @@ export function InvoiceSummaryDialog({
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
     return `${wholeHours}h ${minutes}m`;
+  };
+
+  const generatePublicLink = async () => {
+    if (invoiceEntries.length === 0) {
+      toast.error("No entries to share");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const firstEntry = invoiceEntries[0];
+      const lastEntry = invoiceEntries[invoiceEntries.length - 1];
+      
+      const response = await api.timeTracking.generateInvoiceLink({
+        start_date: firstEntry.date,
+        end_date: lastEntry.date,
+        payment_status: PaymentStatus.NOT_PAID,
+        expires_in_days: 30, // Link expires in 30 days
+      });
+      
+      setPublicUrl(response.public_url);
+      navigator.clipboard.writeText(response.public_url);
+      toast.success("Public link copied to clipboard!");
+    } catch (error) {
+      toast.error("Failed to generate public link");
+      console.error("Error generating public link:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {
@@ -126,15 +169,27 @@ export function InvoiceSummaryDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Invoice Summary</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={copyToClipboard}
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Copy to Clipboard
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={generatePublicLink}
+                disabled={isGenerating}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                {isGenerating ? "Generating..." : "Generate Link"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyToClipboard}
+                className="gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copy to Clipboard
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
@@ -165,11 +220,26 @@ export function InvoiceSummaryDialog({
           <div className="text-sm text-muted-foreground text-center">
             Period: {formatInTimezone(invoiceEntries[0].start_time, timezone, "MMMM dd")} - {formatInTimezone(invoiceEntries[invoiceEntries.length - 1].start_time, timezone, "MMMM dd, yyyy")}
           </div>
+          
+          {/* Public Link */}
+          {publicUrl && (
+            <Card className="bg-muted/50">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <Link2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Public Link:</span>
+                  <code className="flex-1 px-2 py-1 bg-background rounded text-xs break-all">
+                    {publicUrl}
+                  </code>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Separator />
 
           {/* Daily Breakdown */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="font-semibold">Daily Breakdown</h3>
             {Array.from(entriesByDate.entries()).map(([date, entries]) => {
               const dayTotal = entries.reduce((sum, e) => sum + (e.total_earned || 0), 0);
@@ -177,11 +247,14 @@ export function InvoiceSummaryDialog({
               
               return (
                 <Card key={date} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2 font-medium">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {format(new Date(date), "EEEE, MMMM dd, yyyy")}
+                        {(() => {
+                          const [year, month, day] = date.split('-').map(Number);
+                          return format(new Date(year, month - 1, day, 12), "EEEE, MMMM dd, yyyy");
+                        })()}
                       </div>
                       <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
@@ -195,7 +268,7 @@ export function InvoiceSummaryDialog({
                       </div>
                     </div>
                     
-                    <div className="space-y-2 ml-6">
+                    <div className="space-y-1 ml-6">
                       {entries.map((entry) => (
                         <div key={entry.id} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">

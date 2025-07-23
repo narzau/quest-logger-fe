@@ -2,6 +2,7 @@ import { format, parseISO, addHours } from "date-fns";
 
 /**
  * Parse timezone offset from string like "UTC-3" or "UTC+5:30"
+ * Returns the offset in hours (negative for west of UTC, positive for east)
  */
 export function parseTimezoneOffset(timezone: string): number {
   const match = timezone.match(/UTC([+-])(\d+)(?::(\d+))?/);
@@ -9,7 +10,9 @@ export function parseTimezoneOffset(timezone: string): number {
   
   const [, sign, hours, minutes = "0"] = match;
   const offset = parseInt(hours) + parseInt(minutes) / 60;
-  return sign === "+" ? -offset : offset; // Negative because we add to UTC to get local
+  // UTC-3 means 3 hours behind UTC, so return -3
+  // UTC+5 means 5 hours ahead of UTC, so return +5
+  return sign === "+" ? offset : -offset;
 }
 
 /**
@@ -18,7 +21,8 @@ export function parseTimezoneOffset(timezone: string): number {
 export function utcToUserTimezone(utcDate: string | Date, timezone: string): Date {
   const date = typeof utcDate === "string" ? parseISO(utcDate) : utcDate;
   const offset = parseTimezoneOffset(timezone);
-  return addHours(date, -offset);
+  // If offset is -3 (UTC-3), we subtract 3 hours from UTC to get local time
+  return addHours(date, offset);
 }
 
 /**
@@ -26,7 +30,8 @@ export function utcToUserTimezone(utcDate: string | Date, timezone: string): Dat
  */
 export function userTimezoneToUtc(localDate: Date, timezone: string): Date {
   const offset = parseTimezoneOffset(timezone);
-  return addHours(localDate, offset);
+  // If offset is -3 (UTC-3), we add 3 hours to local time to get UTC
+  return addHours(localDate, -offset);
 }
 
 /**

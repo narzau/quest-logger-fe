@@ -133,6 +133,23 @@ export function useTimeTracking(filters?: {
     },
   });
   
+  // Batch update payment status
+  const batchUpdatePaymentStatusMutation = useMutation({
+    mutationFn: ({ entryIds, paymentStatus }: { entryIds: number[]; paymentStatus: PaymentStatus }) =>
+      api.timeTracking.batchUpdatePaymentStatus({
+        entry_ids: entryIds,
+        payment_status: paymentStatus,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["timeTrackingStats"] });
+      toast.success("Payment status updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update payment status");
+    },
+  });
+  
   // Handle different response formats from backend
   type PaginatedResponse = { items?: TimeEntry[]; results?: TimeEntry[] };
   const entriesData = entriesQuery.data as TimeEntry[] | PaginatedResponse | undefined;
@@ -169,6 +186,7 @@ export function useTimeTracking(filters?: {
     }),
     stopSession: stopSessionMutation.mutate,
     updateSettings: updateSettingsMutation.mutate,
+    batchUpdatePaymentStatus: batchUpdatePaymentStatusMutation.mutate,
     
     // Action loading states
     isCreating: createEntryMutation.isPending,
@@ -177,6 +195,7 @@ export function useTimeTracking(filters?: {
     isStartingSession: startSessionMutation.isPending,
     isStoppingSession: stopSessionMutation.isPending,
     isUpdatingSettings: updateSettingsMutation.isPending,
+    isBatchUpdating: batchUpdatePaymentStatusMutation.isPending,
     
     // Refetch functions
     refetchEntries: () => queryClient.invalidateQueries({ queryKey: ["timeEntries"] }),

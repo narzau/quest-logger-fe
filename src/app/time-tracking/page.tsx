@@ -15,9 +15,10 @@ import {
   TimeTrackingDetailedMetrics,
   ImportDataDialog,
   TimeTrackingMonthFilter,
+  BatchPaymentStatus,
 } from "@/components/time-tracking";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings as SettingsIcon, FileSpreadsheet, Upload } from "lucide-react";
+import { Plus, Settings as SettingsIcon, FileSpreadsheet, Upload, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/settingsStore";
 
@@ -27,6 +28,7 @@ export default function TimeTrackingPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isBatchStatusOpen, setIsBatchStatusOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [monthFilter, setMonthFilter] = useState<{ start: Date; end: Date }>({
     start: startOfMonth(new Date()),
@@ -58,16 +60,21 @@ export default function TimeTrackingPage() {
     return () => clearInterval(interval);
   }, [activeSession, refetchActiveSession]);
 
-  // Filter entries by selected month
+  // Filter entries by selected month and sort by start_time
   const filteredEntries = useMemo(() => {
     if (!entries) return [];
-    return entries.filter(entry => {
-      // Parse date string as local date, not UTC
-      // entry.date is "YYYY-MM-DD" format
-      const [year, month, day] = entry.date.split('-').map(Number);
-      const entryDate = new Date(year, month - 1, day); // month is 0-indexed in JS
-      return isWithinInterval(entryDate, { start: monthFilter.start, end: monthFilter.end });
-    });
+    return entries
+      .filter(entry => {
+        // Parse date string as local date, not UTC
+        // entry.date is "YYYY-MM-DD" format
+        const [year, month, day] = entry.date.split('-').map(Number);
+        const entryDate = new Date(year, month - 1, day); // month is 0-indexed in JS
+        return isWithinInterval(entryDate, { start: monthFilter.start, end: monthFilter.end });
+      })
+      .sort((a, b) => {
+        // Sort by start_time in descending order (most recent first)
+        return new Date(b.start_time).getTime() - new Date(a.start_time).getTime();
+      });
   }, [entries, monthFilter]);
 
   // Calculate stats for filtered month
@@ -172,6 +179,13 @@ export default function TimeTrackingPage() {
               </Button>
               <Button
                 variant="outline"
+                onClick={() => setIsBatchStatusOpen(true)}
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Update Status
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setIsSettingsOpen(true)}
               >
                 <SettingsIcon className="h-4 w-4 mr-2" />
@@ -250,6 +264,11 @@ export default function TimeTrackingPage() {
             open={isImportDialogOpen}
             onOpenChange={setIsImportDialogOpen}
             defaultHourlyRate={settings?.default_hourly_rate || 50}
+          />
+          
+          <BatchPaymentStatus
+            open={isBatchStatusOpen}
+            onOpenChange={setIsBatchStatusOpen}
           />
         </div>
       </DashboardLayout>

@@ -528,6 +528,28 @@ export const timeTrackingApi = {
     const response = await axiosClient.put<TimeTrackingSettings>("/time-tracking/settings", settings);
     return response.data;
   },
+  
+  // Generate public invoice link
+  generateInvoiceLink: async (params: {
+    start_date?: string;
+    end_date?: string;
+    payment_status?: string;
+    expires_in_days?: number;
+  }): Promise<{ public_url: string }> => {
+    const response = await axiosClient.post<{ public_url: string }>(
+      "/time-tracking/generate-invoice-link",
+      params
+    );
+    return response.data;
+  },
+  
+  // Batch update payment status
+  batchUpdatePaymentStatus: async (params: {
+    entry_ids: number[];
+    payment_status: string;
+  }): Promise<void> => {
+    await axiosClient.post("/time-tracking/batch-update-payment-status", params);
+  },
 };
 
 export const api = {

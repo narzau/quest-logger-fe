@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
 import { TimeEntry, PaymentStatus } from "@/types/time-tracking";
-import { userTimezoneToUtc } from "@/lib/timezone-utils";
+import { parseTimezoneOffset } from "@/lib/timezone-utils";
 import {
   Dialog,
   DialogContent,
@@ -94,19 +94,29 @@ export function EditTimeEntryDialog({
 
   const onSubmit = (values: EditTimeEntryFormValues) => {
     const dateStr = format(values.date, "yyyy-MM-dd");
-    const startDateTime = `${dateStr}T${values.start_time}:00`;
-    const endDateTime = values.end_time ? `${dateStr}T${values.end_time}:00` : undefined;
     
-    // Convert to UTC before sending
-    const startTimeUtc = userTimezoneToUtc(new Date(startDateTime), timezone);
-    const endTimeUtc = endDateTime ? userTimezoneToUtc(new Date(endDateTime), timezone) : undefined;
+    // Create timezone offset string
+    const offsetHours = parseTimezoneOffset(timezone);
+    const absOffsetHours = Math.abs(offsetHours);
+    const offsetHoursPart = Math.floor(absOffsetHours);
+    const offsetMinsPart = Math.round((absOffsetHours - offsetHoursPart) * 60);
+    const offsetSign = offsetHours < 0 ? '-' : '+';
+    const offsetString = `${offsetSign}${String(offsetHoursPart).padStart(2, '0')}:${String(offsetMinsPart).padStart(2, '0')}`;
+    
+    // Create datetime strings with timezone offset
+    const startDateTimeWithTz = `${dateStr}T${values.start_time}:00${offsetString}`;
+    const endDateTimeWithTz = values.end_time ? `${dateStr}T${values.end_time}:00${offsetString}` : undefined;
+    
+    // JavaScript will correctly parse these and convert to UTC
+    const startDate = new Date(startDateTimeWithTz);
+    const endDate = endDateTimeWithTz ? new Date(endDateTimeWithTz) : undefined;
 
     updateEntry({
       entryId: entry.id,
       data: {
         // Don't include date - backend derives it from start_time
-        start_time: startTimeUtc.toISOString(),
-        end_time: endTimeUtc?.toISOString(),
+        start_time: startDate.toISOString(),
+        end_time: endDate?.toISOString(),
         hourly_rate: values.hourly_rate,
         payment_status: values.payment_status,
         notes: values.notes,

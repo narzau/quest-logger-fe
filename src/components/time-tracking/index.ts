@@ -7,4 +7,5 @@ export { TimeTrackingSettings } from "./time-tracking-settings";
 export { InvoiceSummaryDialog } from "./invoice-summary-dialog";
 export { TimeTrackingDetailedMetrics } from "./time-tracking-detailed-metrics";
 export { ImportDataDialog } from "./import-data-dialog";
-export { TimeTrackingMonthFilter } from "./time-tracking-month-filter"; 
+export { TimeTrackingMonthFilter } from "./time-tracking-month-filter";
+export { BatchPaymentStatus } from "./batch-payment-status"; 

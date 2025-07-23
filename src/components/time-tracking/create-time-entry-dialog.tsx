@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTimeTracking } from "@/hooks/useTimeTracking";
 import { PaymentStatus } from "@/types/time-tracking";
-import { getTodayInTimezone, userTimezoneToUtc } from "@/lib/timezone-utils";
+import { getTodayInTimezone, parseTimezoneOffset } from "@/lib/timezone-utils";
 import {
   Dialog,
   DialogContent,
@@ -91,18 +91,29 @@ export function CreateTimeEntryDialog({
   const onSubmit = (values: CreateTimeEntryFormValues) => {
     const dateStr = format(values.date, "yyyy-MM-dd");
     
-    // Create local date times
-    const localStartDateTime = new Date(`${dateStr}T${values.start_time}:00`);
-    const localEndDateTime = new Date(`${dateStr}T${values.end_time}:00`);
+    // The user's input times are in their timezone
+    // We need to create proper timestamps that include timezone offset
+    const offsetHours = parseTimezoneOffset(timezone);
+    const absOffsetHours = Math.abs(offsetHours);
+    const offsetHoursPart = Math.floor(absOffsetHours);
+    const offsetMinsPart = Math.round((absOffsetHours - offsetHoursPart) * 60);
+    // For UTC-3, offsetHours is -3, so we want "-03:00" offset
+    const offsetSign = offsetHours < 0 ? '-' : '+';
+    const offsetString = `${offsetSign}${String(offsetHoursPart).padStart(2, '0')}:${String(offsetMinsPart).padStart(2, '0')}`;
     
-    // Convert to UTC
-    const utcStartDateTime = userTimezoneToUtc(localStartDateTime, timezone);
-    const utcEndDateTime = userTimezoneToUtc(localEndDateTime, timezone);
+    // Create datetime strings with timezone offset
+    // e.g., "2025-04-01T00:00:00-03:00" for midnight in UTC-3
+    const startDateTimeWithTz = `${dateStr}T${values.start_time}:00${offsetString}`;
+    const endDateTimeWithTz = `${dateStr}T${values.end_time}:00${offsetString}`;
+    
+    // JavaScript will correctly parse these and convert to UTC
+    const startDate = new Date(startDateTimeWithTz);
+    const endDate = new Date(endDateTimeWithTz);
 
     createEntry({
       date: dateStr,
-      start_time: utcStartDateTime.toISOString(),
-      end_time: utcEndDateTime.toISOString(),
+      start_time: startDate.toISOString(),
+      end_time: endDate.toISOString(),
       hourly_rate: values.hourly_rate,
       payment_status: values.payment_status,
       notes: values.notes,
