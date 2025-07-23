@@ -102,8 +102,14 @@ export function InvoiceSummaryDialog({
         expires_in_days: 30, // Link expires in 30 days
       });
       
-      setPublicUrl(response.public_url);
-      navigator.clipboard.writeText(response.public_url);
+      // Replace the domain with the invoice subdomain
+      const invoiceUrl = response.public_url.replace(
+        'https://questlog.site/public/invoice/',
+        'https://invoices.arzaut.com/'
+      );
+      
+      setPublicUrl(invoiceUrl);
+      navigator.clipboard.writeText(invoiceUrl);
       toast.success("Public link copied to clipboard!");
     } catch (error) {
       toast.error("Failed to generate public link");
