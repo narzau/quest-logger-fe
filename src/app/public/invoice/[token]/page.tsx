@@ -59,6 +59,18 @@ export default function PublicInvoicePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Set the page title when data is available
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const invoiceData = formatInvoiceData(data);
+      if (invoiceData.startDate && invoiceData.endDate) {
+        const startDate = formatInTimezone(invoiceData.startDate, "UTC", "MMM dd");
+        const endDate = formatInTimezone(invoiceData.endDate, "UTC", "MMM dd, yyyy");
+        document.title = `Invoice | ${startDate} - ${endDate}`;
+      }
+    }
+  }, [data]);
+
   useEffect(() => {
     async function fetchData() {
       try {

@@ -1,0 +1,31 @@
+{
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "https://questlog.site/public/invoice/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "invoices.arzaut.com"
+        }
+      ]
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ],
+      "has": [
+        {
+          "type": "host",
+          "value": "invoices.arzaut.com"
+        }
+      ]
+    }
+  ]
+} 
