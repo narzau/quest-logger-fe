@@ -917,7 +917,7 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
               <motion.div
-                className="bg-[#131c33] rounded-lg border border-blue-900/30 overflow-hidden"
+                className="bg-[#131c33] rounded-lg border border-blue-900/30 overflow-hidden h-full flex flex-col"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
@@ -929,38 +929,39 @@ export default function HomePage() {
                     transition: { duration: 0.6, delay: 0.1 },
                   },
                 }}
-              >
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-slate-200 mb-2">
-                    Starter
-                  </h3>
-                  <p className="text-slate-400 mb-6">
-                    Perfect for solo adventurers
-                  </p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-slate-200">
-                      $0
-                    </span>
-                    <span className="text-slate-400">/month</span>
+              ><div className="p-6 flex flex-col flex-1 justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-200 mb-2">
+                      Starter
+                    </h3>
+                    <p className="text-slate-400 mb-6">
+                      Perfect for solo adventurers
+                    </p>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-slate-200">
+                        $0
+                      </span>
+                      <span className="text-slate-400">/month</span>
+                    </div>
+                    <ul className="space-y-4 mb-6">
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">Unlimited quests</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">Basic gamification</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">5 daily quests</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">Web access</span>
+                      </li>
+                    </ul>
                   </div>
-                  <ul className="space-y-4 mb-6">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Unlimited quests</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Basic gamification</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">5 daily quests</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Web access</span>
-                    </li>
-                  </ul>
                   <a
                     href="/auth/register"
                     className="block text-center py-2 px-4 rounded-md border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 font-medium"
@@ -971,7 +972,7 @@ export default function HomePage() {
               </motion.div>
 
               <motion.div
-                className="bg-[#131c33] rounded-lg border-2 border-blue-500 overflow-hidden relative"
+                className="bg-[#131c33] rounded-lg border-2 border-blue-500 overflow-hidden relative h-full flex flex-col"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
@@ -987,45 +988,47 @@ export default function HomePage() {
                 <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-400 text-center py-1 text-xs text-white font-medium">
                   MOST POPULAR
                 </div>
-                <div className="p-6 pt-8">
-                  <h3 className="text-xl font-bold text-slate-200 mb-2">Pro</h3>
-                  <p className="text-slate-400 mb-6">
-                    For serious quest-takers
-                  </p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-slate-200">
-                      $9.99
-                    </span>
-                    <span className="text-slate-400">/month</span>
+                <div className="p-6 flex flex-col flex-1 justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-200 mb-2">Pro</h3>
+                    <p className="text-slate-400 mb-6">
+                      For serious quest-takers
+                    </p>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-slate-200">
+                        $9.99
+                      </span>
+                      <span className="text-slate-400">/month</span>
+                    </div>
+                    <ul className="space-y-4 mb-6">
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">
+                          Everything in Starter
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">AI Voice-to-Quest</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">Advanced analytics</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">
+                          Custom achievements
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-slate-300">
+                          Unlimited daily quests
+                        </span>
+                      </li>
+                    </ul>
                   </div>
-                  <ul className="space-y-4 mb-6">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">
-                        Everything in Starter
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">AI Voice-to-Quest</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Advanced analytics</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">
-                        Custom achievements
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-blue-400 mr-2 shrink-0 mt-0.5" />
-                      <span className="text-slate-300">
-                        Unlimited daily quests
-                      </span>
-                    </li>
-                  </ul>
                   <a
                     href="/auth/register"
                     className="block text-center py-2 px-4 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium"
